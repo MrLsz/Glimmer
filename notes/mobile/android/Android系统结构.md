@@ -8,7 +8,7 @@ Android 基于 Linux，但在内核之上叠加了专为移动场景设计的运
 
 ### 分层架构图
 
-![Android 系统分层架构（AOSP 官方软件堆栈图）](./android-architecture-stack.png)
+<img src="./images/android-architecture-stack.png" width="400" alt="Android 系统分层架构（AOSP 官方软件堆栈图）">
 
 > 图源：Android Open Source Project 官方软件堆栈图（via Wikimedia Commons，CC 授权）。图中自上而下为：系统应用 → Java API 框架 → Android 运行时 & 原生 C/C++ 库 → HAL → Linux 内核。
 
