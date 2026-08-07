@@ -7,18 +7,17 @@
 ```
 Glimmer/
 ├── notes/                  # 学习笔记
-│   ├── frontend/           # 前端技术
+│   ├── 客户端技术/          # 客户端开发
+│   │   ├── Android/        # Android 开发
+│   │   └── iOS/            # iOS 开发
 │   ├── backend/            # 后端技术
-│   ├── devops/             # DevOps & CI/CD
-│   ├── database/           # 数据库
+│   ├── 框架设计/            # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
-│   ├── system-design/      # 系统设计
 │   └── ai-ml/              # AI / 机器学习
 ├── experience/             # 经验积累
 │   ├── troubleshooting/    # 踩坑记录 & 故障排查
 │   ├── best-practices/     # 最佳实践
 │   └── code-snippets/      # 实用代码片段
-├── books/                  # 读书笔记
 └── projects/               # 项目复盘 & 总结
 ```
 
