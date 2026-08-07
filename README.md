@@ -10,7 +10,6 @@ Glimmer/
 │   ├── mobile/             # 客户端开发
 │   │   ├── android/        # Android 开发
 │   │   └── ios/            # iOS 开发
-│   ├── backend/            # 后端技术
 │   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # AI / 机器学习
