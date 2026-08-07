@@ -7,11 +7,11 @@
 ```
 Glimmer/
 ├── notes/                  # 学习笔记
-│   ├── 客户端技术/          # 客户端开发
-│   │   ├── Android/        # Android 开发
-│   │   └── iOS/            # iOS 开发
+│   ├── mobile/             # 客户端开发
+│   │   ├── android/        # Android 开发
+│   │   └── ios/            # iOS 开发
 │   ├── backend/            # 后端技术
-│   ├── 框架设计/            # 框架设计与原理
+│   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # AI / 机器学习
 ├── experience/             # 经验积累
