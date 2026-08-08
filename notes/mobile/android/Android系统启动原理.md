@@ -330,22 +330,51 @@ Zygote.forkSystemServer()
 
 Launcher 是系统的 **HOME 应用（桌面）**，本质上是一个普通 App，但承担系统桌面角色。
 
-### 1. 如何被启动
+### 1. 启动过程
+
+**（1）AMS 决策：启动哪个 Launcher**
 
 ```text
-system_server 就绪
-  → AMS.systemReady()
-    → 查询带 CATEGORY_HOME 的 Activity
-      → 找到默认 Launcher 包
-        → 请求 Zygote fork Launcher 进程
-          → Launcher 加载桌面与应用图标
+AMS.systemReady()
+  → startHomeOnAllDisplays()
+    → 构造 Intent(ACTION_MAIN, CATEGORY_HOME)
+    → resolveActivity() 查询 PMS 中匹配的 Activity
+    → 有多个 HOME 时：
+        - 若用户已选默认 → 直接用
+        - 若无默认 → 弹出选择框（ResolverActivity）
+    → 取到目标 Launcher 的 ComponentName
+```
+
+**（2）Launcher 进程创建**
+
+```text
+AMS.startActivity(intent, LauncherComponentName)
+  → 目标进程不存在 → Zygote socket 请求 fork
+  → Zygote fork() 出 Launcher 进程
+  → 子进程 exec ActivityThread.main()
+    → attachApplication() 向 AMS 注册
+    → 创建 Application（回调 onCreate）
+    → AMS 调度 Activity 生命周期
 ```
 
 <img src="./images/app-launch.png" width="300" alt="App / Launcher 启动流程">
 
+**（3）Launcher 桌面加载**
+
+```text
+LauncherActivity 启动后：
+  → 通过 PMS 查询所有 CATEGORY_LAUNCHER 的 Activity
+  → 按应用分组生成快捷方式列表
+  → inflate workspace 布局（桌面网格）
+  → 逐个加载图标（异步，减轻主线程压力）
+  → 恢复已有的 AppWidget（RemoteViews 跨进程渲染）
+  → 监听应用安装/卸载广播，实时更新桌面图标
+```
+
 ### 2. 关键点
 
-- Launcher 与其他 App 一样由 Zygote fork、运行 ActivityThread
-- 通过 `CATEGORY_HOME` 标识；系统可装多个 Launcher，由用户选默认
-- 职责：显示桌面、应用图标、widget，响应图标点击启动应用
-- 按 Home 键即回到 Launcher
+- Launcher 与普通 App 一样由 Zygote fork、运行 ActivityThread
+- 通过 `CATEGORY_HOME` 标识自身为桌面；系统可装多个 Launcher
+- 有多个 HOME 时 RESOLVE 机制弹出选择框，用户选默认后记录到 PMS
+- 职责：显示桌面图标、管理 widget、响应点击 launch 其他 App
+- 按 Home 键回到已运行的 Launcher（Resume，不重新创建）
