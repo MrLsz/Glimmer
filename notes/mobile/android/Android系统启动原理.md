@@ -4,7 +4,7 @@
 
 ## 一、总览
 
-<img src="./images/boot-overview.png" width="280" alt="Android 启动总链路">
+<img src="./images/boot-overview.png" width="340" alt="Android 启动总链路">
 
 **各阶段速览**
 
@@ -163,7 +163,7 @@ init 不硬编码启动逻辑，而是解析 `.rc` 脚本：
 
 ### 4. action 触发顺序
 
-<img src="./images/init-chain.png" width="200" alt="init 触发链">
+<img src="./images/init-chain.png" width="220" alt="init 触发链">
 
 ### 5. 属性服务（Property Service）
 
@@ -230,7 +230,7 @@ init → app_process
 
 ### 3. fork + COW（核心）
 
-<img src="./images/zygote-cow.png" width="280" alt="Zygote fork 与 COW">
+<img src="./images/zygote-cow.png" width="320" alt="Zygote fork 与 COW">
 
 - 子进程继承 Zygote 地址空间与已加载类
 - 只读页共享，写入时才复制（Copy-On-Write）
@@ -266,7 +266,7 @@ Android 系统服务（AMS/WMS/PMS…）运行在不同进程，客户端要调�
         → 之后客户端直接与服务端 Binder 通信（不再经过 ServiceManager）
 ```
 
-<img src="./images/binder-hub.png" width="280" alt="Binder 与 ServiceManager">
+<img src="./images/binder-hub.png" width="340" alt="Binder 与 ServiceManager">
 
 ### 3. 关键点
 
@@ -301,7 +301,7 @@ Zygote.forkSystemServer()
 
 ### 2. 三批服务
 
-<img src="./images/system-server.png" width="280" alt="system_server 三批服务">
+<img src="./images/system-server.png" width="340" alt="system_server 三批服务">
 
 | 批次            | 特征      | 核心服务                                  |
 | ------------- | ------- | ------------------------------------- |
@@ -341,7 +341,7 @@ system_server 就绪
           → Launcher 加载桌面与应用图标
 ```
 
-<img src="./images/app-launch.png" width="280" alt="App / Launcher 启动流程">
+<img src="./images/app-launch.png" width="300" alt="App / Launcher 启动流程">
 
 ### 2. 关键点
 
