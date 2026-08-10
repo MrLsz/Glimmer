@@ -25,6 +25,8 @@ Android 基于 Linux，但在内核之上叠加了专为移动场景设计的运
 
 ### 分层架构图
 
+下图是 AOSP 官方的六层堆栈图——从 Linux 内核到系统应用，自上而下逐层展示 Android 的完整软件架构。
+
 <img src="./images/android-architecture-stack.png" width="400" alt="Android 系统分层架构（AOSP 官方软件堆栈图）">
 
 > 图源：Android Open Source Project 官方软件堆栈图（via Wikimedia Commons，CC 授权）。图中自上而下为：系统应用 → Java API 框架 → Android 运行时 & 原生 C/C++ 库 → HAL → Linux 内核。
@@ -207,6 +209,8 @@ int AndroidRuntime::startReg(JNIEnv* env) {
 
 ### 启动流程
 
+从设备上电到 Launcher 桌面可见的完整进程诞生链——Bootloader → 内核 → init → Zygote → system_server → Launcher，每一环都有明确产出。
+
 <img src="./images/android-boot-flow.png" width="480" alt="Android启动流程">
 
 **深入点**
@@ -216,6 +220,8 @@ int AndroidRuntime::startReg(JNIEnv* env) {
 - **init.rc**：声明各原生服务、权限、文件系统的启动脚本，是用户态起点
 
 ### 分区（简要）
+
+Android 存储设备的物理划分——不同分区承载不同职责，并且有独立的 OTA 策略。
 
 - `boot`：内核与 ramdisk
 - `system`：框架与系统应用（Treble 后框架可独立 OTA）

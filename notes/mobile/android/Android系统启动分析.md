@@ -49,12 +49,16 @@ Bootloader 是设备上电后运行的**第一段软件**，固化在芯片 Boot
 
 ### 2. 核心职责
 
+Bootloader 的核心任务分三类——硬件初始化、启动模式选择、安全校验，每一步不可跳过。
+
 - 初始化最基础硬件：DRAM、时钟、电源管理、最小存储/调试接口
 - 决定启动模式：正常启动 / Recovery / Fastboot（Download）
 - 安全校验：通过 AVB 验证 boot/vendor/system 等镜像
 - 加载内核：把 kernel、ramdisk、dtb（设备树）读入内存并跳转
 
 ### 3. 安全启动链（Chain of Trust）
+
+从硬件 ROM 到最终加载内核，每一级固件都对下一级的签名做校验——任何一环失败即中止启动，信任根在芯片 Boot ROM。
 
 ```text
 Boot ROM(不可改，eFuse 存公钥哈希)
@@ -69,6 +73,8 @@ Boot ROM(不可改，eFuse 存公钥哈希)
 
 ### 4. AVB（Android Verified Boot）
 
+AVB（Android Verified Boot）是 Google 的完整性校验体系——通过 vbmeta、dm-verity 和 rollback index 保证启动链路中每一分区未被篡改。
+
 | 机制                       | 作用                                                 |
 | ------------------------ | -------------------------------------------------- |
 | **vbmeta**               | 存各分区哈希/签名的元数据分区                                    |
@@ -77,6 +83,8 @@ Boot ROM(不可改，eFuse 存公钥哈希)
 | **locked / unlocked**    | locked 只接受厂商签名；`fastboot flashing unlock` 后可刷自定义镜像 |
 
 ### 5. A/B（无缝）更新相关
+
+A/B 分区允许系统保留两套完整镜像——OTA 时更新「非活跃槽」，重启后自动切换，失败可自动回退。
 
 - Bootloader 依据 `slot`（A/B）标记选择启动哪套分区
 - 依据 `bootable` / `successful` 标记判断上次启动是否成功，失败自动回切到另一槽位
@@ -88,6 +96,8 @@ Boot ROM(不可改，eFuse 存公钥哈希)
 > **一句话概述**：Linux Kernel 是启动的第二个阶段——完成硬件与内核子系统初始化、挂载根文件系统，并启动第一个用户态进程 init，把系统从裸机带入用户空间。
 
 ### 1. 内核启动主流程
+
+Linux Kernel 从自解压开始，经 start_kernel() 完整初始化所有子系统，最终通过 rest_init() 拉出 kernel_init 线程——由它来 exec init，把系统从内核态带入用户空间。
 
 ```text
 自解压 → start_kernel() → rest_init()
@@ -112,6 +122,8 @@ early → core → postcore → arch → subsys → fs → device → late
 
 ### 3. Android 特有的内核改动
 
+相比主线 Linux，Android 内核打了大量专有补丁——Binder 驱动、ashmem、wakelocks、LOW_MEMORY_KILLER 等，均为移动场景定制。
+
 | 特性                    | 作用                   |
 | --------------------- | -------------------- |
 | **Binder**            | 进程间通信核心驱动            |
@@ -123,11 +135,15 @@ early → core → postcore → arch → subsys → fs → device → late
 
 ### 4. 设备树（DTB）
 
+设备树（Device Tree）让硬件描述与内核代码解耦——Bootloader 传递 dtb/dto 给内核，内核根据描述初始化对应驱动，无需硬编码。
+
 - 硬件信息不硬编码进内核，而用**设备树**描述
 - Bootloader 把 dtb 传给内核，内核据此初始化对应驱动
 - Android 用 **DTBO** 分区叠加厂商差异
 
 ### 5. rootfs 与分区挂载
+
+内核启动 init 之前必须挂载根文件系统——从 initramfs 临时根到 system-as-root 的演进，决定了 rootfs 的挂载方式和 dm-verity 的介入时机。
 
 - 内核先挂载 **initramfs**（ramdisk 里的临时根），含 `init`、`fstab`、`sepolicy`
 - system-as-root 后 `/` 直接是 system 分区
@@ -135,6 +151,8 @@ early → core → postcore → arch → subsys → fs → device → late
 - 后续由 init 挂载 `/vendor`、`/data` 等
 
 ### 6. GKI（通用内核镜像，Android 11+）
+
+GKI 将通用内核与厂商模块彻底解耦——内核由 Google 统一构建分发，厂商通过内核模块提供硬件支持，根治碎片化。
 
 - 把通用内核（GKI）与厂商模块（vendor modules）分离
 - 提升内核一致性，简化 OTA 与安全更新
@@ -147,6 +165,8 @@ init 是 Android 用户态**第一个进程（PID 1）**，所有用户态进程
 
 ### 1. init 启动总流程（源码视角）
 
+init 的启动分为 FirstStage 和 SecondStage 两个阶段——前者挂载分区、加载 sepolicy，后者解析 init.rc、拉起所有 native 服务、进入 epoll 主循环。以下是源码级调用链：
+
 ```text
 kernel → /init main()
   → FirstStageMain()     # 第一阶段：基础文件系统
@@ -158,6 +178,8 @@ kernel → /init main()
 
 ### 2. 两个阶段
 
+init 分为 FirstStage 和 SecondStage 两个阶段——FirstStage 运行在最小化环境（挂载分区+SELinux），SecondStage 才进入完整的用户空间初始化。
+
 | 阶段           | 入口                  | 职责                                                     |
 | ------------ | ------------------- | ------------------------------------------------------ |
 | First stage  | `FirstStageMain()`  | 创建/挂载 `/dev`、`/proc`、`/sys`、`/system`、`/vendor`，准备早期环境 |
@@ -165,14 +187,100 @@ kernel → /init main()
 
 ### 3. init.rc 与 init 语言
 
-init 不硬编码启动逻辑，而是解析 `.rc` 脚本：
+init 不硬编码启动逻辑，而是解析 `.rc` 脚本——解析器把 rc 文本转化为 `Action` 和 `Service` 对象，再由主循环按 trigger 顺序执行。
+
+**RC 脚本的核心语法**
 
 - **service**：定义一个服务（可执行文件、user/group、权限、重启策略）
 - **on `<trigger>`**：在某触发点执行一组 command
 - **import**：引入其他 rc 文件
-- 触发点示例：`early-init`、`init`、`late-init`、`early-fs`、`fs`、`post-fs`、`boot`、`property:<key>=<value>`
+
+#### 解析器工作流程：以 Zygote 的 service 块为例
+
+以下面这段 Zygote 的 rc 配置为例，拆解解析器如何逐行识别：
+
+```rc
+service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-system-server
+    class main
+    socket zygote stream 660 root system
+    onrestart restart audioserver
+    critical
+```
+
+**解析过程**：
+
+```text
+① Parser 逐行读取 rc 文件
+② 遇到 "service zygote /system/bin/app_process64 ..." 
+   → 匹配 ServiceParser，进入 service 段落模式
+   → 创建 Service 对象：name="zygote", path="/system/bin/app_process64"
+   → 第一行剩余部分作为启动参数 args
+③ 缩进行逐条解析：
+   "class main"          → 设置 class_ = "main"
+   "socket zygote stream 660 root system"
+                         → 创建 /dev/socket/zygote，权限 660
+   "onrestart restart audioserver"
+                         → 记录到 onrestart_ 列表（重启时级联重启）
+   "critical"            → 设置 flags_ |= SVC_CRITICAL
+④ 空行或新 "on"/"service" 关键字结束当前 service 段落
+   → Service 对象被注册到全局 ServiceList
+```
+
+**核心源码与类图**
+
+解析涉及的核心类关系如下——Parser 按关键字将解析委托给各 SectionParser，最终产出 Service 和 Action 对象：
+
+<img src="./images/init-rc-parser-class.png" width="510" alt="init.rc 解析器类图">
+
+```cpp
+// system/core/init/action_manager.cpp — 解析入口
+bool ActionManager::LoadBootScripts(
+    const std::vector<std::string>& paths) {
+    Parser parser;
+    parser.AddSectionParser("service",
+        std::make_unique<ServiceParser>(&service_list, ...));
+    parser.AddSectionParser("on",
+        std::make_unique<ActionParser>(this, ...));
+    parser.AddSectionParser("import",
+        std::make_unique<ImportParser>(&parser));
+    for (auto& path : paths) {
+        parser.ParseConfig(path);  // 逐行解析
+    }
+    return true;
+}
+
+// system/core/init/service.cpp — ServiceParser::ParseSection
+Result<void> ServiceParser::ParseSection(
+    std::vector<std::string>&& args, ...) {
+    // args[0] = "service", args[1] = "zygote",
+    // args[2] = "/system/bin/app_process64", ...
+    service_ = std::make_unique<Service>(args[1], ...);
+    return {};
+}
+```
+
+> 整条链路：`LoadBootScripts` 注册三种解析器 → `ParseConfig` 逐行读 rc → 遇到 `service` 关键字交给 `ServiceParser` → `ParseSection` 创建 Service 对象 → `EndSection` 注册到全局列表。类似的，`on <trigger>` 交给 `ActionParser` 生成 Action。解析完成后 `ActionManager::QueueEventTrigger` 按序触发执行。
+
+**解析后的触发时机**：
+
+```
+ActionManager 执行 action:
+  on late-init
+    trigger zygote-start       ← 触发名为 "zygote-start" 的 trigger
+
+  on zygote-start && property:ro.crypto.state=unencrypted
+    class_start main           ← 启动 class="main" 的所有 service（含 zygote）
+
+  → ServiceList::FindByClass("main") → 找到 zygote 的 Service 对象
+    → Service::Start() → fork() + execve("/system/bin/app_process64")
+      → 子进程进入 ZygoteInit.main()
+```
+
+**关键源码路径**：`system/core/init/parser.cpp`（词法/语法解析）、`system/core/init/service.cpp`（Service 对象）、`system/core/init/builtins.cpp`（`class_start` 等内建命令）。
 
 ### 4. action 触发顺序
+
+action 是 init.rc 中 `on <trigger>` 定义的一组命令集合——init 按先后顺序逐个触发，从 early-init 一直走到 sys.boot_completed=1。下图是标准的 action 触发链：
 
 <img src="./images/init-chain.png" width="220" alt="init 触发链">
 
@@ -197,17 +305,23 @@ init 不硬编码启动逻辑，而是解析 `.rc` 脚本：
 
 ### 7. ueventd：设备节点管理
 
+ueventd 负责监听内核 uevent 事件并管理 /dev 设备节点——包括启动时的 coldboot 和运行时的热插拔响应。
+
 - 监听内核 uevent（设备热插拔事件）
 - **coldboot**：启动时遍历 `/sys`，为已存在设备补发 uevent
 - 按 `ueventd.rc` 规则创建 `/dev` 节点并设置权限
 
 ### 8. SELinux 加载
 
+SELinux 是 Android 安全的基础防线——在 FirstStage 加载 sepolicy，所有后续进程的权限边界都受其管控，默认 enforcing 模式。
+
 - first stage 加载 `sepolicy`（`/system/etc/selinux` 或 `/vendor/etc/selinux`）
 - init 早期 `setenforce` 进入 enforcing
 - 服务以各自安全上下文运行，越权操作被 avc 拒绝（`dmesg | grep avc`）
 
 ### 9. 服务重启与看门狗
+
+init 通过 SIGCHLD 感知子进程退出并自动重启，critical 服务连续崩溃则触发 recovery——这是 Android 防止 bootloop 的最后防线。
 
 - service 可声明 `oneshot`（退出不重启）/ `critical`（崩溃多次触发重启进 recovery）
 - `onrestart`：服务重启时执行的命令
