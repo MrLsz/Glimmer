@@ -1,6 +1,17 @@
-# Android 系统启动原理
+# Android 系统启动分析
 
-> 从按下电源键到 Launcher 桌面的完整进程诞生链。按启动顺序逐组件详解，图示为主，文字为辅。
+> 从按下电源键到 Launcher 桌面的完整进程诞生链。按启动顺序逐组件详解，图示为主，文字为辅，关键源码逐一拆解。
+
+## 目录
+
+- [一、总览](#一总览)
+- [二、Bootloader 详解](#二bootloader-详解)
+- [三、Linux Kernel 详解](#三linux-kernel-详解)
+- [四、init 进程启动详解](#四init-进程启动详解)
+- [五、Zygote 详解](#五zygote-详解)
+- [六、ServiceManager 详解](#六servicemanager-详解)
+- [七、system_server 详解](#七system_server-详解)
+- [八、Launcher 详解](#八launcher-详解)
 
 ## 一、总览
 
@@ -230,7 +241,7 @@ init → app_process
 
 ### 3. fork + COW（核心）
 
-<img src="./images/zygote-cow.png" width="320" alt="Zygote fork 与 COW">
+<img src="./images/zygote-cow.png" width="500" alt="Zygote fork 与 COW">
 
 - 子进程继承 Zygote 地址空间与已加载类
 - 只读页共享，写入时才复制（Copy-On-Write）
