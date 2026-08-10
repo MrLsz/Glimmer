@@ -28,6 +28,18 @@ Zygote 的解法：**先启动一个「模板进程」，预加载所有公共�
 | 公共 .so 加载 | 每 App `System.loadLibrary` 一次 | fork 继承 |
 | JNI 注册 | 每 App 注册上百个 native 方法 | 一次注册，全部继承 |
 
+### Zygote 与传统 Linux 服务架构的对比
+
+| 维度 | 传统 daemon 模型（systemd） | Zygote 模型 |
+|---|---|---|
+| 进程创建 | 每个服务独立 `fork+exec` | 所有 App 从一个模板 fork |
+| 启动开销 | 每次 fork 后独立初始化 | fork 前预加载，子进程零成本继承 |
+| 内存共享 | 各进程独立地址空间 | COW 让所有子进程共享 framework 只读页 |
+| 热更新 | 需重启服务 | fork 后的子进程自然继承最新预加载 |
+| 适用场景 | 通用 Linux 服务 | Java/ART 密集的移动应用生态 |
+
+> 传统 Linux 没有 Zygote 的需求——不需要同时运行数百个 Java 进程。Android 的 App 模型决定了必须有一个「公共预加载池」，这正是 Zygote 设计的根源。
+
 ### Dalvik → ART 的演进
 
 | 时期 | 运行时 | Zygote 行为 |
@@ -316,6 +328,18 @@ void registerServerSocketFromEnv(String socketName) {
 
 <img src="./images/zygote-startup.png" width="236" alt="Zygote 启动总流程">
 
+上图的每一步对应的时间和关键动作：
+
+| 阶段 | 耗时（参考） | 关键输出 |
+|------|-------------|---------|
+| init → app_process | ~50ms | Native 入口分发，选择 Zygote 模式 |
+| 创建 ART 虚拟机 | ~200ms | Runtime::Init() → 堆、类链接器就绪 |
+| 注册 JNI 方法 | ~50ms | 数百个 native 函数绑定到 ArtMethod |
+| preload() | **~1-2s** | framework 类、资源、.so 全部载入 |
+| 注册 Socket | ~5ms | 获取 init 创建的 /dev/socket/zygote fd |
+| fork system_server | ~50ms | 系统服务进程诞生 |
+| runSelectLoop | — | 永久 epoll 等待 |
+
 ```
 init 拉起 app_process
   → AndroidRuntime 创建 ART 虚拟机
@@ -371,6 +395,28 @@ private static Runnable forkSystemServer(...) {
 | capabilities | 保留特权 | 全部删除 |
 
 > system_server 保留了 `CAP_SYS_ADMIN`、`CAP_SYS_NICE`、`CAP_NET_ADMIN`、`CAP_SYS_BOOT` 等少数关键 capability——管理整个系统所必需。普通 App 进程在 fork 后所有 capabilities 被清零，完全依赖 Binder IPC 请求系统服务。
+
+### Native 层对比：forkSystemServer vs forkAndSpecialize
+
+两个 fork 路径在 Native 侧调用的都是 `ForkCommon()`，差异仅在于参数：
+
+```cpp
+// com_android_internal_os_Zygote.cpp
+
+// forkSystemServer 调用路径：
+ForkCommon(env, /*is_system_server=*/true, fds_to_close, ...)
+  → 保留所有 capabilities
+  → uid/gid 设为 1000(system)
+  → 不删除 supplementary groups
+
+// forkAndSpecialize（App 用）调用路径：
+ForkCommon(env, /*is_system_server=*/false, fds_to_close, ...)
+  → 删除所有 capabilities（SetCapabilities(0)）
+  → uid/gid 切换为 App 专用
+  → 设置 seccomp filter（限制 app 可用系统调用）
+```
+
+> 本质区别：system_server 保留了最小特权集（管理系统的底线），App 进程的 capabilities 被**彻底清零**——这是 Android 安全模型的关键一环。
 
 ---
 
@@ -483,6 +529,25 @@ ZygoteHooks.preFork()          ← fork 前：关 fd、GC
 
 这些 hook 确保子进程复用 Zygote 的 **ART runtime 代码**（无需重新加载），但**不继承 Zygote 的运行时状态**（线程、GC 统计、Trace buffer 等），避免相互干扰。
 
+### 子进程初始化的完整顺序
+
+fork 后，子进程在进入 `ActivityThread.main()` 之前，按以下顺序完成所有初始化：
+
+```text
+① close Zygote socket fd         — 子进程不需要监听 fork 请求
+② SetProcessName (prctl)          — 改为 App 包名，方便 ps/top 识别
+③ setUid / setGid                 — 从 root 降为 App 专属 UID
+④ setSELinuxContext               — 切换到 App 的 security context
+⑤ DropCapabilities (all to 0)     — 删除所有 Linux capability
+⑥ setSeccompFilter                — 安装 seccomp-bpf 限制系统调用
+⑦ setResourceLimits (rlimits)     — 防止单个 App 耗尽 fd/线程/内存
+⑧ ZygoteHooks.postForkChild       — 重置 ART GC 统计、JIT profile
+⑨ nativePostForkApp               — USAP 模式下额外操作
+⑩ 进入 ActivityThread.main()      — Android App 生命周期正式开始
+```
+
+> 步骤②-⑦是一道安全栅栏——fork 后子进程不能以 root 身份、不能持有 capability、不能调用危险系统调用。这是 Android 沙箱在进程级别的实现。
+
 ---
 
 ## 十一、fork + COW 原理
@@ -584,6 +649,26 @@ fork() 系统调用 → 内核态:
 | App 冷启 | ~2-3s | ~0.5-1s |
 | framework 内存 | 每 App 独占一份 | 所有 App 共享 |
 | 启动代码路径 | 每个 App 走完整初始化 | 只需 fork + 专用化 |
+
+### COW 对 ART GC 的影响
+
+COW 有一个常被忽略的副作用：**任何写入操作都会触发页面复制**，包括 GC 标记阶段。
+
+```text
+子进程运行中：
+  GC 扫描堆对象 → 写 Mark Bitmap 位图
+    → 每个 bitmap 的写操作触发一次 COW 缺页
+    → 产生数十甚至数百次 page copy
+
+如果 App 频繁 GC → COW 开销显著 → 总内存和 CPU 压力上升
+```
+
+**ART 的应对措施**：
+- fork 前 GC（`requestGCBeforeFork`）整理堆、回收垃圾 → 减少子进程 GC 频率
+- fork 后 `postForkChild` 重置 GC 统计——清空累计计数，让子进程从零开始
+- 每个 App 独立管理自己的 Heap，互不干扰
+
+> 这也解释了为什么「fork 后子进程不立刻 GC」——此时堆基本是干净的（fork 前刚 GC 过），等 App 真正执行一段时间后才触发。
 
 ---
 

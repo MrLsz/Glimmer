@@ -2,6 +2,23 @@
 
 > 从底层内核到上层应用的完整分层，重点讲清每一层的职责、关键组件，以及层与层之间如何协作。目标：建立一张可长期对照的「Android 全景图」。
 
+## 目录
+
+- [一、总览](#一总览)
+- [二、分层详解](#二分层详解)
+  - [1. Linux 内核层](#1-linux-内核层linux-kernel)
+  - [2. 硬件抽象层](#2-硬件抽象层hal-hardware-abstraction-layer)
+  - [3. 原生 C/C++ 库](#3-原生-cc-库native-libraries)
+  - [4. Android 运行时](#4-android-运行时art-android-runtime)
+  - [5. Java API 框架层](#5-java-api-框架层application-framework)
+  - [6. 系统应用层](#6-系统应用层system-apps)
+- [三、关键跨层机制](#三关键跨层机制)
+  - [Binder IPC](#binder-ipc)
+  - [JNI](#jnijava-native-interface)
+  - [启动流程](#启动流程)
+  - [分区（简要）](#分区简要)
+- [四、一条 UI 绘制的完整链路](#四一条-ui-绘制的完整链路)
+
 ## 一、总览
 
 Android 基于 Linux，但在内核之上叠加了专为移动场景设计的运行时与框架。自上而下分为六层。日常开发主要打交道的是 **Java API 框架层**（SDK 类）与运行在 **ART** 上的应用进程；其余各层由系统维护。
@@ -138,52 +155,59 @@ Android 的底座，基于长期支持（LTS）的 Linux 内核，并打了大�
 
 ## 三、关键跨层机制
 
+本章覆盖 Android 架构中最核心的四项跨层能力——Binder IPC（进程通信骨架）、JNI（Java↔Native 桥梁）、系统启动流程（从加电到 App 运行）、以及分区布局（存储侧的结构基础）。
+
 ### Binder IPC
 
 Android 的跨进程通信 backbone，C/S 模型。一次典型调用：
 
-```mermaid
-sequenceDiagram
-    participant C as Client 进程
-    participant SM as ServiceManager
-    participant D as Binder 驱动(内核)
-    participant S as Server 进程(Binder 线程池)
-
-    C->>SM: getService("name") 查询句柄
-    SM-->>C: 返回 Binder 引用
-    C->>D: transact(code, Parcel) 经 ioctl 写入
-    D->>S: 唤醒服务端线程，拷贝 Parcel
-    S->>S: onTransact() 执行真实逻辑
-    S->>D: 写回结果 Parcel
-    D->>C: 唤醒客户端，返回结果
-```
+<img src="./images/android-binder-ipc.png" width="500" alt="Binder IPC 时序图（Client→ServiceManager→驱动→Server）">
 
 **深入点**
 
 - **一次拷贝**：数据经内核 Binder 驱动中转，Client→驱动→Server 仅一次内存拷贝（对比管道/socket 需两次），靠 `mmap` 共享内核缓冲区实现
 - **线程池**：Server 端维护 Binder 线程池（默认最大 15），并发处理多个 Client 请求；`Parcel` 是序列化载体
 - **两个域**：普通服务走 `binder`，HAL 走独立的 `hwbinder`，隔离框架与厂商代码
+
+**Binder 驱动核心：ioctl 收发**
+
+```cpp
+// 底层 ioctl 封装 — frameworks/native/libs/binder/IPCThreadState.cpp
+status_t IPCThreadState::transact(int32_t handle, uint32_t code,
+                                   const Parcel& data, Parcel* reply, uint32_t flags) {
+    // 将 handle + code + Parcel 写入 Binder 驱动（单次 ioctl）
+    status_t err = writeTransactionData(BC_TRANSACTION, flags, handle, code, data, nullptr);
+    // 阻塞等待驱动返回
+    err = waitForResponse(reply);
+    return err;
+}
+```
+
+> 本质就是一次 `ioctl(fd, BINDER_WRITE_READ, ...)`——把序列化后的数据丢给内核，内核负责找到目标进程、拷贝数据、唤醒对端线程。
 - **AIDL**：接口描述语言，编译后自动生成 `Stub`（服务端）/`Proxy`（客户端）样板代码
 
 ### JNI（Java Native Interface）
 
-连接 Java 框架与原生库的桥。应用层 `native` 方法、系统服务中的性能敏感路径都经此下沉到 C/C++。`RegisterNatives` 把 Java 方法映射到 C 函数指针，避免逐次按名查找。
+连接 Java 框架与原生库的桥。应用层 `native` 方法、系统服务中的性能敏感路径都经此下沉到 C/C++。
+
+```cpp
+// frameworks/base/core/jni/AndroidRuntime.cpp
+int AndroidRuntime::startReg(JNIEnv* env) {
+    // gRegJNI 是静态数组，含上百个 framework 类的 JNI 注册项
+    if (register_jni_procs(gRegJNI, NELEM(gRegJNI), env) < 0) {
+        return -1;
+    }
+    return 0;
+}
+// 每个 REG_JNI 宏展开为 env->RegisterNatives(clazz, methods, nMethods)
+// 将 Java native 方法绑定到对应 C 函数指针
+```
+
+> `RegisterNatives` 把 Java 方法映射到 C 函数指针，避免逐次按名查找——子进程通过 COW 继承这套绑定，零成本可用。
 
 ### 启动流程
 
-```mermaid
-flowchart TB
-    P0[上电] --> P1[Bootloader]
-    P1 --> P2[加载 Linux 内核]
-    P2 --> P3["init 进程 (PID 1)<br/>解析 init.rc"]
-    P3 --> P4["Zygote (ART 孵化器)<br/>预加载 framework 类/资源"]
-    P3 --> P5["创建 /dev/socket、挂载分区"]
-    P4 --> P6["fork → system_server<br/>(框架系统服务)"]
-    P6 --> P7["AMS 启动 SystemUI / Launcher"]
-    P4 --> P8["用户点图标 → AMS 请求 fork"]
-    P8 --> P9["Zygote fork 出 App 进程<br/>(COW 复用已加载的 ART/类)"]
-    P9 --> P10["执行 ActivityThread.main()<br/>进入 Looper 消息循环"]
-```
+<img src="./images/android-boot-flow.png" width="480" alt="Android启动流程">
 
 **深入点**
 
@@ -201,7 +225,9 @@ flowchart TB
 
 ---
 
-## 四、一条 UI 绘制的完整链路
+## 四、层级协作示例-UI绘制的过程
+
+用一次「点击按钮 → 画面变化」把前文六层的协作串起来——每一步都跨越不同层级，是建立全栈认知的最佳切面。
 
 > 用「点击按钮 → 画面变化」把跨层协作串起来，便于建立全局观：
 
