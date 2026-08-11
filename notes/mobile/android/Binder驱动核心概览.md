@@ -21,6 +21,8 @@
 
 ### 内核空间与用户空间
 
+Linux 将进程虚拟地址划分为内核空间（高 1GB）和用户空间（低 3GB），两者隔离以实现内核安全保护。下图展示了这一划分：
+
 <img src="./images/binder-doc1-00.png" width="500" alt="Binder图解">
 
 
@@ -34,12 +36,16 @@ Linux 将进程的虚拟地址空间划分为两部分：高 1GB 为内核空间
 - `copy_to_user`：将内核空间数据拷贝到用户空间
 
 ### 内存映射（mmap）
+
+mmap 将磁盘文件映射到内存，用户通过修改内存间接修改文件——原本需要两次拷贝（磁盘→页缓存→用户），映射后只需一次。下图展示了内存映射原理：
 <img src="./images/binder-doc1-02.png" width="500" alt="内存映射原理">
 
 
 mmap 将磁盘文件映射到内存，使得用户可以通过修改内存间接修改磁盘文件——原本需要两次拷贝（磁盘→页缓存→用户空间），映射后只需一次。Binder 没有物理介质，但利用 mmap 建立内核缓冲区和用户空间的映射关系来跨进程传递数据。
 
 ### 传统 IPC 的两次拷贝问题
+
+传统 IPC 需要两次拷贝：发送方 copy_from_user → 内核缓冲区 → copy_to_user → 接收方。下图展示了这一过程：
 <img src="./images/binder-doc1-01.png" width="500" alt="传统IPC两次拷贝">
 
 
@@ -49,6 +55,8 @@ mmap 将磁盘文件映射到内存，使得用户可以通过修改内存间接
 ```
 
 ### Binder 的一次拷贝方案
+
+Binder 通过 mmap 将内核缓冲区与接收方用户空间建立映射——发送方只需一次 copy_from_user，数据直接出现在接收方。下图对比了两次拷贝和一次拷贝的区别：
 <img src="./images/binder-doc1-03.png" width="500" alt="Binder一次拷贝">
 
 
@@ -88,6 +96,8 @@ Binder 驱动以 misc 设备注册为 `/dev/binder`，是纯软件虚拟字符�
 
 
 ### 2.1 设备初始化：binder_init
+
+`binder_init` 在模块加载时注册 misc 设备 `/dev/binder`，绑定文件操作表 `binder_fops`，并创建 debugfs 调试目录。核心代码如下：
 
 ```cpp
 static int __init binder_init(void) {
@@ -164,6 +174,8 @@ static int binder_open(struct inode *nodp, struct file *filp) {
 核心动作：创建 `binder_proc` 对象保存进程信息 → 加入全局哈希表 `binder_procs` → 将 proc 存入 `filp->private_data`。后续 `mmap` 和 `ioctl` 调用时，内核将同一个 `file` 结构传回驱动，驱动通过 `private_data` 取回对应的 `binder_proc`。
 
 ### 2.3 内存映射：binder_mmap
+
+`binder_mmap` 是 Binder 一次拷贝的物理基础——在内核空间分配缓冲区，同时映射到用户空间。最大 4MB，异步空间占一半。核心代码如下：
 
 ```cpp
 static int binder_mmap(struct file *filp, struct vm_area_struct *vma) {
@@ -431,6 +443,8 @@ struct binder_write_read {
 
 ### 3.8 binder_transaction_data：事务数据的描述
 
+`binder_transaction_data` 描述一次 IPC 调用的完整参数——目标句柄、方法编号、数据指针和 Binder 对象偏移数组。结构体定义如下：
+
 ```cpp
 struct binder_transaction_data {
     union {
@@ -453,6 +467,8 @@ struct binder_transaction_data {
 
 ### 3.9 flat_binder_object：跨进程传输的 Binder 封装
 
+`flat_binder_object` 是跨进程传输的最小单元——驱动根据其 `type` 字段决定创建 node/ref 还是查找现有引用。结构体定义和类型的驱动处理逻辑如下：
+
 ```cpp
 struct flat_binder_object {
     uint32_t type;        // BINDER_TYPE_BINDER / HANDLE / FD / WEAK_BINDER / WEAK_HANDLE
@@ -470,6 +486,8 @@ struct flat_binder_object {
 - `BINDER_TYPE_HANDLE`：这是一个引用，驱动查找源进程的 `binder_ref`，为目标进程创建对应的 `binder_ref`，改写 handle 编号
 
 ### 关系总览
+
+下图汇总了 9 种数据结构之间的关系：`binder_proc` 持有线程池和实体/引用红黑树，`binder_ref` 通过 `node` 指向 `binder_node`，`binder_transaction` 携带数据在两者之间传递。
 
 <img src="./images/binder-doc3-00.png" width="500" alt="Binder图解">
 
@@ -494,6 +512,8 @@ Binder 协议分为两大类：**BC_**（Binder Command，用户空间→驱动�
 
 ### 常用 BC 命令
 
+BC_（Binder Command）是用户空间发给驱动的请求码，在 `binder_thread_write` 中按 cmd 分发处理。常用命令如下：
+
 | 命令 | 含义 |
 |------|------|
 | `BC_TRANSACTION` | 发送同步调用（最频繁） |
@@ -508,6 +528,8 @@ Binder 协议分为两大类：**BC_**（Binder Command，用户空间→驱动�
 
 ### 常用 BR 命令
 
+BR_（Binder Reply）是驱动返回给用户空间的响应码，在 `binder_thread_read` 中根据工作项类型生成。常用命令如下：
+
 | 命令 | 含义 |
 |------|------|
 | `BR_TRANSACTION` | 通知服务端处理调用 |
@@ -519,6 +541,7 @@ Binder 协议分为两大类：**BC_**（Binder Command，用户空间→驱动�
 | `BR_FAILED_REPLY` | 回复发送失败 |
 
 ### 发送流程：binder_thread_write
+`binder_thread_write` 是 BC_ 请求的处理入口——从用户空间读取命令码，按类型分发。`BC_TRANSACTION` 和 `BC_REPLY` 最终调用 `binder_transaction` 执行实际传输。流程图如下：
 
 <img src="./images/binder-doc4-00.png" width="500" alt="Binder图解">
 
@@ -587,6 +610,8 @@ static void binder_transaction(struct binder_proc *proc,
 ```
 
 ### 接收流程：binder_thread_read
+
+`binder_thread_read` 是 BR_ 响应的处理入口——线程阻塞在 `wait_event` 等待工作项，收到后根据 `w->type` 生成对应的 BR 响应码返回用户空间。流程图如下：
 
 <img src="./images/binder-doc4-02.png" width="500" alt="Binder图解">
 
