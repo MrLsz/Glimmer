@@ -319,7 +319,7 @@ int binder_parse(struct binder_state *bs, struct binder_io *bio,
 
 以下是 ServiceManager 从 init 拉起、打开驱动、注册上下文到进入事件循环的完整时序图：
 
-<img src="./images/binder-sm-start-seq.png" width="500" alt="ServiceManager 启动时序图">
+<img src="./images/binder-sm-start-seq.png" width="500" alt="SM启动详细时序">
 
 ---
 
@@ -566,13 +566,13 @@ BpRefBase::BpRefBase(const sp<IBinder>& o)
 
 以下是 App 进程从 `defaultServiceManager()` 到最终获得 `BpServiceManager` 代理对象的完整时序图：
 
-<img src="./images/binder-sm-get-seq.png" width="500" alt="ServiceManager 获取时序图">
+<img src="./images/binder-sm-get-seq.png" width="500" alt="SM获取详细时序">
 
 ---
 
 ## 三、代理对象类关系图
 
-<img src="./images/binder-proxy-class.png" width="500" alt="Binder 代理对象类图">
+<img src="./images/binder-proxy-class.png" width="500" alt="完整代理类图">
 
 | 类 | 角色 |
 |----|------|
