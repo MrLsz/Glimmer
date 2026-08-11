@@ -224,6 +224,8 @@ static int binder_update_page_range(struct binder_proc *proc, int allocate,
 
 > 一块物理内存同时映射到内核空间和用户空间——Binder 一次拷贝的物理基础。
 
+**一次拷贝的完整理解**：虚拟进程地址空间（`vm_area_struct`）和虚拟内核地址空间（`vm_struct`）都映射到同一块物理内存。当 Client 发送数据时，从自己的进程空间 `copy_from_user` 拷贝到内核空间——由于内核空间与 Server 进程空间共享物理页，Server 侧无需再次 `copy_to_user`，只需通过 `user_buffer_offset` 偏移即可直接读取数据。对比传统 IPC 的两次拷贝（用户→内核→用户），Binder 只需要一次。
+
 ### 2.4 数据收发：binder_ioctl
 
 所有 Binder 通信最终都是 `ioctl(fd, BINDER_WRITE_READ, &bwr)` ——一次系统调用完成写入和读取。
@@ -245,17 +247,227 @@ ioctl 入口 → binder_ioctl()
 
 ## 三、核心数据结构
 
-Binder 驱动通过 7 个核心结构体维护进程状态、实体引用关系、数据传输和线程管理。
+Binder 驱动通过一系列结构体维护进程状态、实体引用关系、数据传输和线程管理。每个结构体的字段和用途如下。
 
-| 结构体 | 角色 | 核心字段 |
-|--------|------|---------|
-| `binder_proc` | 使用 Binder 的进程 | `tsk`、`todo`（待处理）、`threads`（红黑树线程池）、`nodes`（实体红黑树）、`refs_by_desc`/`refs_by_node`（引用红黑树）、`buffer`/`buffer_size`（内核缓冲区） |
-| `binder_thread` | Binder 线程 | `task`（task_struct）、`proc`（所属进程）、`todo`（待处理事务）、`transaction_stack`（事务栈）、`looper`（线程状态） |
-| `binder_node` | Binder 实体对象 | `ptr`/`cookie`（用户空间地址对，用于找到服务对象）、`proc`（所属进程）、`refs`（引用列表）、`work`（待处理工作）、`has_strong_ref`/`has_weak_ref` |
-| `binder_ref` | Binder 引用对象 | `node`（指向实体）、`desc`（句柄编号，跨进程唯一）、`proc`（持有该引用的进程）、`death`（死亡通知） |
-| `binder_buffer` | 传输数据缓冲区 | `data`（数据指针）、`offsets`（Binder 对象偏移数组）、`async`（是否异步）、`transaction`（所属事务）、`free`（是否空闲） |
-| `binder_transaction` | 一次跨进程调用 | `from`（发起线程/进程）、`to_thread`/`to_proc`（目标）、`buffer`（数据缓冲）、`code`（方法编号）、`flags`（TF_ONE_WAY 等） |
-| `flat_binder_object` | 跨进程传输的 Binder 对象封装 | `type`（BINDER_TYPE_BINDER/HANDLE/FD）、`binder`（实体指针）、`handle`（引用句柄）、`cookie`（服务端上下文） |
+### 3.1 binder_proc
+
+代表一个使用 Binder 机制的进程。当进程 `open("/dev/binder")` 时创建，通过 `filp->private_data` 关联。
+
+```cpp
+struct binder_proc {
+    struct hlist_node proc_node;       // 全局 hash 表 binder_procs 的节点
+    struct rb_root threads;            // 线程池红黑树（以 pid 为键）
+    struct rb_root nodes;              // Binder 实体对象红黑树（以 ptr 为键）
+    struct rb_root refs_by_desc;       // 引用对象红黑树（以 desc 句柄为键）
+    struct rb_root refs_by_node;       // 引用对象红黑树（以 node 为键）
+    int pid;                           // 进程组 ID
+    struct vm_area_struct *vma;        // 用户空间映射区域
+    struct task_struct *tsk;           // 进程任务控制块
+    struct files_struct *files;        // 打开文件结构体数组
+    void *buffer;                      // 内核缓冲区地址（内核空间视角）
+    ptrdiff_t user_buffer_offset;      // 内核空间地址与用户空间地址的差值
+    struct list_head buffers;          // 小块内核缓冲区列表（按地址排序）
+    struct rb_root free_buffers;       // 空闲缓冲区红黑树
+    struct rb_root allocated_buffers;  // 已分配缓冲区红黑树
+    struct page **pages;               // 物理页面指针数组
+    size_t buffer_size;                // 内核缓冲区总大小（最大 4MB）
+    struct list_head todo;             // 待处理工作项队列
+    wait_queue_head_t wait;            // 等待队列（阻塞等待事务）
+    struct binder_stats stats;         // 统计信息
+    int max_threads;                   // 驱动可主动请求的最大线程数
+    int requested_threads;             // 已请求但尚未启动的线程数
+    int ready_threads;                 // 当前空闲的 Binder 线程数
+    long default_priority;             // 默认线程优先级
+};
+```
+
+关键说明：
+- `buffer` 是内核空间地址，`vma->vm_start` 是用户空间地址，`user_buffer_offset = 用户地址 - 内核地址`，通过偏移量可双向换算
+- `allocated_buffers` / `free_buffers` 分别管理在用和空闲的内核缓冲块
+- `threads` 红黑树以线程 ID 为键组织该进程的 Binder 线程池
+
+### 3.2 binder_thread
+
+代表 Binder 线程池中的一个线程。线程通过 `BC_REGISTER_LOOPER` 或 `BC_ENTER_LOOPER` 注册时创建。
+
+```cpp
+struct binder_thread {
+    struct binder_proc *proc;                     // 所属进程
+    struct rb_node rb_node;                       // 进程 threads 红黑树节点
+    int pid;                                      // 线程 ID
+    int looper;                                   // 线程状态
+    struct binder_transaction *transaction_stack;  // 事务栈（嵌套调用用）
+    struct list_head todo;                        // 待处理工作项
+    wait_queue_head_t wait;                       // 等待队列
+    struct binder_stats stats;                    // 统计信息
+};
+```
+
+线程状态枚举：
+
+```cpp
+enum {
+    BINDER_LOOPER_STATE_REGISTERED  = 0x01,  // 准备就绪
+    BINDER_LOOPER_STATE_ENTERED     = 0x02,  // 已进入循环
+    BINDER_LOOPER_STATE_EXITED      = 0x04,  // 已退出
+    BINDER_LOOPER_STATE_INVALID     = 0x08,  // 异常
+    BINDER_LOOPER_STATE_WAITING     = 0x10,  // 等待中
+    BINDER_LOOPER_STATE_NEED_RETURN = 0x20,  // 需返回用户空间
+};
+```
+
+### 3.3 binder_node
+
+描述一个 Binder 实体对象。每个 Service 组件在驱动中对应一个 `binder_node`，驱动通过强/弱引用计数维护其生命周期。
+
+```cpp
+struct binder_node {
+    int debug_id;
+    struct binder_work work;
+    union {
+        struct rb_node rb_node;       // 宿主进程 nodes 红黑树的节点
+        struct hlist_node dead_node;  // 宿主进程死亡后挂入全局 hash 列表
+    };
+    struct binder_proc *proc;         // 宿主进程
+    struct hlist_head refs;           // 引用该实体的所有 binder_ref 构成的 hash 列表
+    int internal_strong_refs;         // 强引用计数
+    int local_weak_refs;              // 弱引用计数
+    int local_strong_refs;
+    void __user *ptr;                 // 指向 Service 组件内部引用计数对象的用户空间地址
+    void __user *cookie;              // 指向 Service 组件的用户空间地址
+    unsigned has_strong_ref : 1;      // 是否持有 Service 组件的强引用
+    unsigned pending_strong_ref : 1;  // 正在请求增加/减少强引用
+    unsigned has_weak_ref : 1;
+    unsigned pending_weak_ref : 1;
+    unsigned has_async_transaction : 1;  // 是否正在处理异步事务
+    unsigned accept_fds : 1;         // 是否接受文件描述符
+    int min_priority : 8;            // 处理线程的最小优先级
+    struct list_head async_todo;     // 异步事务队列
+};
+```
+
+### 3.4 binder_ref
+
+描述一个 Binder 引用对象。每个 Client 组件在驱动中对应一个 `binder_ref`，通过句柄值 `desc` 引用目标 `binder_node`。
+
+```cpp
+struct binder_ref {
+    int debug_id;
+    struct rb_node rb_node_desc;      // 宿主进程 refs_by_desc 红黑树节点（以 desc 为键）
+    struct rb_node rb_node_node;      // 宿主进程 refs_by_node 红黑树节点（以 node 为键）
+    struct hlist_node node_entry;     // 目标 binder_node 的 refs hash 列表节点
+    struct binder_proc *proc;         // 持有该引用的宿主进程
+    struct binder_node *node;         // 指向目标 Binder 实体对象
+    uint32_t desc;                    // 句柄值/描述符（在此进程中唯一）
+    int strong;                       // 强引用计数
+    int weak;                         // 弱引用计数
+    struct binder_ref_death *death;   // 死亡通知结构（注册后非空）
+};
+```
+
+> Client 进程通过句柄值 `desc` 引用 Service，驱动通过 `desc` 在 `refs_by_desc` 红黑树中找到 `binder_ref`，再通过 `node` 找到 `binder_node`，最终定位 Service。
+
+### 3.5 binder_buffer
+
+描述一个内核缓冲区，用于进程间传输数据。Binder 驱动将大缓冲区划分为多个小块管理。
+
+```cpp
+struct binder_buffer {
+    struct list_head entry;             // 进程 buffers 链表的节点
+    struct rb_node rb_node;             // free_buffers 或 allocated_buffers 节点
+    unsigned free : 1;                  // 是否空闲
+    unsigned allow_user_free : 1;       // 允许 Service 处理完后释放
+    unsigned async_transaction : 1;     // 是否关联异步事务
+    unsigned debug_id : 29;
+    struct binder_transaction *transaction;  // 所属事务
+    struct binder_node *target_node;    // 目标 Binder 实体对象
+    size_t data_size;                   // 普通数据大小
+    size_t offsets_size;                // Binder 对象偏移数组大小
+    uint8_t data[0];                    // 变长数据缓冲区（普通数据 + 偏移数组）
+};
+```
+
+> `data[]` 是柔性数组，实际布局为：`[普通数据][flat_binder_object 偏移数组]`。偏移数组的每个元素指向数据中 `flat_binder_object` 的位置，驱动据此维护 Binder 对象生命周期。
+
+### 3.6 binder_transaction
+
+描述一次跨进程通信过程（一个事务）。
+
+```cpp
+struct binder_transaction {
+    int debug_id;
+    struct binder_work work;
+    struct binder_thread *from;                // 发起事务的线程
+    struct binder_transaction *from_parent;    // 依赖的父事务
+    struct binder_proc *to_proc;               // 目标进程
+    struct binder_thread *to_thread;           // 目标线程
+    struct binder_transaction *to_parent;      // 目标线程的下一个事务
+    unsigned need_reply : 1;                   // 是否需要回复（同步/异步）
+    struct binder_buffer *buffer;              // 事务数据缓冲区
+    unsigned int code;                         // 方法编号
+    unsigned int flags;                        // TF_ONE_WAY 等标志
+    long priority;                             // 源线程优先级
+    long saved_priority;                       // 保存的优先级
+    uid_t sender_euid;                         // 发送方用户 ID
+};
+```
+
+### 3.7 binder_write_read
+
+描述用户空间与驱动之间的一次数据交换——由 `ioctl(fd, BINDER_WRITE_READ, &bwr)` 传入和传出。
+
+```cpp
+struct binder_write_read {
+    signed long write_size;       // 输入数据大小
+    signed long write_consumed;   // 驱动已处理的输入字节数
+    unsigned long write_buffer;   // 输入缓冲区用户空间地址（BC_ 命令数组）
+    signed long read_size;        // 输出缓冲区大小
+    signed long read_consumed;    // 用户空间已处理的输出字节数
+    unsigned long read_buffer;    // 输出缓冲区用户空间地址（BR_ 命令数组）
+};
+```
+
+> `write_buffer` 和 `read_buffer` 本质上都是数组，每个元素由一个协议码（BC_/BR_）及其关联数据组成。这是 Binder ioctl 唯一的输入/输出接口。
+
+### 3.8 binder_transaction_data：事务数据的描述
+
+```cpp
+struct binder_transaction_data {
+    union {
+        size_t handle;    // BC_TRANSACTION 时为目标句柄
+        void *ptr;        // BC_REPLY 时为目标指针
+    } target;
+    void *cookie;         // 目标对象 cookie
+    unsigned int code;    // 方法编号
+    unsigned int flags;   // 标志位
+    pid_t sender_pid;     // 发送方 PID
+    uid_t sender_euid;    // 发送方 UID
+    size_t data_size;     // 普通数据大小
+    size_t offsets_size;  // Binder 对象偏移数组大小
+    union {
+        struct { const void *buffer; const void *offsets; } ptr;
+        uint8_t buf[8];
+    } data;               // 内联数据或数据指针
+};
+```
+
+### 3.9 flat_binder_object：跨进程传输的 Binder 封装
+
+```cpp
+struct flat_binder_object {
+    uint32_t type;        // BINDER_TYPE_BINDER / HANDLE / FD / WEAK_BINDER / WEAK_HANDLE
+    uint32_t flags;       // FLAT_BINDER_FLAG_* 标志
+    union {
+        struct { void *binder; signed long cookie; };  // type=BINDER 时使用
+        uint32_t handle;                                // type=HANDLE 时使用
+    };
+    void *cookie;         // 额外的上下文指针
+};
+```
+
+`type` 决定了驱动在 `binder_transaction` 中如何处理这个对象：
+- `BINDER_TYPE_BINDER`：这是一个实体，驱动创建/查找 `binder_node`，为目标进程创建 `binder_ref`，改写为 `BINDER_TYPE_HANDLE`
+- `BINDER_TYPE_HANDLE`：这是一个引用，驱动查找源进程的 `binder_ref`，为目标进程创建对应的 `binder_ref`，改写 handle 编号
 
 ### 关系总览
 
