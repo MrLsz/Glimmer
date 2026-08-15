@@ -1,6 +1,24 @@
-# Zygote 进程启动原理
+# Zygote 进程启动分析
 
 > Zygote 是 Android 所有 Java 进程的「母体」。它启动一次，预加载 framework，然后通过 fork + COW 让每个 App 以近乎零成本继承这份工作——这是 Android 冷启动性能的基石。
+
+---
+
+## 目录
+
+- [一、为什么需要 Zygote](#一为什么需要-zygote)
+- [二、init 拉起 Zygote](#二init-拉起-zygote)
+- [三、创建 ART 虚拟机](#三创建-art-虚拟机)
+- [四、注册 JNI 方法](#四注册-jni-方法)
+- [五、预加载（preload）](#五预加载preload)
+- [六、注册 Socket](#六注册-socket)
+- [七、启动流程图](#七启动流程图)
+- [八、fork system_server](#八fork-system_server)
+- [九、runSelectLoop — 进入主循环](#九runselectloop--进入主循环)
+- [十、处理 App fork 请求](#十处理-app-fork-请求)
+- [十一、fork + COW 原理](#十一fork--cow-原理)
+- [十二、源码阅读入口](#十二源码阅读入口)
+- [十三、一条线记忆](#十三一条线记忆)
 
 ---
 
@@ -21,6 +39,8 @@ Zygote 的解法：**先启动一个「模板进程」，预加载所有公共�
 
 ### 有无 Zygote 的量化对比
 
+Zygote 带来的收益可以量化到冷启动耗时和内存占用两个维度：
+
 | 维度 | 无 Zygote | 有 Zygote + COW |
 |---|---|---|
 | 每个 App 冷启动 | 2-3s | 0.5-1s |
@@ -29,6 +49,8 @@ Zygote 的解法：**先启动一个「模板进程」，预加载所有公共�
 | JNI 注册 | 每 App 注册上百个 native 方法 | 一次注册，全部继承 |
 
 ### Zygote 与传统 Linux 服务架构的对比
+
+Zygote 的「模板进程 + fork」思路与传统 Linux daemon 模型有本质差异，对比如下：
 
 | 维度 | 传统 daemon 模型（systemd） | Zygote 模型 |
 |---|---|---|
@@ -42,6 +64,8 @@ Zygote 的解法：**先启动一个「模板进程」，预加载所有公共�
 
 ### Dalvik → ART 的演进
 
+Zygote 的预加载行为随运行时从 Dalvik 演进到 ART 发生了显著变化：
+
 | 时期 | 运行时 | Zygote 行为 |
 |---|---|---|
 | Android 4.4 及之前 | Dalvik (JIT) | 加载 `.dex`，每 App 独立 JIT |
@@ -54,6 +78,8 @@ Zygote 的解法：**先启动一个「模板进程」，预加载所有公共�
 ## 二、init 拉起 Zygote
 
 ### rc 配置
+
+Zygote 由 init 通过 rc 脚本拉起，核心配置定义在 `init.zygote*.rc` 中：
 
 ```rc
 # /system/core/rootdir/init.zygote64_32.rc
@@ -75,6 +101,8 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
 - `critical`：Zygote 死了整机进 Recovery，不可接受的故障
 
 ### app_process 入口
+
+`app_process` 是 Zygote 的 Native 入口，`app_main.cpp` 的 `main()` 只做一件事——根据参数判断走 Zygote 还是普通命令行工具模式：
 
 ```cpp
 // frameworks/base/cmds/app_process/app_main.cpp
@@ -117,6 +145,8 @@ init 根据设备 CPU ABI 选择不同 rc 文件：
 
 ### startVm
 
+`startVm` 负责创建 ART 虚拟机，其中 Zygote 模式会附加一组专用参数：
+
 ```cpp
 // frameworks/base/core/jni/AndroidRuntime.cpp
 int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv,
@@ -147,6 +177,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv,
 | `-Xjitsaveprofilinginfo` | 保存 JIT Profile | 云 Profile 加速后续启动 |
 
 ### JNI_CreateJavaVM 内部
+
+`startVm` 最终调用 `JNI_CreateJavaVM` 进入 libart，创建 ART 运行时实例：
 
 ```cpp
 // art/runtime/java_vm_ext.cc
@@ -181,6 +213,8 @@ VM 创建好了，但 Java 层的 native 方法还找不到对应的 C++ 函数�
 
 ### startReg
 
+`startReg` 遍历 `gRegJNI` 数组，逐个注册 framework 层的 native 方法绑定：
+
 ```cpp
 // frameworks/base/core/jni/AndroidRuntime.cpp
 int AndroidRuntime::startReg(JNIEnv* env) {
@@ -197,6 +231,8 @@ int AndroidRuntime::startReg(JNIEnv* env) {
 ```
 
 ### gRegJNI 注册了什么（部分）
+
+`gRegJNI` 数组列出了所有需要注册的 JNI 模块，以下是与 Zygote 启动直接相关的部分：
 
 ```cpp
 static const RegJNIRec gRegJNI[] = {
@@ -222,6 +258,8 @@ env->RegisterNatives(clazz, methods, numMethods);
 
 ### RegisterNatives 内部机制
 
+`RegisterNatives` 把 native 函数指针直接写入 `ArtMethod` 对象内部，绑定后无需每次查表：
+
 ```cpp
 // art/runtime/jni_internal.cc
 jint RegisterNatives(JNIEnv* env, jclass java_class,
@@ -246,6 +284,8 @@ jint RegisterNatives(JNIEnv* env, jclass java_class,
 
 ### 调用链
 
+preload 的入口是 `ZygoteInit.main()`，调用链如下：
+
 ```text
 AndroidRuntime::start()
   → ZygoteInit.main()
@@ -253,6 +293,8 @@ AndroidRuntime::start()
 ```
 
 ### preload 源码
+
+`preload()` 依次完成类、资源、so、HAL、图形驱动等预加载，是 Zygote 启动最耗时的一步：
 
 ```java
 // frameworks/base/core/java/com/android/internal/os/ZygoteInit.java
@@ -288,6 +330,8 @@ m preloaded-classes
 生成逻辑遍历 framework 代码，统计每个类被引用的频率，将 Top-N 写入列表。不同 Android 版本这个列表在 1800-3000 类之间变动。
 
 ### ClassLoader 层次
+
+预加载使用 `BootClassLoader` 而非 `PathClassLoader`，层次结构如下：
 
 ```text
 BootClassLoader
@@ -326,6 +370,8 @@ void registerServerSocketFromEnv(String socketName) {
 
 ## 七、启动流程图
 
+下面用一张图串联 Zygote 从 init 拉起到进入永久等待的完整生命周期，再配一张阶段耗时表量化每个环节的代价。
+
 <img src="./images/zygote-startup.png" width="236" alt="Zygote 启动总流程">
 
 上图的每一步对应的时间和关键动作：
@@ -359,6 +405,8 @@ init 拉起 app_process
 
 ### 源码
 
+`forkSystemServer` 在 fork 前触发 GC，fork 后让子进程进入 `SystemServer.main()`：
+
 ```java
 // ZygoteInit.java
 private static Runnable forkSystemServer(...) {
@@ -386,6 +434,8 @@ private static Runnable forkSystemServer(...) {
 ```
 
 ### 与普通 App fork 的区别
+
+fork system_server 与 fork 普通 App 在 UID、入口、capabilities 上有本质差异：
 
 | 维度 | system_server | 普通 App |
 |---|---|---|
@@ -465,9 +515,13 @@ Runnable runSelectLoop(String abiList) {
 
 ### 整体流程
 
+AMS 发起 fork 请求后，Zygote 经 socket 解析参数、fork、让子进程进入 ActivityThread，流程图如下：
+
 <img src="./images/zygote-fork-flow.png" width="340" alt="Zygote fork App 流程">
 
 ### processOneCommand
+
+`processOneCommand` 是 fork App 的核心——读取参数、调用 `forkAndSpecialize`、子进程返回 `Runnable` 入口：
 
 ```java
 // ZygoteConnection.java
@@ -494,6 +548,8 @@ Runnable processOneCommand(ZygoteServer zygoteServer) {
 ```
 
 ### AMS 发送的关键参数
+
+AMS 通过 socket 向 Zygote 发送一组参数，决定子进程的身份和运行时配置：
 
 | 参数 | 值示例 | 含义 |
 |---|---|---|
@@ -556,6 +612,8 @@ COW（Copy-On-Write）是 Zygote 架构赖以成立的核心机制。没有它�
 
 ### 三阶段原理图
 
+COW 分三个阶段演进——fork 前共享、fork 后只读映射、首次写入触发复制，下图从左到右展示这一时间线：
+
 <img src="./images/zygote-cow.png" width="600" alt="Zygote fork 与 COW 三阶段原理">
 
 整张图分三个阶段，从左到右是时间线：
@@ -567,6 +625,8 @@ COW（Copy-On-Write）是 Zygote 架构赖以成立的核心机制。没有它�
 **阶段三：子进程首次写入，COW 触发** — 子进程尝试写入某一页（比如修改某个类的静态字段）。CPU 检测到写保护 → 触发缺页异常（page fault）。内核的 `do_wp_page()` 识别这是 COW 场景：分配一个新物理页，用 `copy_user_highpage()` 把原页内容复制过去，更新子进程页表指向新页并标记为可读写。父进程完全不受影响，继续使用原来那页。
 
 ### 为什么关键：fork 不复制、只"锁"
+
+fork 的成本与内存大小无关，只与页表条目数有关——这是 Zygote 架构成立的根本原因：
 
 ```text
 fork() 的成本 ≈ 遍历页表、标记写保护（O(页表条目数)）
@@ -580,6 +640,8 @@ Zygote 内存 ≈ 50MB+
 > 这就是 Zygote 架构成立的根本原因：**fork 快，COW 让后续成本也低**。如果 Linux 没有 COW，每个 App 都要复制 50MB——那 Zygote 设计毫无意义。
 
 ### Native fork 实现
+
+`ForkCommon` 是 Zygote 所有 fork 路径的 Native 实现，fork 前后分别做准备工作：
 
 ```cpp
 // frameworks/base/core/jni/com_android_internal_os_Zygote.cpp
@@ -599,6 +661,8 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
 ### 为什么 fork 前要 GC
 
+fork 前触发 GC 能减少 COW 的脏页数量，从而降低 fork 和子进程写入的成本：
+
 ```java
 // 每次 fork system_server 或 App 之前
 VMRuntime.getRuntime().requestHeapTrim();     // 整理堆，紧凑对象
@@ -611,6 +675,8 @@ VMRuntime.getRuntime().requestGCBeforeFork();  // 触发 GC，回收垃圾
 - 同时整理堆让存活对象紧凑排列 → 减少总的页表条目数 → fork 本身更快
 
 ### Kernel 层面：完整调用链
+
+从 fork 系统调用到 COW 缺页处理，内核侧的完整调用链如下：
 
 ```text
 fork() 系统调用 → 内核态:
@@ -644,6 +710,8 @@ fork() 系统调用 → 内核态:
 
 ### 最终效果
 
+Zygote + COW 的最终收益汇总：
+
 | 指标 | 无 Zygote | 有 Zygote + COW |
 |---|---|---|
 | App 冷启 | ~2-3s | ~0.5-1s |
@@ -673,6 +741,8 @@ COW 有一个常被忽略的副作用：**任何写入操作都会触发页面�
 ---
 
 ## 十二、源码阅读入口
+
+把前文提到的所有关键源码文件按调用顺序汇总成一张速查表，方便对照阅读和回看。
 
 | 文件 | 职责 | 顺序 |
 |---|---|---|

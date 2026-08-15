@@ -206,6 +206,8 @@ static const JNINativeMethod gBinderInternalMethods[] = {
 
 ## 三、Java 层 ServiceManager 封装
 
+ServiceManager 在 Java 层的封装链路是理解整个 Framework 层的入口——从 `getIServiceManager()` 单例获取开始，经 `getContextObject()` 的 JNI 转换，最终落到 `ServiceManagerProxy` 代理对象。本章按调用顺序拆解这三步。
+
 ### 3.1 getIServiceManager：单例获取 SM 代理
 
 `ServiceManager.getIServiceManager()` 采用单例模式获取 SM 代理——首次调用时通过 `BinderInternal.getContextObject()` 和 `ServiceManagerNative.asInterface()` 构造 `ServiceManagerProxy`。完整代码：
@@ -324,6 +326,8 @@ class ServiceManagerProxy implements IServiceManager {
 ---
 
 ## 四、服务注册：Java → Native 全链路
+
+服务注册是 Binder Framework 层最完整的纵向切片——从 Java 层 `ServiceManagerProxy.addService` 出发，经 `writeStrongBinder` 的 JNI 转换、`JavaBBinder` 桥、`flatten_binder` 扁平化，最终进入 `BpBinder::transact`。本章逐层拆解每一环的转换细节。
 
 ### 4.1 ServiceManagerProxy.addService
 
@@ -495,6 +499,8 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
 ---
 
 ## 五、服务获取：Java → Native 全链路
+
+服务获取与注册共享同一套 Java → Native 转换通道，但方向相反——查询完成后，驱动返回的 BpBinder 需要经 `readStrongBinder` 反向转换回 Java 层的 `BinderProxy`。本章拆解获取侧的三个关键环节。
 
 ### 5.1 ServiceManager.getService
 
