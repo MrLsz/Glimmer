@@ -31,6 +31,7 @@ Glimmer/
 | [init进程启动分析.md](notes/mobile/android/init进程启动分析.md) | init PID 1：FirstStage/SecondStage、rc 解析、属性服务 |
 | [zygote进程启动分析.md](notes/mobile/android/zygote进程启动分析.md) | Zygote：ART 孵化器、fork+COW、preload 机制 |
 | [system_server进程启动分析.md](notes/mobile/android/system_server进程启动分析.md) | system_server：三批服务发布、AMS.systemReady、Looper 主循环 |
+| [Launcher启动分析.md](notes/mobile/android/Launcher启动分析.md) | Launcher：HOME 应用、resolveActivity、fork、桌面加载 |
 | [Binder驱动核心概览.md](notes/mobile/android/Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种数据结构、BC_/BR_ 协议 |
 | [Binder ServiceManager的启动与获取分析.md](notes/mobile/android/Binder%20ServiceManager的启动与获取分析.md) | SM 启动三阶段、SET_CONTEXT_MGR、handle 0 获取 |
 | [Binder 服务注册与获取过程分析.md](notes/mobile/android/Binder%20服务注册与获取过程分析.md) | flat_binder_object 改写、注册/获取全链路源码 |
