@@ -53,6 +53,7 @@ Glimmer/
 | [leetcode-62-unique-paths.md](notes/algorithm/dp/leetcode-62-unique-paths.md) | DP | #62 不同路径 |
 | [leetcode-102-binary-tree-level-order-traversal.md](notes/algorithm/tree/leetcode-102-binary-tree-level-order-traversal.md) | Tree | #102 层序遍历 |
 | [leetcode-104-maximum-depth-of-binary-tree.md](notes/algorithm/tree/leetcode-104-maximum-depth-of-binary-tree.md) | Tree | #104 最大深度 |
+| [leetcode-137-single-number-ii.md](notes/algorithm/bit/leetcode-137-single-number-ii.md) | 位运算 | #137 只出现一次的数字 II |
 | [leetcode-141-linked-list-cycle.md](notes/algorithm/double-point/leetcode-141-linked-list-cycle.md) | 双指针 | #141 环形链表 |
 | [leetcode-200-number-of-islands.md](notes/algorithm/dfs_bfs/leetcode-200-number-of-islands.md) | DFS/BFS | #200 岛屿数量 |
 | [leetcode-215-kth-largest-element.md](notes/algorithm/sort/leetcode-215-kth-largest-element.md) | 堆 | #215 第K大元素 |
