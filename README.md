@@ -38,6 +38,8 @@ Glimmer/
 | [10-Launcher启动分析.md](notes/mobile/android/10-Launcher启动分析.md) | Launcher：HOME 应用、resolveActivity、fork、桌面加载 |
 | [11-Activity启动过程分析（上）.md](notes/mobile/android/11-Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→ActivityStarter→进程创建 |
 | [12-Activity启动过程分析（下）.md](notes/mobile/android/12-Activity启动过程分析（下）.md) | Activity 下：attachApplication→ClientTransaction→生命周期回调 |
+| [13-Broadcast基础和注册分析.md](notes/mobile/android/13-Broadcast基础和注册分析.md) | Broadcast：观察者模式、分类、动态注册源码 |
+| [14-Broadcast发送和接收过程分析.md](notes/mobile/android/14-Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→BroadcastQueue→onReceive 全链路 |
 
 ### 算法
 

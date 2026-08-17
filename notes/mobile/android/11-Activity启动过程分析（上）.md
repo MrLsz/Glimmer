@@ -101,7 +101,7 @@ Activity 的生命周期由 `Instrumentation` 调度，由 system_server 的 ATM
 
 整个启动过程的跨进程时序如下（本文覆盖前半程，即 App 发起 → ATMS 调度 → 进程创建）：
 
-![Activity 启动跨进程时序图](./images/activity-start-seq.png)
+<img src="./images/activity-start-seq.png" width="500" alt="Activity 启动跨进程时序图">
 
 | 阶段      | 关键角色                           | 职责                                |
 | ------- | ------------------------------ | --------------------------------- |
@@ -277,7 +277,7 @@ private int startActivityAsUser(...) {
 
 ActivityStarter 的内部方法调用时序如下（自调用链展示 execute → executeRequest → startActivityInner 的完整过程）：
 
-![ActivityStarter 内部调用时序图](./images/activity-starter-seq.png)
+<img src="./images/activity-starter-seq.png" width="320" alt="ActivityStarter 内部调用时序图">
 
 ### execute → executeRequest
 

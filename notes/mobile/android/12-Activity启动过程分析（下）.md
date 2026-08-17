@@ -525,6 +525,8 @@ void removeChild(ActivityStack stack);
 
 ### 各层关系总结
 
+把六层结构从根到叶的包含关系汇总如下：
+
 ```text
 RootWindowContainer（1 个）
   └── ActivityDisplay（每屏 1 个）
