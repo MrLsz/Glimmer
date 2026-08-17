@@ -32,6 +32,8 @@ Glimmer/
 | [zygote进程启动分析.md](notes/mobile/android/zygote进程启动分析.md) | Zygote：ART 孵化器、fork+COW、preload 机制 |
 | [system_server进程启动分析.md](notes/mobile/android/system_server进程启动分析.md) | system_server：三批服务发布、AMS.systemReady、Looper 主循环 |
 | [Launcher启动分析.md](notes/mobile/android/Launcher启动分析.md) | Launcher：HOME 应用、resolveActivity、fork、桌面加载 |
+| [Activity启动过程分析（上）.md](notes/mobile/android/Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→ActivityStarter→进程创建 |
+| [Activity启动过程分析（下）.md](notes/mobile/android/Activity启动过程分析（下）.md) | Activity 下：attachApplication→ClientTransaction→生命周期回调 |
 | [Binder驱动核心概览.md](notes/mobile/android/Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种数据结构、BC_/BR_ 协议 |
 | [Binder ServiceManager的启动与获取分析.md](notes/mobile/android/Binder%20ServiceManager的启动与获取分析.md) | SM 启动三阶段、SET_CONTEXT_MGR、handle 0 获取 |
 | [Binder 服务注册与获取过程分析.md](notes/mobile/android/Binder%20服务注册与获取过程分析.md) | flat_binder_object 改写、注册/获取全链路源码 |
@@ -45,13 +47,19 @@ Glimmer/
 | [leetcode-11-container-with-most-water.md](notes/algorithm/double-point/leetcode-11-container-with-most-water.md) | 双指针 | #11 盛水容器 |
 | [leetcode-20-valid-parentheses.md](notes/algorithm/stack/leetcode-20-valid-parentheses.md) | Stack | #20 有效括号 |
 | [leetcode-46-permutations.md](notes/algorithm/backtracking/leetcode-46-permutations.md) | 回溯 | #46 全排列 |
+| [leetcode-56-merge-intervals.md](notes/algorithm/sort/leetcode-56-merge-intervals.md) | 排序/区间 | #56 合并区间 |
 | [leetcode-62-unique-paths.md](notes/algorithm/dp/leetcode-62-unique-paths.md) | DP | #62 不同路径 |
 | [leetcode-102-binary-tree-level-order-traversal.md](notes/algorithm/tree/leetcode-102-binary-tree-level-order-traversal.md) | Tree | #102 层序遍历 |
 | [leetcode-104-maximum-depth-of-binary-tree.md](notes/algorithm/tree/leetcode-104-maximum-depth-of-binary-tree.md) | Tree | #104 最大深度 |
+| [leetcode-141-linked-list-cycle.md](notes/algorithm/double-point/leetcode-141-linked-list-cycle.md) | 双指针 | #141 环形链表 |
 | [leetcode-200-number-of-islands.md](notes/algorithm/dfs_bfs/leetcode-200-number-of-islands.md) | DFS/BFS | #200 岛屿数量 |
+| [leetcode-215-kth-largest-element.md](notes/algorithm/sort/leetcode-215-kth-largest-element.md) | 堆 | #215 第K大元素 |
 | [leetcode-225-implement-stack-using-queues.md](notes/algorithm/queue/leetcode-225-implement-stack-using-queues.md) | Queue | #225 用队列实现栈 |
+| [leetcode-303-range-sum-query-immutable.md](notes/algorithm/sort/leetcode-303-range-sum-query-immutable.md) | 前缀和 | #303 区域和检索 |
+| [leetcode-344-reverse-string.md](notes/algorithm/double-point/leetcode-344-reverse-string.md) | 双指针 | #344 反转字符串 |
 | [leetcode-455-assign-cookies.md](notes/algorithm/greedy/leetcode-455-assign-cookies.md) | Greedy | #455 分发饼干 |
 | [leetcode-704-binary-search.md](notes/algorithm/binary-search/leetcode-704-binary-search.md) | 二分 | #704 二分查找 |
+| [leetcode-739-daily-temperatures.md](notes/algorithm/stack/leetcode-739-daily-temperatures.md) | 单调栈 | #739 每日温度 |
 
 ---
 
