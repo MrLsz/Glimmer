@@ -1,4 +1,4 @@
-# Launcher 启动分析
+# 10. Launcher 启动分析
 
 > Launcher（桌面）是 Android 系统的 HOME 应用——本质是一个普通 App，但承担「系统桌面」角色，是开机后用户看到的第一个界面。本文按调用链拆解从 `AMS.systemReady()` 触发、`resolveActivity` 解析、Zygote fork、`attachApplication` 绑定，到 `LauncherModel` 工作线程加载应用列表和图标的完整过程。
 

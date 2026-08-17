@@ -1,4 +1,4 @@
-# Binder ServiceManager 的启动与获取分析
+# 05. Binder 系列二-ServiceManager 分析
 
 > ServiceManager 是 Binder 通信的名字服务——系统启动的第一批 native 进程，负责注册中心角色。本文按源码顺序拆解其启动三阶段（open→SET_CONTEXT_MGR→binder_loop），然后分析普通进程如何通过 ProcessState → BpBinder(0) → interface_cast 获取 ServiceManager 的代理对象。每步配关键源码、时序图和类图。
 

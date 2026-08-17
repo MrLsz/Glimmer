@@ -1,4 +1,4 @@
-# Activity 启动过程分析（上）
+# 11. Activity 启动过程分析（上）
 
 > Activity 启动的前半程——从 `startActivity()` 出发，经 Instrumentation 跨进程到 system_server 的 ATMS，由 ActivityStarter 完成解析、launchMode 判断与 task 复用，再视情况经 ProcessList 请求 Zygote fork 新进程。本文按源码调用链拆解这条路径，覆盖「App 发起 → 系统调度 → 进程创建」三个阶段。
 

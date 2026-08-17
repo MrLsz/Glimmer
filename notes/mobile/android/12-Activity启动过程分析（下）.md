@@ -1,4 +1,4 @@
-# Activity 启动过程分析（下）
+# 12. Activity 启动过程分析（下）
 
 > Activity 启动的后半程——Zygote fork 出 App 进程后，从 `ActivityThread.main` 初始化、`attachApplication` 绑定，到 ATMS 通过 `ClientTransaction` 事务下发启动指令，再由 `TransactionExecutor` 依次触发 `onCreate → onStart → onResume`。本文承接上篇（App 发起 → 系统调度 → 进程创建），拆解「进程初始化 → 生命周期回调」的完整链路。
 

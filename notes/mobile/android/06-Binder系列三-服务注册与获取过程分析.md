@@ -1,4 +1,4 @@
-# Binder 服务注册与获取过程分析
+# 06. Binder 系列三-服务注册与获取过程分析
 
 > 以 MediaPlayerService 注册和 App 获取 AMS 为例，按源码调用链完整拆解 Binder 服务注册与获取的全流程——从 Java 层 addService/getService，经 IPCThreadState 的 transact/talkWithDriver，到 Binder 驱动的 binder_transaction 处理和 flat_binder_object 类型改写，最后回到 ServiceManager 的 svcmgr_handler 分发。每步标注关键源码。
 

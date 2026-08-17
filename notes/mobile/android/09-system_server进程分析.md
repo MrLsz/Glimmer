@@ -1,4 +1,4 @@
-# system_server 进程启动分析
+# 09. system_server 进程分析
 
 > system_server 是 Zygote fork 出的第一个 Java 系统进程，承载 AMS/ATMS/WMS/PMS 等绝大多数系统服务，是 Android framework 层的核心。本文按调用链拆解从 `forkSystemServer()` 到三批服务发布、BootPhase 阶段推进、再到 `Looper.loop()` 主循环的完整启动过程。
 

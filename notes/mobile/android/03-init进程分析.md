@@ -1,4 +1,4 @@
-# init 进程启动分析
+# 03. init 进程分析
 
 > init 是 Android 用户态的第一个进程（PID 1），所有用户态进程的祖先。本文按源码调用链拆解 init 的内部机制：两阶段启动、rc 解析、属性服务、native 服务管理、ueventd、SELinux、服务重启与看门狗。
 

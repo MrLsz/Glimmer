@@ -1,4 +1,4 @@
-# Zygote 进程启动分析
+# 08. Zygote 进程分析
 
 > Zygote 是 Android 所有 Java 进程的「母体」。它启动一次，预加载 framework，然后通过 fork + COW 让每个 App 以近乎零成本继承这份工作——这是 Android 冷启动性能的基石。
 

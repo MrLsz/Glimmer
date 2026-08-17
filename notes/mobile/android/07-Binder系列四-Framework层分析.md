@@ -1,4 +1,4 @@
-# Binder Framework 层分析
+# 07. Binder 系列四-Framework 层分析
 
 > Binder 在 Java Framework 层通过 JNI 桥接到 Native 层的 C/S 架构（Binder/BinderProxy ↔ BBinder/BpBinder），向上为应用提供 ServiceManager API、AIDL 编译机制和完整的跨进程调用能力。本文覆盖 JNI 注册表、Java 层 ServiceManager 全链路封装、Java ↔ Native Binder 对象转换（javaObjectForIBinder / ibinderForJavaObject）、以及完整的 addService/getService 调用链。
 
