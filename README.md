@@ -9,6 +9,7 @@ Glimmer/
 ├── notes/                  # 学习笔记
 │   ├── java/               # Java 语言
 │   ├── kotlin/             # Kotlin 语言
+│   ├── objective-c/        # Objective-C 语言
 │   ├── mobile/             # 客户端开发
 │   │   ├── android/        # Android 开发
 │   │   └── ios/            # iOS 开发
@@ -38,6 +39,12 @@ Glimmer/
 |------|------|
 | [01-Kotlin基础语法.md](notes/kotlin/01-Kotlin基础语法.md) | 空安全、函数与 Lambda、类与对象、委托、扩展、泛型、作用域函数、Kotlin/Java 互操作 |
 | [02-Kotlin协程.md](notes/kotlin/02-Kotlin协程.md) | suspend 原理（CPS+状态机）、调度器、结构化并发、取消、Flow/Channel |
+
+### Objective-C
+
+| 文件 | 说明 |
+|------|------|
+| [01-Objective-C基础语法.md](notes/objective-c/01-Objective-C基础语法.md) | 类与对象、属性与内存管理（MRC/ARC）、消息传递、协议、Category/Extension、Block、KVC/KVO、集合、单例 |
 
 ### Android
 
