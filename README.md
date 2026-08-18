@@ -7,6 +7,7 @@
 ```
 Glimmer/
 ├── notes/                  # 学习笔记
+│   ├── java/               # Java 语言
 │   ├── mobile/             # 客户端开发
 │   │   ├── android/        # Android 开发
 │   │   └── ios/            # iOS 开发
@@ -21,6 +22,14 @@ Glimmer/
 ```
 
 ## 文章索引
+
+### Java
+
+| 文件 | 说明 |
+|------|------|
+| [01-Java基础语法.md](notes/java/01-Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、Java 8~21 新特性 |
+| [02-Java集合体系.md](notes/java/02-Java集合体系.md) | List/Map/Set/Queue 全实现类、HashMap 源码、并发容器、fail-fast |
+| [03-Java并发编程.md](notes/java/03-Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池、ThreadLocal |
 
 ### Android
 
