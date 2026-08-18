@@ -44,7 +44,7 @@ Glimmer/
 
 | 文件 | 说明 |
 |------|------|
-| [01-Objective-C基础语法.md](notes/objective-c/01-Objective-C基础语法.md) | 类与对象、属性与内存管理（MRC/ARC）、消息传递、协议、Category/Extension、Block、KVC/KVO、集合、单例 |
+| [01-Objective-C基础语法.md](notes/objective-c/01-Objective-C基础语法.md) | 类与对象、isa/元类、属性与内存管理（MRC/ARC）、消息传递与转发、协议/委托、Category/Extension、Block、KVC/KVO、集合、错误处理、设计模式、Swift 互操作 |
 
 ### Android
 
