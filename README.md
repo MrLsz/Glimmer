@@ -53,10 +53,10 @@ Glimmer/
 | [03-init进程分析.md](notes/mobile/android/03-init进程分析.md) | init PID 1：FirstStage/SecondStage、rc 解析、属性服务 |
 | [04-Binder系列一-Binder驱动核心概览.md](notes/mobile/android/04-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种数据结构、BC_/BR_ 协议 |
 | [05-Binder系列二-ServiceManager分析.md](notes/mobile/android/05-Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET_CONTEXT_MGR、handle 0 获取 |
-| [06-Binder系列三-服务注册与获取过程分析.md](notes/mobile/android/06-Binder系列三-服务注册与获取过程分析.md) | flat_binder_object 改写、注册/获取全链路源码 |
+| [06-Binder系列三-服务注册与获取分析.md](notes/mobile/android/06-Binder系列三-服务注册与获取过程分析.md) | flat_binder_object 改写、注册/获取全链路源码 |
 | [07-Binder系列四-Framework层分析.md](notes/mobile/android/07-Binder系列四-Framework层分析.md) | Java 层 JNI 注册、ServiceManager 封装、AIDL 调用链 |
 | [08-Zygote进程分析.md](notes/mobile/android/08-Zygote进程分析.md) | Zygote：ART 孵化器、fork+COW、preload 机制 |
-| [09-system_server进程分析.md](notes/mobile/android/09-system_server进程分析.md) | system_server：三批服务发布、AMS.systemReady、Looper 主循环 |
+| [09-SystemServer进程分析.md](notes/mobile/android/09-system_server进程分析.md) | system_server：三批服务发布、AMS.systemReady、Looper 主循环 |
 | [10-Launcher启动分析.md](notes/mobile/android/10-Launcher启动分析.md) | Launcher：HOME 应用、resolveActivity、fork、桌面加载 |
 | [11-Activity启动过程分析（上）.md](notes/mobile/android/11-Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→ActivityStarter→进程创建 |
 | [12-Activity启动过程分析（下）.md](notes/mobile/android/12-Activity启动过程分析（下）.md) | Activity 下：attachApplication→ClientTransaction→生命周期回调 |
