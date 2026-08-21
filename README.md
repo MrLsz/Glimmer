@@ -10,6 +10,7 @@ Glimmer/
 │   ├── java/               # Java 语言
 │   ├── kotlin/             # Kotlin 语言
 │   ├── objective-c/        # Objective-C 语言
+│   ├── swift/              # Swift 语言
 │   ├── mobile/             # 客户端开发
 │   │   ├── android/        # Android 开发
 │   │   └── ios/            # iOS 开发
@@ -46,6 +47,13 @@ Glimmer/
 |------|------|
 | [01-OC基础语法.md](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、协议/委托、Category/Extension、Block、KVC/KVO、集合等 |
 | [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | 多线程基础、NSThread、GCD、NSOperation、线程安全、RunLoop 保活等 |
+
+### Swift
+
+| 文件 | 说明 |
+|------|------|
+| [01-Swift基础语法.md](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型、错误处理等 |
+| [02-Swift多线程.md](notes/swift/02-Swift多线程.md) | GCD、锁、async/await、Task、结构化并发、Actor、Sendable、多读单写等 |
 
 ### Android
 
