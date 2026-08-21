@@ -7,13 +7,14 @@
 ```
 Glimmer/
 ├── notes/                  # 学习笔记
+│   │  【Android 开发体系】
 │   ├── java/               # Java 语言
 │   ├── kotlin/             # Kotlin 语言
+│   ├── mobile/android/     # Android 系统开发
+│   │  【iOS 开发体系】
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
-│   ├── mobile/             # 客户端开发
-│   │   ├── android/        # Android 开发
-│   │   └── ios/            # iOS 开发
+│   ├── mobile/ios/         # iOS 开发（暂空）
 │   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # AI / 机器学习
@@ -26,7 +27,9 @@ Glimmer/
 
 ## 文章索引
 
-### Java
+### Android 开发体系
+
+#### Java
 
 | 文件 | 说明 |
 |------|------|
@@ -34,28 +37,14 @@ Glimmer/
 | [02-Java集合体系.md](notes/java/02-Java集合体系.md) | List/Map/Set/Queue 全实现类、HashMap 源码、并发容器、fail-fast |
 | [03-Java并发编程.md](notes/java/03-Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池、ThreadLocal |
 
-### Kotlin
+#### Kotlin
 
 | 文件 | 说明 |
 |------|------|
 | [01-Kotlin基础语法.md](notes/kotlin/01-Kotlin基础语法.md) | 空安全、函数与 Lambda、类与对象、委托、扩展、泛型、作用域函数等 |
 | [02-Kotlin协程.md](notes/kotlin/02-Kotlin协程.md) | suspend 原理（CPS+状态机）、调度器、结构化并发、取消、Flow/Channel |
 
-### Objective-C
-
-| 文件 | 说明 |
-|------|------|
-| [01-OC基础语法.md](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、协议/委托、Category/Extension、Block、KVC/KVO、集合等 |
-| [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | 多线程基础、NSThread、GCD、NSOperation、线程安全、RunLoop 保活等 |
-
-### Swift
-
-| 文件 | 说明 |
-|------|------|
-| [01-Swift基础语法.md](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型等 |
-| [02-Swift多线程.md](notes/swift/02-Swift多线程.md) | GCD、锁、async/await、Task、结构化并发、Actor、Sendable、多读单写等 |
-
-### Android
+#### Android
 
 | 文件 | 说明 |
 |------|------|
@@ -73,6 +62,22 @@ Glimmer/
 | [12-Activity启动过程分析（下）.md](notes/mobile/android/12-Activity启动过程分析（下）.md) | Activity 下：attachApplication→ClientTransaction→生命周期回调 |
 | [13-Broadcast基础和注册分析.md](notes/mobile/android/13-Broadcast基础和注册分析.md) | Broadcast：观察者模式、分类、动态注册源码 |
 | [14-Broadcast发送和接收过程分析.md](notes/mobile/android/14-Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→BroadcastQueue→onReceive 全链路 |
+
+### iOS 开发体系
+
+#### Objective-C
+
+| 文件 | 说明 |
+|------|------|
+| [01-OC基础语法.md](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、协议/委托、Category/Extension、Block、KVC/KVO、集合等 |
+| [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | 多线程基础、NSThread、GCD、NSOperation、线程安全、RunLoop 保活等 |
+
+#### Swift
+
+| 文件 | 说明 |
+|------|------|
+| [01-Swift基础语法.md](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型等 |
+| [02-Swift多线程.md](notes/swift/02-Swift多线程.md) | GCD、锁、async/await、Task、结构化并发、Actor、Sendable、多读单写等 |
 
 ### 算法
 
