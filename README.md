@@ -52,7 +52,7 @@ Glimmer/
 
 | 文件 | 说明 |
 |------|------|
-| [01-Swift基础语法.md](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型、错误处理等 |
+| [01-Swift基础语法.md](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型等 |
 | [02-Swift多线程.md](notes/swift/02-Swift多线程.md) | GCD、锁、async/await、Task、结构化并发、Actor、Sendable、多读单写等 |
 
 ### Android
