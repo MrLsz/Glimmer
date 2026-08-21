@@ -29,42 +29,42 @@ Glimmer/
 
 | 文件 | 说明 |
 |------|------|
-| [01-Java基础语法.md](notes/java/01-Java基础语法.md) | 数据类型、OOP、泛型、反射、注解 |
-| [02-Java集合体系.md](notes/java/02-Java集合体系.md) | 集合实现类、HashMap 源码 |
-| [03-Java并发编程.md](notes/java/03-Java并发编程.md) | JMM、锁、CAS、AQS、线程池 |
+| [01-Java基础语法.md](notes/java/01-Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、Java 8~21 新特性 |
+| [02-Java集合体系.md](notes/java/02-Java集合体系.md) | List/Map/Set/Queue 全实现类、HashMap 源码、并发容器、fail-fast |
+| [03-Java并发编程.md](notes/java/03-Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池、ThreadLocal |
 
 ### Kotlin
 
 | 文件 | 说明 |
 |------|------|
-| [01-Kotlin基础语法.md](notes/kotlin/01-Kotlin基础语法.md) | 空安全、Lambda、委托、扩展 |
-| [02-Kotlin协程.md](notes/kotlin/02-Kotlin协程.md) | suspend 原理、结构化并发、Flow |
+| [01-Kotlin基础语法.md](notes/kotlin/01-Kotlin基础语法.md) | 空安全、函数与 Lambda、类与对象、委托、扩展、泛型、作用域函数、Kotlin/Java 互操作 |
+| [02-Kotlin协程.md](notes/kotlin/02-Kotlin协程.md) | suspend 原理（CPS+状态机）、调度器、结构化并发、取消、Flow/Channel |
 
 ### Objective-C
 
 | 文件 | 说明 |
 |------|------|
-| [01-OC基础语法.md](notes/objective-c/01-OC基础语法.md) | 类、isa、内存管理、Block、KVC/KVO |
-| [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | GCD、NSOperation、锁、多读单写 |
+| [01-OC基础语法.md](notes/objective-c/01-OC基础语法.md) | 类与对象、isa/元类、属性与内存管理（MRC/ARC）、消息传递与转发、协议/委托、Category/Extension、Block、KVC/KVO、集合、错误处理、设计模式、Swift 互操作 |
+| [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | 多线程基础、NSThread、GCD（队列/sync/async/group/barrier/semaphore/死锁）、NSOperation（依赖/取消/并发数）、锁与线程安全、多读单写、RunLoop 保活 |
 
 ### Android
 
 | 文件 | 说明 |
 |------|------|
-| [01-Android系统结构.md](notes/mobile/android/01-Android系统结构.md) | 六层架构全景 |
-| [02-Android系统启动分析.md](notes/mobile/android/02-Android系统启动分析.md) | 加电到 Launcher 启动链路 |
-| [03-init进程分析.md](notes/mobile/android/03-init进程分析.md) | rc 解析、属性服务 |
-| [04-Binder系列一-Binder驱动核心概览.md](notes/mobile/android/04-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、BC_/BR_ 协议 |
-| [05-Binder系列二-ServiceManager分析.md](notes/mobile/android/05-Binder系列二-ServiceManager分析.md) | SM 启动、SET_CONTEXT_MGR |
-| [06-Binder系列三-服务注册与获取过程分析.md](notes/mobile/android/06-Binder系列三-服务注册与获取过程分析.md) | flat_binder_object 改写 |
-| [07-Binder系列四-Framework层分析.md](notes/mobile/android/07-Binder系列四-Framework层分析.md) | JNI 注册、AIDL 调用链 |
-| [08-Zygote进程分析.md](notes/mobile/android/08-Zygote进程分析.md) | ART 孵化器、fork+COW |
-| [09-system_server进程分析.md](notes/mobile/android/09-system_server进程分析.md) | 服务发布、AMS.systemReady |
-| [10-Launcher启动分析.md](notes/mobile/android/10-Launcher启动分析.md) | HOME 应用、桌面加载 |
-| [11-Activity启动过程分析（上）.md](notes/mobile/android/11-Activity启动过程分析（上）.md) | startActivity→ActivityStarter |
-| [12-Activity启动过程分析（下）.md](notes/mobile/android/12-Activity启动过程分析（下）.md) | attachApplication→生命周期回调 |
-| [13-Broadcast基础和注册分析.md](notes/mobile/android/13-Broadcast基础和注册分析.md) | 观察者模式、动态注册 |
-| [14-Broadcast发送和接收过程分析.md](notes/mobile/android/14-Broadcast发送和接收过程分析.md) | sendBroadcast→onReceive |
+| [01-Android系统结构.md](notes/mobile/android/01-Android系统结构.md) | 六层架构全景：Linux 内核→HAL→运行时→Framework→应用 |
+| [02-Android系统启动分析.md](notes/mobile/android/02-Android系统启动分析.md) | 从加电到 Launcher 的完整进程诞生链 |
+| [03-init进程分析.md](notes/mobile/android/03-init进程分析.md) | init PID 1：FirstStage/SecondStage、rc 解析、属性服务 |
+| [04-Binder系列一-Binder驱动核心概览.md](notes/mobile/android/04-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种数据结构、BC_/BR_ 协议 |
+| [05-Binder系列二-ServiceManager分析.md](notes/mobile/android/05-Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET_CONTEXT_MGR、handle 0 获取 |
+| [06-Binder系列三-服务注册与获取过程分析.md](notes/mobile/android/06-Binder系列三-服务注册与获取过程分析.md) | flat_binder_object 改写、注册/获取全链路源码 |
+| [07-Binder系列四-Framework层分析.md](notes/mobile/android/07-Binder系列四-Framework层分析.md) | Java 层 JNI 注册、ServiceManager 封装、AIDL 调用链 |
+| [08-Zygote进程分析.md](notes/mobile/android/08-Zygote进程分析.md) | Zygote：ART 孵化器、fork+COW、preload 机制 |
+| [09-system_server进程分析.md](notes/mobile/android/09-system_server进程分析.md) | system_server：三批服务发布、AMS.systemReady、Looper 主循环 |
+| [10-Launcher启动分析.md](notes/mobile/android/10-Launcher启动分析.md) | Launcher：HOME 应用、resolveActivity、fork、桌面加载 |
+| [11-Activity启动过程分析（上）.md](notes/mobile/android/11-Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→ActivityStarter→进程创建 |
+| [12-Activity启动过程分析（下）.md](notes/mobile/android/12-Activity启动过程分析（下）.md) | Activity 下：attachApplication→ClientTransaction→生命周期回调 |
+| [13-Broadcast基础和注册分析.md](notes/mobile/android/13-Broadcast基础和注册分析.md) | Broadcast：观察者模式、分类、动态注册源码 |
+| [14-Broadcast发送和接收过程分析.md](notes/mobile/android/14-Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→BroadcastQueue→onReceive 全链路 |
 
 ### 算法
 
