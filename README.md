@@ -45,6 +45,7 @@ Glimmer/
 | 文件 | 说明 |
 |------|------|
 | [01-Objective-C基础语法.md](notes/objective-c/01-Objective-C基础语法.md) | 类与对象、isa/元类、属性与内存管理（MRC/ARC）、消息传递与转发、协议/委托、Category/Extension、Block、KVC/KVO、集合、错误处理、设计模式、Swift 互操作 |
+| [02-OC多线程.md](notes/objective-c/02-OC多线程.md) | 多线程基础、NSThread、GCD（队列/sync/async/group/barrier/semaphore/死锁）、NSOperation（依赖/取消/并发数）、锁与线程安全、多读单写、RunLoop 保活 |
 
 ### Android
 
