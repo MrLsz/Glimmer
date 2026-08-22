@@ -14,7 +14,7 @@ Glimmer/
 │   │  【iOS 开发体系】
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
-│   ├── mobile/ios/         # iOS 开发（暂空）
+│   ├── mobile/ios/         # iOS 开发
 │   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # AI / 机器学习
@@ -78,6 +78,12 @@ Glimmer/
 |------|------|
 | [01-Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、集合、控制流、函数闭包、类与结构体、ARC、协议泛型等 |
 | [02-Swift多线程](notes/swift/02-Swift多线程.md) | GCD、锁、async/await、Task、结构化并发、Actor、Sendable、多读单写等 |
+
+#### iOS
+
+| 文件 | 说明 |
+|------|------|
+| [01-iOS内存管理](notes/mobile/ios/01-iOS内存管理.md) | 内存分区与 Mach-O 映射、堆分配机制（scalable malloc）、引用计数（isa 位域/SideTable）、ARC 与所有权修饰符、weak 底层（OC/Swift 双线 + 查找过程）、AutoreleasePool（用法→原理→RunLoop）、循环引用、Clean/Dirty/Compressed、Swift 差异 |
 
 ### 算法
 
