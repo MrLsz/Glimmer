@@ -84,7 +84,7 @@ Glimmer/
 | 文件                                           | 说明                                             |
 | -------------------------------------------- | ---------------------------------------------- |
 | [01-iOS内存管理](notes/mobile/ios/01-iOS内存管理.md) | 内存分区、堆分配机制、引用计数、ARC、weak 底层、AutoreleasePool 等 |
-| [02-类结构体协议底层原理](notes/mobile/ios/02-类结构体协议底层原理.md) | OC 类/isa/元类/消息发送/协议/Category + Swift HeapObject/值语义/存在容器/Witness Table/派发对比 |
+| [02-类的底层分析](notes/mobile/ios/02-类的底层分析.md) | objc_class 存储结构逐字段拆解、方法调用原理、协议/分类/扩展的存储与原理 |
 
 ### 算法
 
