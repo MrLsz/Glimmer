@@ -40,7 +40,7 @@
 
 ## 1. 集合体系总览
 
-![](images/java-collections-overview.png)
+<img src="images/java-collections-overview-official.png" width="1200" />
 
 > 以下按 **List → Map → Set → Stack → Queue** 逐接口展开，每个下列出关键实现类的源码原理与扩展思考。
 
