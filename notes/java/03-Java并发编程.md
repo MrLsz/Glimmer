@@ -89,19 +89,7 @@ pool.shutdown();
 
 📊 **6 状态转换**
 
-```mermaid
-stateDiagram-v2
-    [*] --> NEW
-    NEW --> RUNNABLE: start()
-    RUNNABLE --> BLOCKED: 抢 synchronized 失败
-    BLOCKED --> RUNNABLE: 获得锁
-    RUNNABLE --> WAITING: wait()/join()/park()
-    WAITING --> RUNNABLE: notify()/unpark()
-    RUNNABLE --> TIMED_WAITING: sleep(ms)/wait(ms)
-    TIMED_WAITING --> RUNNABLE: 时间到
-    RUNNABLE --> TERMINATED: 完毕
-    TERMINATED --> [*]
-```
+![](images/java-thread-state.png)
 
 📌 **6 种状态详解（来自 `Thread.State` 枚举）**
 
@@ -199,17 +187,7 @@ public void run() {
 
 🔍 **核心抽象：主内存 vs 工作内存**
 
-```text
-        ┌─────────────┐
-        │  主内存 Main  │  ← 所有线程共享，存放变量"真实值"
-        └──────┬──────┘
-        ┌──────┴──────┐
-   ┌────┴────┐   ┌────┴────┐
-   │线程A工作内存│  │线程B工作内存│  ← 每个线程私有，拷贝自主内存
-   │(=CPU缓存/  │  │(=CPU缓存/  │
-   │ 寄存器)    │  │ 寄存器)    │
-   └─────────┘   └─────────┘
-```
+![](images/java-jmm.png)
 
 - 线程**不能直接**读写主内存变量，必须先 `read/load` 到自己的工作内存，改完再 `store/write` 回主内存。
 - 工作内存对应\*\* CPU 缓存 / 寄存器\*\*（不是 JVM 的堆/栈区！）。所以 A 改了变量但没刷回主内存，或 B 一直读自己工作内存的旧拷贝，就出现**可见性问题**。
@@ -278,6 +256,8 @@ JMM 用 "happens-before" 关系判定**哪些操作之间一定有可见、有�
 重量级  10 | 指向 Monitor(ObjectMonitor) 指针
 GC标记  11 | —
 ```
+
+![](images/java-markword.png)
 
 🔍 **源码解析 · Lock Record 与轻量级锁的完整流程**
 
@@ -381,13 +361,7 @@ ObjectMonitor {
 
 📊 **锁升级流程**
 
-```mermaid
-graph TD
-    A[无锁] -->|单线程| B[偏向锁]
-    B -->|有竞争| C[轻量级锁 CAS自旋]
-    C -->|失败/线程多| D[重量级锁 OS互斥]
-    D -->|释放| E[唤醒阻塞线程]
-```
+![](images/java-lock-upgrade.png)
 
 ## 6. wait / notify（线程间通信基础）
 
@@ -471,13 +445,7 @@ class BoundedQueue<T> {
 
 📊 **wait/notify 线程状态转换**
 
-```mermaid
-stateDiagram-v2
-    RUNNABLE --> ENTER_LOCK: 抢锁
-    ENTER_LOCK --> WAITING: wait() 释放锁+挂起
-    WAITING --> ENTER_LOCK: notify() 唤醒进入EntryList
-    ENTER_LOCK --> RUNNABLE: 抢到锁继续执行
-```
+![](images/java-wait-notify.png)
 
 ## 7. volatile 与 JMM
 
@@ -534,11 +502,7 @@ x86 上 StoreLoad 用 lock 前缀指令（如 lock addl）实现
 
 📊 **JMM happens-before**
 
-```mermaid
-graph LR
-    T1[线程1 写 volatile] -->|happens-before| T2[线程2 读同一 volatile]
-    T2 --> V[看到线程1 写入前所有修改]
-```
+![](images/java-happens-before.png)
 
 ## 8. CAS 与原子类
 
@@ -609,28 +573,11 @@ public ThreadPoolExecutor(
 
 📊 **线程池执行流程**
 
-```mermaid
-graph TD
-    A[提交任务] --> B{核心<corePoolSize?}
-    B -->|是| C[创建核心线程]
-    B -->|否| D{队列未满?}
-    D -->|是| E[入队列]
-    D -->|否| F{线程<maximumPoolSize?}
-    F -->|是| G[创建非核心线程]
-    F -->|否| H[拒绝策略]
-```
+![](images/java-threadpool.png)
 
 📊 **线程池状态机（ctl 高 3 位）**
 
-```mermaid
-stateDiagram-v2
-    RUNNING --> SHUTDOWN: shutdown()
-    RUNNING --> STOP: shutdownNow()
-    SHUTDOWN --> STOP: shutdownNow()
-    STOP --> TIDYING: 任务清空且 worker=0
-    SHUTDOWN --> TIDYING: 任务清空且 worker=0
-    TIDYING --> TERMINATED: terminated() 执行完
-```
+![](images/java-threadpool-state.png)
 
 > RUNNING 收新任务且处理队列；SHUTDOWN 不收新任务但处理队列；STOP 不收不处理且中断进行中任务；TIDYING 全终止、worker=0；TERMINATED 钩子执行完毕。
 
@@ -737,13 +684,7 @@ public final boolean release(int arg) {
 
 📊 **AQS 队列**
 
-```mermaid
-graph LR
-    H[head 哨兵] --> N1[Node 线程A]
-    N1 --> N2[Node 线程B]
-    N2 --> T[tail]
-    S[state=0] -->|CAS| OK[某线程获取 state=1]
-```
+![](images/java-aqs.png)
 
 ## 12. ThreadLocal 原理与内存泄漏
 
@@ -764,14 +705,7 @@ Entry[] table;                             // 桶数组，开放寻址
 
 📊 **ThreadLocal 存储结构**
 
-```mermaid
-graph TD
-    TH[Thread 当前线程] -->|强引用| MAP[ThreadLocalMap]
-    MAP -->|Entry[] table| E1[Entry: key弱引用→TL1, value=V1]
-    MAP -->|Entry[] table| E2[Entry: key弱引用→TL2, value=V2]
-    TL1[ThreadLocal 实例] -.->|弱引用| E1
-    TL2[ThreadLocal 实例] -.->|弱引用| E2
-```
+![](images/java-threadlocal.png)
 
 🔍 **源码视角 · set 流程**
 
@@ -859,14 +793,7 @@ key 弱引用，value 强引用；ThreadLocal 外部置 null 后 key 被 GC，va
 
 📊 **ThreadLocal 泄漏链**
 
-```mermaid
-graph TD
-    T[Thread] -->|强引用| M[ThreadLocalMap]
-    M -->|弱引用 key| K[ThreadLocal]
-    M -->|强引用| V[value]
-    G[GC 回收外部引用] -->|key 变 null| KNULL[key=null]
-    KNULL -->|value 仍强引用| LEAK[value 泄漏 除非 remove]
-```
+![](images/java-threadlocal-leak.png)
 
 ### 实战示例
 
@@ -985,17 +912,7 @@ public enum Singleton {
 > A：是容器级单例（每个 Bean 在 IoC 内一份），不等于 JVM 全局单例——同一个类可以被加载为两个不同 name 的 Bean，也可以被不同 ApplicationContext 各自创建一份。
 
 📊 **5 种单例路线图**
-```mermaid
-graph TD
-    A[选单例实现] --> B{需要懒加载?}
-    B -->|否| C[饿汉式 简单但可能浪费]
-    B -->|是| D{能否接受 synchronized 开销?}
-    D -->|可接受| E[懒汉式 synchronized 方法]
-    D -->|不可接受| F[静态内部类 推荐]
-    F --> G[Holder 延迟类加载 + 无锁]
-    A --> H{需防反射 / 反序列化?}
-    H -->|是| I[枚举 权威推荐 Effective Java]
-```
+![](images/java-singleton.png)
 
 ## 14. CompletableFuture（异步编排）
 

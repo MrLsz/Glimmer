@@ -40,113 +40,7 @@
 
 ## 1. 集合体系总览
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 560" width="760" height="560">
-<rect width="760" height="560" fill="#0f1115" rx="8"/>
-<defs>
-<marker id="a" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6c7a8a"/></marker>
-<marker id="ab" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4f9dff"/></marker>
-<marker id="ag" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0,8 3,0 6" fill="#38d39f"/></marker>
-<marker id="ay" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0,8 3,0 6" fill="#e8a838"/></marker>
-<marker id="ap" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d96bcc"/></marker>
-</defs>
-
-<text x="380" y="28" text-anchor="middle" font-size="17" font-family="sans-serif" font-weight="bold" fill="#e6e8ec">Java Collections Framework 继承关系</text>
-
-<!-- 左树：Collection 体系 -->
-<text x="265" y="58" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#7a8595">（一）Collection 体系</text>
-
-<!-- 总线（画在框下面，缝隙处显示为连接线） -->
-<line x1="135" y1="258" x2="135" y2="450" stroke="#4f9dff" stroke-width="1.6"/>
-<line x1="265" y1="258" x2="265" y2="450" stroke="#38d39f" stroke-width="1.6"/>
-<line x1="395" y1="258" x2="395" y2="410" stroke="#e8a838" stroke-width="1.6"/>
-<line x1="625" y1="104" x2="625" y2="348" stroke="#d96bcc" stroke-width="1.6"/>
-
-<!-- Iterable -> Collection -->
-<rect x="200" y="70" width="130" height="34" rx="5" fill="#171a21" stroke="#9aa3b2" stroke-width="1.4"/>
-<text x="265" y="91" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#9aa3b2">Iterable</text>
-<line x1="265" y1="104" x2="265" y2="148" stroke="#6c7a8a" stroke-width="1.6" marker-end="url(#a)"/>
-<rect x="200" y="150" width="130" height="34" rx="5" fill="#171a21" stroke="#e6e8ec" stroke-width="1.6"/>
-<text x="265" y="171" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#ffffff">Collection</text>
-
-<!-- Collection -> 三个子接口 -->
-<line x1="265" y1="184" x2="135" y2="222" stroke="#6c7a8a" stroke-width="1.6" marker-end="url(#a)"/>
-<line x1="265" y1="184" x2="265" y2="222" stroke="#6c7a8a" stroke-width="1.6" marker-end="url(#a)"/>
-<line x1="265" y1="184" x2="395" y2="222" stroke="#6c7a8a" stroke-width="1.6" marker-end="url(#a)"/>
-
-<rect x="70" y="224" width="130" height="34" rx="5" fill="#171a21" stroke="#4f9dff" stroke-width="1.6"/>
-<text x="135" y="245" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#4f9dff">List</text>
-<rect x="200" y="224" width="130" height="34" rx="5" fill="#171a21" stroke="#38d39f" stroke-width="1.6"/>
-<text x="265" y="245" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#38d39f">Set</text>
-<rect x="330" y="224" width="130" height="34" rx="5" fill="#171a21" stroke="#e8a838" stroke-width="1.6"/>
-<text x="395" y="245" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#e8a838">Queue</text>
-
-<!-- List 实现类 -->
-<line x1="135" y1="258" x2="135" y2="298" stroke="#4f9dff" stroke-width="1.6" marker-end="url(#ab)"/>
-<rect x="70" y="300" width="130" height="30" rx="4" fill="#171a21" stroke="#4f9dff"/>
-<text x="135" y="319" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">ArrayList（数组）</text>
-<rect x="70" y="340" width="130" height="30" rx="4" fill="#171a21" stroke="#4f9dff"/>
-<text x="135" y="359" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">LinkedList</text>
-<rect x="70" y="380" width="130" height="30" rx="4" fill="#2a1a1a" stroke="#cc4444"/>
-<text x="135" y="399" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#cc6666">Vector（已淘汰）</text>
-<rect x="70" y="420" width="130" height="30" rx="4" fill="#171a21" stroke="#4f9dff"/>
-<text x="135" y="439" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#e6e8ec">CopyOnWriteArrayList</text>
-
-<!-- Set 实现类 -->
-<line x1="265" y1="258" x2="265" y2="298" stroke="#38d39f" stroke-width="1.6" marker-end="url(#ag)"/>
-<rect x="200" y="300" width="130" height="30" rx="4" fill="#171a21" stroke="#38d39f"/>
-<text x="265" y="319" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">HashSet</text>
-<rect x="200" y="340" width="130" height="30" rx="4" fill="#171a21" stroke="#38d39f"/>
-<text x="265" y="359" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">LinkedHashSet</text>
-<rect x="200" y="380" width="130" height="30" rx="4" fill="#171a21" stroke="#38d39f"/>
-<text x="265" y="399" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">TreeSet（排序）</text>
-<rect x="200" y="420" width="130" height="30" rx="4" fill="#171a21" stroke="#38d39f"/>
-<text x="265" y="439" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#e6e8ec">CopyOnWriteArraySet</text>
-
-<!-- Queue 实现类 -->
-<line x1="395" y1="258" x2="395" y2="298" stroke="#e8a838" stroke-width="1.6" marker-end="url(#ay)"/>
-<rect x="330" y="300" width="130" height="30" rx="4" fill="#171a21" stroke="#e8a838"/>
-<text x="395" y="319" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">ArrayDeque（Deque）</text>
-<rect x="330" y="340" width="130" height="30" rx="4" fill="#171a21" stroke="#e8a838"/>
-<text x="395" y="359" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">PriorityQueue（堆）</text>
-<rect x="330" y="380" width="130" height="30" rx="4" fill="#171a21" stroke="#e8a838"/>
-<text x="395" y="399" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">BlockingQueue</text>
-<text x="330" y="416" font-size="10" font-family="sans-serif" fill="#e8a838">LinkedList 亦实现 Deque（见 List 列）</text>
-
-<!-- 右树：Map 体系（独立） -->
-<line x1="515" y1="60" x2="515" y2="360" stroke="#3a4150" stroke-width="1" stroke-dasharray="4,3"/>
-<text x="625" y="58" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#7a8595">（二）Map 体系（独立顶层接口）</text>
-
-<rect x="560" y="70" width="130" height="34" rx="5" fill="#171a21" stroke="#d96bcc" stroke-width="1.6"/>
-<text x="625" y="91" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#d96bcc">Map</text>
-<text x="625" y="120" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#d96bcc">不继承 Collection / Iterable</text>
-
-<line x1="625" y1="104" x2="625" y2="148" stroke="#d96bcc" stroke-width="1.6" marker-end="url(#ap)"/>
-<rect x="560" y="150" width="130" height="28" rx="4" fill="#171a21" stroke="#d96bcc"/>
-<text x="625" y="168" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">HashMap</text>
-<rect x="560" y="184" width="130" height="28" rx="4" fill="#171a21" stroke="#d96bcc"/>
-<text x="625" y="202" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">LinkedHashMap（LRU）</text>
-<rect x="560" y="218" width="130" height="28" rx="4" fill="#171a21" stroke="#d96bcc"/>
-<text x="625" y="236" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">TreeMap（红黑树）</text>
-<rect x="560" y="252" width="130" height="28" rx="4" fill="#2a1a1a" stroke="#cc4444"/>
-<text x="625" y="270" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#cc6666">Hashtable（已淘汰）</text>
-<rect x="560" y="286" width="130" height="28" rx="4" fill="#171a21" stroke="#d96bcc"/>
-<text x="625" y="304" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">ConcurrentHashMap</text>
-<rect x="560" y="320" width="130" height="28" rx="4" fill="#171a21" stroke="#d96bcc"/>
-<text x="625" y="338" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#e6e8ec">ConcurrentSkipListMap</text>
-
-<!-- 底部说明 -->
-<rect x="70" y="470" width="500" height="30" rx="4" fill="#171a21" stroke="#9aa3b2"/>
-<text x="320" y="489" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#9aa3b2">Stack（继承 Vector，已淘汰）→ 用 ArrayDeque 的 push / pop / peek 替代</text>
-<rect x="70" y="510" width="500" height="28" rx="4" fill="#171a21" stroke="#2a2f3a"/>
-<text x="320" y="528" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#9aa3b2">文档展开顺序：List → Map → Set → Stack → Queue</text>
-
-<!-- 图例 -->
-<rect x="600" y="472" width="12" height="12" rx="2" fill="#4f9dff"/><text x="618" y="483" font-size="10" font-family="sans-serif" fill="#e6e8ec">List</text>
-<rect x="600" y="490" width="12" height="12" rx="2" fill="#38d39f"/><text x="618" y="501" font-size="10" font-family="sans-serif" fill="#e6e8ec">Set</text>
-<rect x="600" y="508" width="12" height="12" rx="2" fill="#e8a838"/><text x="618" y="519" font-size="10" font-family="sans-serif" fill="#e6e8ec">Queue</text>
-<rect x="600" y="526" width="12" height="12" rx="2" fill="#d96bcc"/><text x="618" y="537" font-size="10" font-family="sans-serif" fill="#e6e8ec">Map</text>
-<rect x="660" y="472" width="12" height="12" rx="2" fill="#cc4444"/><text x="678" y="483" font-size="10" font-family="sans-serif" fill="#e6e8ec">已淘汰</text>
-</svg>
+![](images/java-collections-overview.png)
 
 > 以下按 **List → Map → Set → Stack → Queue** 逐接口展开，每个下列出关键实现类的源码原理与扩展思考。
 
@@ -344,18 +238,7 @@ else                         newTab[j + oldCap] = e;  // 迁移到原位置+旧�
 
 📊 **HashMap put 流程**
 
-```mermaid
-graph TD
-    A[put key] --> B[hash 扰动]
-    B --> C[(n-1)&hash 定位桶]
-    C -->|桶空| D[直接放]
-    C -->|key同| E[覆盖]
-    C -->|红黑树| F[putTreeVal]
-    C -->|链表| G[尾插]
-    G --> H{≥8且table≥64?}
-    H -->|是| I[树化]
-    D --> J[size>threshold? resize]
-```
+![](images/java-hashmap-put.png)
 
 ### 3.2 LinkedHashMap（LRU 实现原理）
 
@@ -627,11 +510,7 @@ for (Node<E> t = tail, p = t;;) {
 - **fail-fast**：`modCount` 计数器，add/remove 时 `modCount++`；迭代器检查 `expectedModCount != modCount` → 抛异常。
 - **fail-safe**：CHM 不记录 modCount，基于分段遍历；COW 迭代器持有旧快照。
 
-```mermaid
-graph LR
-    F1[ArrayList / HashMap] -->|modCount 检测| EX[fail-fast 抛异常]
-    F2[COW / CHM] -->|快照 / 分段| SAFE[fail-safe 不抛 可能读旧值]
-```
+![](images/java-failfast.png)
 
 ## 8. 多线程安全数据结构全景
 

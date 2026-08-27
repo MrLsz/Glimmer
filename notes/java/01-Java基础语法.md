@@ -86,14 +86,7 @@ java 命令 → 启动 JVM（C++ 实现）
 
 📊 **三者关系图**
 
-```mermaid
-graph TD
-    JDK[JDK 开发工具包] --> JRE[JRE 运行环境]
-    JRE --> JVM[JVM 虚拟机]
-    JRE --> LIB[核心类库]
-    JVM --> INT[解释器 + JIT 混合执行]
-    JVM --> GC[垃圾回收器]
-```
+![](images/java-jdk-jre-jvm.png)
 
 ## 1.2 Java 的优缺点
 
@@ -147,12 +140,7 @@ int i = (int) d;      // 精度损失：i = 3
 
 📊 **类型转换风险**
 
-```mermaid
-graph LR
-    A[小→大 自动] -->|安全| OK[无损失]
-    B[大→小 强制] -->|溢出| OV[截断 300→44]
-    B -->|精度| PR[3.14→3]
-```
+![](images/java-type-cast.png)
 
 ### BigDecimal 与浮点精度（单独问题）
 
@@ -187,11 +175,7 @@ int y = x.intValue();               // 若 x 为 null → 抛 NullPointerExcepti
 
 📊 **装箱 / 拆箱流程**
 
-```mermaid
-graph LR
-    A[int 100] -->|自动装箱 编译器插入 valueOf| B[Integer 对象]
-    B -->|自动拆箱 编译器插入 intValue| C[int 值<br/>若为 null → NPE]
-```
+![](images/java-boxing.png)
 
 ## 1.5 Integer 缓存
 
@@ -309,15 +293,7 @@ m.get(b);                          // null ❌ 找不到！
 
 📊 **equals / hashCode 契约（含 HashMap 桶错位根因）**
 
-```mermaid
-graph TD
-    EQ[equals true 逻辑同键] --> HC[hashCode 必相等]
-    HC --> SB[落入同一桶]
-    SB --> OK[getNode 第③步 equals 命中<br/>HashMap 正确去重]
-    EQ -.->|只重写 equals 没重写 hashCode| BAD[hashCode 不同<br/>基于内存地址]
-    BAD --> DB[落入不同桶]
-    DB --> FAIL[getNode 第①步就去错桶<br/>equals 永不执行 → 返回 null]
-```
+![](images/java-equals-hashcode.png)
 
 ## 1.7 Object 类的 9 个方法
 
@@ -442,15 +418,7 @@ graph TD
 
 📊 **四种内部类分类**
 
-```mermaid
-graph TD
-    NC[内部类 Nested Class]
-    NC --> S[静态内部类 static]
-    NC --> NS[非静态内部类]
-    NS --> M[成员内部类 方法外]
-    NS --> L[方法/局部内部类 方法内]
-    NS --> A[匿名内部类 new 时定义]
-```
+![](images/java-inner-class.png)
 
 ### 1) 成员内部类（非静态内部类）
 
@@ -555,11 +523,7 @@ class Outer$Inner {
 
 📊 **PECS**
 
-```mermaid
-graph LR
-    P[Producer 只读取] -->|? extends T| E[生产者]
-    C[Consumer 只写入] -->|? super T| S[消费者]
-```
+![](images/java-pecs.png)
 
 ## 1.14 Java 泛型的逆变与协变
 
@@ -567,12 +531,7 @@ graph LR
 
 📊 **三种关系**
 
-```mermaid
-graph TD
-    INV[不变 Invariance] -->|List<String> 与 List<Object> 互不为父子| N1[泛型默认]
-    COV[协变 Covariance] -->|? extends T 子类型保持| N2[List<? extends Number> 可接 List<Integer>]
-    CON[逆变 Contravariance] -->|? super T 子类型反转| N3[List<? super Integer> 可接 List<Object>]
-```
+![](images/java-generic-variance.png)
 
 ### 1) 不变（Invariance）—— 默认
 
@@ -680,13 +639,7 @@ finally { return "b"; }
 
 📊 **异常体系**
 
-```mermaid
-graph TD
-    T[Throwable] --> E[Error 严重 不捕获]
-    T --> EX[Exception]
-    EX --> CE[Checked 编译期强制]
-    EX --> RE[RuntimeException Unchecked]
-```
+![](images/java-exception.png)
 
 ## 1.16 Lambda 表达式
 
@@ -871,17 +824,7 @@ Method.invoke(obj, args)
 
 📊 **反射调用流程**
 
-```mermaid
-flowchart LR
-  A[Class 对象] --> B[getMethod / getDeclaredField]
-  B --> C[Method / Field]
-  C --> D[invoke / get / set]
-  D --> E{调用次数 < 阈值 15?}
-  E -->|是| F[NativeMethodAccessorImpl 走 JNI]
-  E -->|否| G[GeneratedMethodAccessorN 字节码]
-  F --> H[目标方法执行]
-  G --> H
-```
+![](images/java-reflection.png)
 
 ## 1.18 注解原理
 
@@ -1010,17 +953,7 @@ class AnnotationInvocationHandler implements InvocationHandler {
 
 📊 **注解的两条处理路径**
 
-```mermaid
-flowchart TD
-  A[@MyAnno 写在源码] --> B{Retention}
-  B -->|SOURCE| C[javac 编译丢弃]
-  B -->|CLASS| D[写进 .class 常量池 但 JVM 不读]
-  B -->|RUNTIME| E[反射 getAnnotation 读取]
-  A --> F{处理方式}
-  F -->|编译期| G[AbstractProcessor 生成代码 Lombok / Dagger / Room]
-  F -->|运行期| H[动态代理 AnnotationInvocationHandler 从 memberValues 取值]
-  E --> H
-```
+![](images/java-annotation.png)
 
 > **实战示例（运行时注解 + 反射驱动重试）：**
 >
@@ -1059,22 +992,7 @@ flowchart TD
 
 📊 **父子类初始化全流程**
 
-```mermaid
-sequenceDiagram
-    participant JVM as JVM 类加载
-    participant Father as 父类
-    participant Son as 子类
-
-    Note over JVM,Son: ── 类加载阶段（只执行一次）──
-    JVM->>Father: 1. 父类静态变量 + 静态代码块（声明顺序）
-    JVM->>Son: 2. 子类静态变量 + 静态代码块（声明顺序）
-
-    Note over JVM,Son: ── 实例化阶段（每次 new 都执行）──
-    Son->>Father: 3. 父类成员变量 + 代码块（声明顺序）
-    Son->>Father: 4. 父类构造器
-    Son->>Son: 5. 子类成员变量 + 代码块（声明顺序）
-    Son->>Son: 6. 子类构造器
-```
+![](images/java-init-order.png)
 
 🔍 **源码验证**
 
@@ -1140,14 +1058,7 @@ invokeinterface → 接口方法
 
 📊 **多态动态绑定**
 
-```mermaid
-sequenceDiagram
-    participant Code as Animal a = new Dog()
-    participant JVM as JVM 运行期
-    Code->>JVM: a.sound() 编译期校验 Animal 有 sound
-    JVM->>JVM: 查实际对象 Dog 的 vtable
-    JVM-->>Code: 执行 Dog.sound()
-```
+![](images/java-polymorphism.png)
 
 ## 2.2 对象创建方式与生命周期
 
@@ -1172,13 +1083,7 @@ invokespecial  # 调用 <init> 构造器
 
 📊 **对象创建 5 步**
 
-```mermaid
-graph TD
-    A[类加载检查] --> B[堆分配内存]
-    B --> C[零值初始化]
-    C --> D[设置对象头]
-    D --> E[执行 init 构造器]
-```
+![](images/java-object-create.png)
 
 ## 2.3 抽象类、接口、普通类的区别
 
@@ -1242,21 +1147,7 @@ class Dog extends Animal {
 
 📊 **三方关系图**
 
-```mermaid
-graph TD
-    A[普通类] --> A1[可直接 new]
-    A --> A2[全部方法有实现]
-    A --> A3[有构造器]
-    B[抽象类] --> B1[不可 new 需子类]
-    B --> B2[抽象 + 具体方法]
-    B --> B3[有构造器 super 调用]
-    C[接口] --> C1[不可 new]
-    C --> C2[抽象 + default + static]
-    C --> C3[无构造器 仅常量]
-    A -.->|子类可继承| B
-    B -.->|子类继承后实例化| A
-    C -.->|实现类实现| A
-```
+![](images/java-class-interface.png)
 
 # 3. Java 新特性与 Optional
 
