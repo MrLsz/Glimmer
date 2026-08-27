@@ -86,7 +86,7 @@ java 命令 → 启动 JVM（C++ 实现）
 
 📊 **三者关系图**
 
-![](images/java-jdk-jre-jvm.png)
+<img src="images/java-jdk-jre-jvm.png" width="595" />
 
 ## 1.2 Java 的优缺点
 
@@ -140,7 +140,7 @@ int i = (int) d;      // 精度损失：i = 3
 
 📊 **类型转换风险**
 
-![](images/java-type-cast.png)
+<img src="images/java-type-cast.png" width="670" />
 
 ### BigDecimal 与浮点精度（单独问题）
 
@@ -824,7 +824,7 @@ Method.invoke(obj, args)
 
 📊 **反射调用流程**
 
-![](images/java-reflection.png)
+<img src="images/java-reflection.png" width="1568" />
 
 ## 1.18 注解原理
 
