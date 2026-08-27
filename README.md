@@ -37,6 +37,12 @@ Glimmer/
 | [02-Java集合体系](notes/java/02-Java集合体系.md) | List/Map/Set/Queue 全实现类、HashMap 源码、并发容器、fail-fast    |
 | [03-Java并发编程](notes/java/03-Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池、ThreadLocal |
 
+#### JVM
+
+| 文件 | 说明 |
+| ---- | ---- |
+| [01-运行时数据区域](notes/jvm/01-运行时数据区域.md) | 五大部分（程序计数器、虚拟机栈、本地方法栈、堆、方法区）、线程共享/私有划分、分代/元空间演进 |
+
 #### Kotlin
 
 | 文件                                             | 说明                                            |
