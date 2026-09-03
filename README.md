@@ -105,6 +105,7 @@ Glimmer/
 | [01-iOS内存管理](notes/mobile/ios/01-iOS内存管理.md) | 内存分区、引用计数、ARC、weak、AutoreleasePool |
 | [02-类的底层分析](notes/mobile/ios/02-类的底层分析.md) | objc_class 存储结构、方法调用原理 |
 | [03-Runtime机制分析](notes/mobile/ios/03-Runtime机制分析.md) | 消息发送转发、Method Swizzling、关联对象 |
+| [04-RunLoop机制分析](notes/mobile/ios/04-RunLoop机制分析.md) | 事件循环、Mode、Source/Timer/Observer、12 步流程、线程保活 |
 
 ### 算法
 
