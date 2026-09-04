@@ -106,6 +106,8 @@ Glimmer/
 | [02-类的底层分析](notes/mobile/ios/02-类的底层分析.md) | objc_class 存储结构、方法调用原理 |
 | [03-Runtime机制分析](notes/mobile/ios/03-Runtime机制分析.md) | 消息发送转发、Method Swizzling、关联对象 |
 | [04-RunLoop机制分析](notes/mobile/ios/04-RunLoop机制分析.md) | 事件循环、Mode、Source/Timer/Observer、12 步流程、线程保活 |
+| [05-KVC机制分析](notes/mobile/ios/05-KVC机制分析.md) | 键值编码、setValue/valueForKey 查找链路、KeyPath 集合运算符、Swift KeyPath |
+| [06-KVO机制分析](notes/mobile/ios/06-KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、change 字典、手动 KVO |
 
 ### 算法
 
