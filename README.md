@@ -109,6 +109,7 @@ Glimmer/
 | [05-KVC机制分析](notes/mobile/ios/05-KVC机制分析.md) | 键值编码、setValue/valueForKey 查找链路、KeyPath 集合运算符、Swift KeyPath |
 | [06-KVO机制分析](notes/mobile/ios/06-KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、change 字典、手动 KVO |
 | [07-Block底层分析](notes/mobile/ios/07-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/__block/循环引用 |
+| [08-NSObject底层分析](notes/mobile/ios/08-NSObject底层分析.md) | objc_object 本质、isa 位域演进、元类闭环、Tagged Pointer、alloc/dealloc、内存对齐 |
 
 ### 算法
 
