@@ -81,6 +81,7 @@ Glimmer/
 | [16-Service的bindService分析](notes/mobile/android/16-Service的bindService分析.md) | Service：bindService 全链路、IBinder 回传 |
 | [17-ContentProvider基础与启动流程分析](notes/mobile/android/17-ContentProvider基础与启动流程分析.md) | ContentProvider：概念与启动安装全链路 |
 | [18-ContentProvider调用流程分析](notes/mobile/android/18-ContentProvider调用流程分析.md) | ContentProvider：query 调用全链路 |
+| [19-Window体系分析](notes/mobile/android/19-Window体系分析.md) | Window 概念与层级、addView 全流程、WindowManager/WMS、Dialog/Toast/PopupWindow |
 
 ### iOS 开发体系
 
