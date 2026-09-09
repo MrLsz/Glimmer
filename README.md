@@ -84,6 +84,7 @@ Glimmer/
 | [19-Window体系分析](notes/mobile/android/19-Window体系分析.md) | Window 概念与层级、addView 全流程、WindowManager/WMS、Dialog/Toast/PopupWindow |
 | [20-Context体系分析](notes/mobile/android/20-Context体系分析.md) | Context 本质与继承体系、ContextImpl/ContextWrapper、三大组件 Context 创建、Service 生命周期 |
 | [21-输入事件体系分析（上）输入事件的读取](<notes/mobile/android/21-输入事件体系分析（上）输入事件的读取.md>) | 输入系统总览、IMS 启动、InputReader 主循环、EventHub、InputDevice/InputMapper、点击读取全流程 |
+| [22-输入事件体系分析（中）输入事件的派发](<notes/mobile/android/22-输入事件体系分析（中）输入事件的派发.md>) | 派发总览与三队列、InputChannel、窗口同步、命中测试、派发执行、ANR、点击派发全流程 |
 
 ### iOS 开发体系
 
