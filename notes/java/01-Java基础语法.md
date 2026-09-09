@@ -77,7 +77,39 @@ java 命令 → 启动 JVM（C++ 实现）
 
 三者关系图
 
-![](images/java-jdk-jre-jvm.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 14, "rankSpacing": 18, "padding": 4, "diagramPadding": 16}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    subgraph JDK["JDK 开发工具包（开发 + 运行）"]
+        direction TB
+        T["开发工具：javac 编译 · java 启动 · jdb 调试<br/>jar 打包 · jlink 裁剪最小运行时"]
+        subgraph JRE["JRE 运行时环境（只运行）"]
+            direction TB
+            L["核心类库：java.lang · java.util · java.io<br/>java.net · java.math · java.time"]
+            subgraph JVM["JVM 虚拟机（跨平台核心）"]
+                direction TB
+                A["类加载器：加载 → 链接（验证·准备·解析）→ 初始化"]
+                B["执行引擎：解释器逐条执行 + JIT 编译热点代码"]
+                C["运行时数据区：堆 · 虚拟机栈 · 方法区 · 程序计数器"]
+                D["GC 与 JNI：可达性分析分代收集 · 本地方法接口"]
+            end
+        end
+    end
+    N["跨平台的是字节码与 JVM 规范；<br/>JVM 由 C/C++ 按 OS 分别实现，二进制不同"]
+
+    JDK -.-> N
+
+    style JDK fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style JRE fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style JVM fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style T fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style L fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style A fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style B fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style C fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style D fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style N fill:#f5f5f5,stroke:#999999,stroke-width:1px,color:#666666
+```
 
 ## 1.2 Java 的优缺点
 
