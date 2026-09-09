@@ -2,6 +2,8 @@
 
 > Java 基础、面向对象、Java 8~21 新特性与 Optional。讲法：源码 + 图示 + Q\&A 串讲。
 
+
+
 ---
 
 ## 目录
@@ -48,6 +50,7 @@
 
 # 1. Java 基础
 
+
 ## 1.1 JDK / JRE / JVM 与跨平台
 
 `JDK ⊃ JRE ⊃ JVM`。跨平台靠字节码 + 各 OS 各自实现的 JVM。
@@ -93,7 +96,9 @@ flowchart TD
                 C["运行时数据区：堆 · 虚拟机栈 · 方法区 · 程序计数器"]
                 D["GC 与 JNI：可达性分析分代收集 · 本地方法接口"]
             end
+            L --- JVM
         end
+        T --- JRE
     end
     N["跨平台的是字节码与 JVM 规范；<br/>JVM 由 C/C++ 按 OS 分别实现，二进制不同"]
 
@@ -160,7 +165,27 @@ int i = (int) d;      // 精度损失：i = 3
 
 类型转换风险
 
-![](images/java-type-cast.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    ROOT["Java 类型转换"]
+    AUTO["小 → 大<br/>自动（隐式）<br/>编译器自动完成"]
+    FORCE["大 → 小<br/>强制（显式）<br/>需加 (类型) 强转"]
+    SAFE["无损失<br/>int 100 → long 100<br/>boolean 不参与"]
+    OVER["溢出截断<br/>int 300 → byte 44<br/>取低 8 位"]
+    PREC["精度损失<br/>double 3.14 → int 3<br/>小数部分丢弃"]
+    ROOT --> AUTO
+    ROOT --> FORCE
+    AUTO -- 安全 --> SAFE
+    FORCE -- 可能 --> OVER
+    FORCE -- 可能 --> PREC
+    style ROOT fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style AUTO fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style FORCE fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style SAFE fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style OVER fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style PREC fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+```
 
 ### BigDecimal 与浮点精度（单独问题）
 
@@ -191,7 +216,16 @@ int y = x.intValue();               // 若 x 为 null → 抛 NullPointerExcepti
 
 装箱 / 拆箱流程
 
-![](images/java-boxing.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 20, "rankSpacing": 30, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart LR
+    A["int 100<br/>基本类型<br/>栈内存 · 4 字节"]
+    B["Integer 对象<br/>包装类<br/>堆内存 · 约 16 字节"]
+    A -- "自动装箱<br/>valueOf(100)" --> B
+    B -- "自动拆箱<br/>intValue() · null → NPE" --> A
+    style A fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style B fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+```
 
 
 ## 1.5 Integer 缓存
@@ -307,7 +341,36 @@ m.get(b);                          // null ❌ 找不到！
 
 equals / hashCode 契约（含 HashMap 桶错位根因）
 
-![](images/java-equals-hashcode.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    ROOT["equals true 逻辑同键<br/>含 HashMap 桶错位根因"]
+    subgraph OK["正确路径：成对重写"]
+        direction TB
+        A1["hashCode 必相等<br/>同 id 同哈希值"]
+        A2["落入同一桶<br/>扰动后桶下标一致"]
+        A3["getNode 第③步 equals 命中<br/>HashMap 正确去重"]
+        A1 --> A2 --> A3
+    end
+    subgraph ERR["错误路径：只重写 equals"]
+        direction TB
+        B1["只重写 equals<br/>没重写 hashCode"]
+        B2["hashCode 不同<br/>默认基于内存地址"]
+        B3["getNode 第①步就走错桶<br/>equals 永不执行 → 返回 null"]
+        B1 --> B2 --> B3
+    end
+    ROOT --> OK
+    ROOT --> ERR
+    style ROOT fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style OK fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style ERR fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style A1 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style A2 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style A3 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style B1 fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style B2 fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style B3 fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+```
 
 
 ## 1.7 Object 类的 9 个方法
@@ -424,7 +487,26 @@ static 修饰四种目标
 
 四种内部类分类
 
-![](images/java-inner-class.png)
+```mermaid
+%%{init: {"theme": "default", "themeVariables": {"fontSize": "15px"}}}%%
+mindmap
+  root((内部类 Nested Class))
+    静态内部类
+      static 修饰
+      不持有外部类引用
+      可直接 new Outer.Inner()
+    非静态内部类
+      成员内部类
+        类内方法外 · 非 static
+        持有 Outer.this 引用
+        需依托外部实例创建
+      局部内部类
+        方法内 · 无访问修饰符
+        访问 final 局部变量
+      匿名内部类
+        表达式内 · 无类名
+        一次性使用
+```
 
 ### 1) 成员内部类（非静态内部类）
 
@@ -526,7 +608,30 @@ class Outer$Inner {
 
 PECS
 
-![](images/java-pecs.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    ROOT["PECS 原则<br/>Producer Extends<br/>Consumer Super"]
+    P["Producer 生产者<br/>只读取，不写入<br/>提供数据给外部使用"]
+    C["Consumer 消费者<br/>只写入，不读取<br/>从外部接收数据处理"]
+    E["? extends T<br/>上界通配符<br/>泛型擦除后为 T"]
+    S["? super T<br/>下界通配符<br/>泛型擦除后为 Object"]
+    PE["读出 T 类型<br/>add 不安全<br/>get 返回 T 或父类"]
+    CO["写入 T 类型<br/>get 仅返回 Object<br/>add 接受 T 或子类"]
+    ROOT --> P
+    ROOT --> C
+    P -- 用 --> E
+    C -- 用 --> S
+    E --> PE
+    S --> CO
+    style ROOT fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style P fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style C fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style E fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style S fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style PE fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style CO fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+```
 
 ## 1.14 Java 泛型的逆变与协变
 
@@ -534,7 +639,39 @@ Java 泛型默认是不变（Invariance）的：`List<String>` 既不是 `List<O
 
 三种关系
 
-![](images/java-generic-variance.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    ROOT["泛型三种关系"]
+    A1["不变 Invariance<br/>List&lt;T&gt;"]
+    A2["无继承关系<br/>List&lt;String&gt;<br/>List&lt;Object&gt;<br/>互为独立类型"]
+    A3["既读又写<br/>读具体 T · 写具体 T"]
+    B1["协变 Covariance<br/>? extends T"]
+    B2["子类型方向保持<br/>子类 → 父类"]
+    B3["只读不写<br/>读出 T · 生产者"]
+    C1["逆变 Contravariance<br/>? super T"]
+    C2["子类型方向反转<br/>父类 → 子类"]
+    C3["只写不读<br/>写入 T · 消费者"]
+    ROOT --> A1
+    ROOT --> B1
+    ROOT --> C1
+    A1 --> A2
+    A2 --> A3
+    B1 --> B2
+    B2 --> B3
+    C1 --> C2
+    C2 --> C3
+    style ROOT fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style A1 fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style A2 fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style A3 fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style B1 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style B2 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style B3 fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style C1 fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style C2 fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style C3 fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+```
 
 ### 1) 不变（Invariance）—— 默认
 
@@ -639,7 +776,36 @@ finally { return "b"; }
 
 异常体系
 
-![](images/java-exception.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    T["Throwable<br/>所有错误与异常的根 · 继承 Object<br/>仅可被 throw / catch 抛出或捕获"]
+    ERR["Error<br/>JVM 层面抛出的严重错误<br/>不建议捕获 · 应用程序无法恢复"]
+    OOM["OutOfMemoryError<br/>堆或方法区内存耗尽<br/>常见于大对象 / 内存泄漏"]
+    SOF["StackOverflowError<br/>线程栈深度过大<br/>常见于无终止递归"]
+    EXC["Exception<br/>程序可捕获并处理<br/>Runtime + Checked 两类子分支"]
+    RT["RuntimeException<br/>Unchecked · 运行期才抛出<br/>编译器不要求 try-catch 或 throws"]
+    RTE["NPE · CCE · AIOOB · Arithmetic<br/>空指针 · 类型转换 · 数组越界 · 算术"]
+    CHK["Checked Exception<br/>编译期强制检查<br/>必须 try-catch 或 throws 声明"]
+    CKE["IOException · SQLException<br/>ClassNotFoundException<br/>读写文件 · JDBC · 反射加载"]
+    T --> ERR
+    T --> EXC
+    ERR --> OOM
+    ERR --> SOF
+    EXC --> RT
+    EXC --> CHK
+    RT --> RTE
+    CHK --> CKE
+    style T fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style ERR fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style OOM fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style SOF fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#333333
+    style EXC fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style RT fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style RTE fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style CHK fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style CKE fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+```
 
 
 ## 1.16 Lambda 表达式
@@ -820,9 +986,33 @@ Method.invoke(obj, args)
 > Q：反射和动态代理、MethodHandle 的区别？  
 > A：反射是"事后 introspect + 调用"，偏通用但慢；动态代理在运行时生成实现接口的代理类，专为 AOP / 拦截设计；`MethodHandle`（invokedynamic 底层）是"方法指针"，可内联、性能接近直接调用，是反射的现代替代。
 
-反射调用流程
+反射调用流程（inflation 机制）
 
-![](images/java-reflection.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12, "curve": "linear"}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart LR
+    A["Class 对象<br/>类名.class · obj.getClass<br/>forName 触发静态初始化"]
+    B["getMethod<br/>getDeclaredField<br/>按名查找方法或字段"]
+    C["Method / Field<br/>持有方法/字段元数据<br/>缓存复用减少反射开销"]
+    D["invoke / get / set<br/>调用方法或读写字段<br/>每次做访问权限检查"]
+    E{"调用次数<br/>&lt; 阈值 15？"}
+    F["NativeMethodAccessorImpl<br/>前 15 次 · 走 JNI 调用<br/>慢 · 跨语言边界"]
+    G["GeneratedMethodAccessorN<br/>超阈值 · JVM 动态生成字节码<br/>快 · 可 JIT 内联"]
+    H["目标方法执行 · 最终落到真正的方法体<br/>两个分支最终汇合于此"]
+    A --> B --> C --> D --> E
+    E -- 是 --> F
+    E -- 否 --> G
+    F --> H
+    G --> H
+    style A fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style B fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style C fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style D fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style E fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style F fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style G fill:#e1d5e7,stroke:#9673a6,stroke-width:1px,color:#333333
+    style H fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+```
 
 
 ## 1.18 注解原理
@@ -948,9 +1138,39 @@ class AnnotationInvocationHandler implements InvocationHandler {
 > Q：为什么注解属性不能用 Integer 只能用 int？  
 > A：注解属性值必须在编译期存入 .class 文件常量池，常量池仅支持基本类型字面量（int 有 `CONSTANT_Integer_info`），而 `Integer` 是引用类型，无法直接编码到常量池——这是 JVM 规范层面的限制，不是语言设计随意为之。
 
-注解的两条处理路径
+注解的两条处理路径（Retention + 处理时机）
 
-![](images/java-annotation.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TD
+    TOP["@MyAnno 写在源码<br/>自定义注解 + 元注解标注<br/>本质是继承 Annotation 的接口"]
+    RET{"Retention<br/>活到哪个阶段？"}
+    PROC{"处理方式<br/>何时被读取处理？"}
+    SRC["SOURCE<br/>javac 编译期丢弃<br/>@Override · @SuppressWarnings"]
+    CLS["CLASS<br/>写进 .class 常量池<br/>JVM 不读 · 默认保留策略"]
+    RT["RUNTIME<br/>运行时保留<br/>反射 getAnnotation 读取"]
+    RTM["运行时处理<br/>反射 / 动态代理<br/>Spring · JUnit · 各类框架"]
+    COM["编译期处理<br/>AbstractProcessor<br/>Lombok · Dagger · Room"]
+    PRX["动态代理<br/>AnnotationInvocationHandler<br/>从 memberValues Map 取值"]
+    TOP --> RET
+    TOP --> PROC
+    RET -- SOURCE --> SRC
+    RET -- CLASS --> CLS
+    RET -- RUNTIME --> RT
+    PROC -- 运行时 --> RTM
+    PROC -- 编译期 --> COM
+    RT --> PRX
+    RTM -.-> PRX
+    style TOP fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style RET fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style PROC fill:#fff2cc,stroke:#d6b656,stroke-width:1px,color:#333333
+    style SRC fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style CLS fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#333333
+    style RT fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style RTM fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+    style COM fill:#e1d5e7,stroke:#9673a6,stroke-width:1px,color:#333333
+    style PRX fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+```
 
 > 实战示例（运行时注解 + 反射驱动重试）：
 >
@@ -988,7 +1208,29 @@ class AnnotationInvocationHandler implements InvocationHandler {
 
 父子类初始化全流程
 
-![](images/java-init-order.png)
+```mermaid
+%%{init: {"sequence": {"useMaxWidth": true, "boxMargin": 8, "messageMargin": 20, "actorMargin": 20, "width": 110, "height": 32}, "themeVariables": {"fontSize": "14px"}}}%%
+sequenceDiagram
+    participant JVM as JVM / 类加载器
+    participant F as Father 父类
+    participant S as Son 子类
+
+    rect rgb(255, 242, 204)
+    Note over JVM,S: 阶段一 · 类加载 clinit（静态，只执行一次）
+    JVM->>F: 加载父类 · 执行 clinit · 静态变量/代码块 · 输出 1
+    JVM->>S: 加载子类 · 执行 clinit · 静态变量/代码块 · 输出 4
+    end
+
+    rect rgb(255, 230, 204)
+    Note over JVM,S: 阶段二 · 实例化 init（实例）
+    JVM->>S: new Son() 触发实例化
+    S->>F: super() 隐式调用父构造器
+    F->>F: 成员变量 / 代码块 · 输出 2
+    F->>F: 构造器 Father() · 输出 3
+    S->>S: 成员变量 / 代码块 · 输出 5
+    S->>S: 构造器 Son() · 输出 6
+    end
+```
 
 源码验证
 
@@ -1050,7 +1292,24 @@ invokeinterface → 接口方法
 
 多态动态绑定
 
-![](images/java-polymorphism.png)
+```mermaid
+%%{init: {"sequence": {"useMaxWidth": true, "boxMargin": 8, "messageMargin": 20, "actorMargin": 20, "width": 110, "height": 32}, "themeVariables": {"fontSize": "14px"}}}%%
+sequenceDiagram
+    participant C as 客户端
+    participant JVM as JVM 运行时
+
+    rect rgb(218, 232, 252)
+    Note over C,JVM: 编译期 · 静态类型检查（看引用类型）
+    C->>JVM: a.sound() 编译期校验 Animal 有 sound 方法
+    end
+
+    rect rgb(255, 230, 204)
+    Note over C,JVM: 运行期 · 动态绑定（vtable 查实际对象）
+    C->>JVM: 查实际对象 Dog 的 vtable
+    JVM->>JVM: vtable 找到 Dog.sound 入口（虚分派）
+    JVM-->>C: 执行 Dog.sound() · 返回结果给调用方
+    end
+```
 
 ## 2.2 对象创建方式与生命周期
 
@@ -1073,25 +1332,37 @@ invokespecial  # 调用 <init> 构造器
 
 对象创建 5 步
 
-![](images/java-object-create.png)
+```mermaid
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 14, "rankSpacing": 20, "padding": 4, "diagramPadding": 12}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart LR
+    A["① 类加载检查<br/>Class 是否已加载<br/>未加载则触发类加载流程"]
+    B["② 堆分配内存<br/>指针碰撞或空闲列表<br/>取决于 GC 是否规整"]
+    C["③ 零值初始化<br/>字段全部置为零值<br/>int=0 · 引用=null"]
+    D["④ 设置对象头<br/>Mark Word + Klass Pointer<br/>哈希码 · GC 分代年龄 · 锁状态"]
+    E["⑤ 执行 init 构造器<br/>成员变量赋值 · 代码块<br/>用户构造器逻辑 · super() 隐式调用"]
+    A --> B --> C --> D --> E
+    style A fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style B fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style C fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style D fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#333333
+    style E fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#333333
+```
 
 
 ## 2.3 抽象类、接口、普通类的区别
 
-普通类是"完整模板"（可直接实例���），抽象类���"半成品���板"（留口给子类实现）�������口是"��力契约"（只定义行为规范不关心实现）。
+普通类是"完整模板"（可直接实例化），抽象类是"半成品模板"（留口给子类实现），接口是"能力契约"（只定义行为规范不关心实现）。
 
-三方对比表
-
-| 维度        | 普通类          | 抽象类                 | 接口（Java 8+）                                |
-| --------- | ------------ | ------------------- | ------------------------------------------ |
-| **实例化**   | ✓ 可以 new     | ✗ 不能（必须子类实现）        | ✗ 不能                                       |
-| **继承/实现** | 单继承          | 单继承                 | 可多实现（implements 多个）                        |
-| **构造器**   | ✓ 有          | ✓ 有（给子类调用）          | ✗ 无                                        |
-| **方法体**   | 全部有实现        | 可有抽象 + 具体方法         | 抽象方法 / default / static / private（Java 9+） |
-| **成员变量**  | 实例变量 + 静态变量  | 实例变量 + 静态变量         | **仅常量**（public static final，隐式）            |
-| **访问修饰符** | 四种均可         | 四种均可                | 方法默认 public（Java 9 private 除外）             |
-| **设计意图**  | 具体事物建模       | "is-a" 复用（模板方法模式）   | "can-do" 能力契约（策略模式、多实现）                    |
-| **final** | 可 final（禁继承） | **不能** final（与抽象矛盾） | 不适用（本身非类）                                  |
+| 维度 | 普通类 Class | 抽象类 Abstract | 接口 Interface |
+|------|-------------|----------------|---------------|
+| 实例化 | ✓ 可 new，直接构造实例 | ✗ 不可 new，必须子类实现 | ✗ 不可 new，仅作行为约定 |
+| 继承 / 实现 | 单继承 `extends` | 单继承 `extends` | 可多实现 `implements` |
+| 构造器 | ✓ 有，给 new 自己用 | ✓ 有，给子类 `super` 用 | ✗ 无构造器 |
+| 方法体 | 全部具体实现 | 抽象方法 + 具体方法混合 | 抽象 + `default` + `static` + `private` |
+| 成员变量 | 实例变量 + 静态变量 | 实例变量 + 静态变量 | 仅常量（`public static final`）|
+| 访问修饰符 | public / protected / private / default 四种均可 | 同左，四种均可 | 隐式 `public`（不可更窄）|
+| final | 可声明 `final` 类 | ✗ 不可，与抽象矛盾 | 不适用（本身非类）|
+| 设计意图 | 具体事物建模，复用公共实现 | `is-a` 复用，模板方法模式 | `can-do` 契约，策略模式 |
 
 源码解析 · 接口的 default 方法底层
 
@@ -1133,10 +1404,6 @@ class Dog extends Animal {
 >
 > Q：抽象类能加 final 吗？  
 > A：不能。final 禁止继承，与抽象类"必须被继承才能实例化"矛盾。同样，抽象方法不能加 private/static/final 等冲突修饰符。
-
-三方关系图
-
-![](images/java-class-interface.png)
 
 # 3. Java 新特性与 Optional
 
