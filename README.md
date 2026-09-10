@@ -86,6 +86,7 @@ Glimmer/
 | [21-输入事件体系分析（上）输入事件的读取](<notes/mobile/android/21-输入事件体系分析（上）输入事件的读取.md>) | 输入系统总览、IMS 启动、InputReader 主循环、EventHub、InputDevice/InputMapper、点击读取全流程 |
 | [22-输入事件体系分析（中）输入事件的派发](<notes/mobile/android/22-输入事件体系分析（中）输入事件的派发.md>) | 派发总览与三队列、InputChannel、窗口同步、命中测试、派发执行、ANR、点击派发全流程 |
 | [23-输入事件体系分析（下）应用层处理过程分析](<notes/mobile/android/23-输入事件体系分析（下）应用层处理过程分析.md>) | 客户端接收、InputStage 责任链七级、触摸/按键 View 树分发、FINISHED 回执闭环、点击应用层全流程 |
+| [24-View三大过程：measure、layout、draw](<notes/mobile/android/24-View三大过程：measure、layout、draw.md>) | performTraversals 调度、MeasureSpec 与 getChildMeasureSpec 规则表、measure/layout/draw 三过程源码、requestLayout 与 invalidate 触发机制 |
 
 ### iOS 开发体系
 
