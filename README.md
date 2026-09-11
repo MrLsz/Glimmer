@@ -87,6 +87,7 @@ Glimmer/
 | [22-输入事件体系分析（中）输入事件的派发](<notes/mobile/android/22-输入事件体系分析（中）输入事件的派发.md>) | 派发总览与三队列、InputChannel、窗口同步、命中测试、派发执行、ANR、点击派发全流程 |
 | [23-输入事件体系分析（下）应用层处理过程分析](<notes/mobile/android/23-输入事件体系分析（下）应用层处理过程分析.md>) | 客户端接收、InputStage 责任链七级、触摸/按键 View 树分发、FINISHED 回执闭环、点击应用层全流程 |
 | [24-View三大过程：measure、layout、draw](<notes/mobile/android/24-View三大过程：measure、layout、draw.md>) | performTraversals 调度、MeasureSpec 与 getChildMeasureSpec 规则表、measure/layout/draw 三过程源码、requestLayout 与 invalidate 触发机制 |
+| [25-整体绘制原理](<notes/mobile/android/25-整体绘制原理.md>) | 软件绘制 vs 硬件加速、RenderNode 属性与 DisplayList 记录、RenderThread 回放与合成层提升、VSYNC 三级分发与 DispSync、Surface 创建链路、GraphicBuffer 分配（Gralloc/ION/DMA-BUF）、BufferQueue 五状态机、Fence 同步原语、SurfaceFlinger Layer 体系与 HWC/GLES 合成、掉帧与过度绘制 |
 
 ### iOS 开发体系
 
