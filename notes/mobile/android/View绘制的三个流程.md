@@ -1,4 +1,4 @@
-# 24-View三大过程：measure、layout、draw
+# View绘制的三个流程
 
 ## meta-info
 
