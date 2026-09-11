@@ -36,7 +36,8 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [Java基础语法](notes/java/Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、新特性 |
 | 2 | [Java集合体系](notes/java/Java集合体系.md) | List/Map/Set/Queue、HashMap 源码、并发容器 |
-| 3 | [Java并发编程](notes/java/Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池 |
+| 3 | [Java集合-List](notes/java/Java集合-List.md) | List 继承体系、ArrayList/LinkedList/Vector/Stack、CopyOnWriteArrayList |
+| 4 | [Java并发编程](notes/java/Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池 |
 
 #### Kotlin
 
