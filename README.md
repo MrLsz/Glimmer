@@ -140,6 +140,7 @@ Glimmer/
 | 6 | [KVO机制分析](notes/mobile/ios/KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、手动 KVO |
 | 7 | [Block底层分析](notes/mobile/ios/Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
 | 8 | [NSObject底层分析](notes/mobile/ios/NSObject底层分析.md) | objc_object、isa 位域、元类闭环、Tagged Pointer、alloc |
+| 9 | [UIViewController机制分析](notes/mobile/ios/UIViewController机制分析.md) | view 懒加载、loadView、生命周期、容器控制器、present |
 
 ### 算法
 
