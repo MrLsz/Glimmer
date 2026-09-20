@@ -141,6 +141,9 @@ Glimmer/
 | 7 | [Block底层分析](notes/mobile/ios/Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
 | 8 | [NSObject底层分析](notes/mobile/ios/NSObject底层分析.md) | objc_object、isa 位域、元类闭环、Tagged Pointer、alloc |
 | 9 | [UIViewController机制分析](notes/mobile/ios/UIViewController机制分析.md) | view 懒加载、loadView、生命周期、容器控制器、present |
+| 10 | [UINavigationController机制分析](notes/mobile/ios/UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、自定义转场 |
+| 11 | [UIView体系分析](notes/mobile/ios/UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
+| 12 | [事件响应链机制分析](notes/mobile/ios/事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
 
 ### 算法
 
