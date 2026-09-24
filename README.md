@@ -16,6 +16,9 @@ Glimmer/
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
 │   ├── mobile/ios/         # iOS 开发
+│   │  【HarmonyOS 开发体系】
+│   ├── mobile/harmonyos/   # ArkTS / ArkUI / Ability
+│   │  【通用】
 │   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # AI / 机器学习
@@ -144,6 +147,16 @@ Glimmer/
 | 10 | [UINavigationController机制分析](notes/mobile/ios/UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、自定义转场 |
 | 11 | [UIView体系分析](notes/mobile/ios/UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
 | 12 | [事件响应链机制分析](notes/mobile/ios/事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
+| 13 | [反射机制分析](notes/mobile/ios/反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
+
+### HarmonyOS 开发体系
+
+#### ArkTS
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [ArkTS基础语法](notes/mobile/harmonyos/ArkTS基础语法.md) | 类型系统、类与泛型、模块、流程控制、空安全、并发、TS 差异 |
+| 2 | [ArkUI基础语法](notes/mobile/harmonyos/ArkUI基础语法.md) | 组件结构、布局容器、基础组件、渲染控制、状态装饰器 V1/V2、UI 复用 |
 
 ### 算法
 
