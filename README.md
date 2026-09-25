@@ -148,6 +148,7 @@ Glimmer/
 | 11 | [UIView体系分析](notes/mobile/ios/UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
 | 12 | [事件响应链机制分析](notes/mobile/ios/事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
 | 13 | [反射机制分析](notes/mobile/ios/反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
+| 14 | [布局方法详解](notes/mobile/ios/布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段、方法对比 |
 
 ### HarmonyOS 开发体系
 
