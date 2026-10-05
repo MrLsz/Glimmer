@@ -149,6 +149,7 @@ Glimmer/
 | 12 | [事件响应链机制分析](notes/mobile/ios/事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
 | 13 | [反射机制分析](notes/mobile/ios/反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
 | 14 | [布局方法详解](notes/mobile/ios/布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段、方法对比 |
+| 15 | [App启动过程分析](notes/mobile/ios/App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
 
 ### HarmonyOS 开发体系
 
