@@ -43,22 +43,7 @@
 
 📊 **线程 vs 协程**
 
-```mermaid
-graph TD
-    T1[线程1] -->|可承载| C1[协程A]
-    T1 -->|可承载| C2[协程B]
-    T1 -->|可承载| C3[协程C]
-    T2[线程2] -->|可承载| C4[协程D]
-    C1 -.挂起时.-> T1
-    C1 -.恢复后.-> T1
-
-    style T1 fill:#1565c0,color:#ffffff
-    style T2 fill:#1565c0,color:#ffffff
-    style C1 fill:#6a1b9a,color:#ffffff
-    style C2 fill:#6a1b9a,color:#ffffff
-    style C3 fill:#6a1b9a,color:#ffffff
-    style C4 fill:#6a1b9a,color:#ffffff
-```
+![线程与协程的关系](images/coroutine-thread.png)
 
 ## 2. 核心概念：四大组件速览
 
@@ -160,23 +145,7 @@ public interface CoroutineContext {
 
 📊 **`+` 的底层：`CombinedContext` 持久化链表**
 
-```mermaid
-graph LR
-    CC[CombinedContext] -->|left| E1[Dispatchers.IO]
-    CC -->|right| R1[CombinedContext]
-    R1 -->|left| E2[Job]
-    R1 -->|right| R2[CombinedContext]
-    R2 -->|left| E3[CoroutineName]
-    R2 -->|right| E4[ExceptionHandler]
-
-    style CC fill:#1565c0,color:#ffffff
-    style R1 fill:#1565c0,color:#ffffff
-    style R2 fill:#1565c0,color:#ffffff
-    style E1 fill:#6a1b9a,color:#ffffff
-    style E2 fill:#6a1b9a,color:#ffffff
-    style E3 fill:#6a1b9a,color:#ffffff
-    style E4 fill:#6a1b9a,color:#ffffff
-```
+![CombinedContext 链式结构](images/coroutine-context.png)
 
 - `A + B` 返回 `CombinedContext(left=A, right=B)`，把两个 context **串成不可变链表**；`get` 沿链表按 `key` 逐个比较、`fold` 遍历。
 - **同类型只能有一个**：查找靠 `Element.key`，所以 `scope + Dispatchers.IO + Dispatchers.Default` 后者覆盖前者、`+ CoroutineName("x")` 叠加——顺序无关、同 key 去重。这就是为什么一份上下文里只有一个 Job、一个调度器。
@@ -190,37 +159,13 @@ graph LR
 
 📊 **结构图示**：`ctx = GlobalScope + Dispatchers.IO + CoroutineName("dl")`
 
-```mermaid
-graph LR
-    R["CombinedContext<br/>left = Name"] --> NL["CoroutineName(dl)"]
-    R --> R1["CombinedContext<br/>left = IO"]
-    R1 --> IL["Dispatchers.IO"]
-    R1 --> R2["CombinedContext<br/>left = Job"]
-    R2 --> JL["GlobalScope.Job"]
-    R2 --> EM["Empty"]
-
-    style R fill:#1565c0,color:#ffffff
-    style R1 fill:#1565c0,color:#ffffff
-    style R2 fill:#1565c0,color:#ffffff
-    style NL fill:#6a1b9a,color:#ffffff
-    style IL fill:#6a1b9a,color:#ffffff
-    style JL fill:#6a1b9a,color:#ffffff
-    style EM fill:#37474f,color:#ffffff
-```
+![协程上下文链：Name → IO → Job → Empty](images/coroutine-context-chain.png)
 
 > 每个 `CombinedContext` 节点 = `left`(一个元素) + `right`(剩下的 context)。`get(key)` 从**最左**节点开始、沿 `right` 向下找，命中即返回（如 `get(Job)` 一路走到最末端）。
 
 📊 **不可变（持久化）图示**：`ctx2 = ctx + Dispatchers.Default`
 
-```mermaid
-graph LR
-    N["CombinedContext<br/>left = Default"] --> ND["Dispatchers.Default"]
-    N --> OLD["原 ctx 旧链<br/>Name → IO → Job → Empty"]
-
-    style N fill:#e65100,color:#ffffff
-    style ND fill:#6a1b9a,color:#ffffff
-    style OLD fill:#2e7d32,color:#ffffff
-```
+![上下文 plus 合并：Default 插到链头](images/coroutine-context-plus.png)
 
 > 只新建「**一个根节点**」`N`，它的 `right` **直接复用原 ctx 的整条旧链**（绿色，不拷贝）。所以原 `ctx` 不变、`ctx[Interceptor]` 仍是 IO；`ctx2[Interceptor]` 从新根左侧就命中 Default（左偏优先）。旧版本被安全保留、新老共享未改动部分 ⇒ 天然线程安全。
 
@@ -232,19 +177,7 @@ graph LR
 
 📊 **Job 的四大作用**
 
-```mermaid
-graph TD
-    J["Job = 协程句柄<br/>身份证 + 遥控器"] --> A["① 身份标识<br/>context[Job] 随时可取"]
-    J --> B["② 查询状态<br/>isActive / Completed / Cancelled"]
-    J --> C["③ 控制生命周期<br/>start / cancel / join"]
-    J --> D["④ 串联层级<br/>attachChild 父子树"]
-
-    style J fill:#1565c0,color:#ffffff
-    style A fill:#6a1b9a,color:#ffffff
-    style B fill:#6a1b9a,color:#ffffff
-    style C fill:#6a1b9a,color:#ffffff
-    style D fill:#6a1b9a,color:#ffffff
-```
+![Job 的四大作用](images/coroutine-job.png)
 
 🔍 **源码视角**（`Job` 接口 + `JobSupport` 实现）
 
@@ -261,36 +194,11 @@ internal abstract class JobSupport : Job, ChildJob, ParentJob {
 
 📊 **状态机：所有生命周期 = 替换 `_state` 这一个原子字段**
 
-```mermaid
-stateDiagram-v2
-    [*] --> Empty : 新建
-    Empty --> Active : start
-    Active --> Finishing : 正常完成
-    Finishing --> Completed : 子都结束
-    Active --> Cancelling : cancel
-    Cancelling --> Cancelled : 子都取消
-    Finishing --> Cancelled : 子失败
-    Completed --> [*]
-    Cancelled --> [*]
-```
+![Job 状态机](images/coroutine-job-state.png)
 
 📊 **层级与传播：父子靠 `attachChild` 挂成树，取消向下广播、失败向上冒泡**
 
-```mermaid
-graph TD
-    P["父 Job"] --> C1["子 A"]
-    P --> C2["子 B"]
-    C2 --> GC["孙"]
-    P -.->|"① cancel 向下广播"| C1
-    P -.->|"① cancel 向下广播"| C2
-    C2 -.->|取消传播| GC
-    C1 -.->|"② 失败向上冒泡"| P
-
-    style P fill:#1565c0,color:#ffffff
-    style C1 fill:#6a1b9a,color:#ffffff
-    style C2 fill:#6a1b9a,color:#ffffff
-    style GC fill:#6a1b9a,color:#ffffff
-```
+![父子 Job 层级与取消传播](images/coroutine-job-hierarchy.png)
 
 > 两个方向：**①向下**——父 `cancel` 调 `makeCancelling`，沿孩子列表递归 `childCancelled`，所有子孙被取消；**②向上**——子协程失败默认冒泡取消父（连带兄弟）。`SupervisorJob` **只重写 `childCancelled` 返回 false**，阻断 ②：子失败仅取消自己，父/兄弟不受影响（适合"多个独立任务并行，部分失败不影响其他"）。
 
@@ -354,20 +262,7 @@ internal class SupervisorJobImpl(parent: Job?) : JobImpl(parent) {
 
 📊 **工作流程**
 
-```mermaid
-graph LR
-    S["协程遇到挂起点<br/>suspend"] --> R["挂起完成<br/>准备 resume"]
-    R --> I["interceptContinuation<br/>包成 DispatchedContinuation"]
-    I --> D["dispatch(ctx, runnable)<br/>投递到目标线程池"]
-    D --> T["目标线程执行续体<br/>Default / IO / Main / Unconfined"]
-    T --> S
-
-    style S fill:#1565c0,color:#ffffff
-    style R fill:#6a1b9a,color:#ffffff
-    style I fill:#e65100,color:#ffffff
-    style D fill:#e65100,color:#ffffff
-    style T fill:#2e7d32,color:#ffffff
-```
+![协程调度流转](images/coroutine-dispatch.png)
 
 > 把"协程逻辑"和"线程归属"解耦——同一份代码换 Dispatcher 就跑在不同线程，代码不用改。
 
@@ -480,28 +375,7 @@ public interface CoroutineExceptionHandler : CoroutineContext.Element {
 
 📊 **异常具体是怎么"抛"上去的？**
 
-```mermaid
-graph TD
-    F["子协程抛未捕获异常"] --> H["JobSupport.resumeWith 捕获"]
-    H --> S["本 Job 进入 Cancelling<br/>先向下取消所有子协程"]
-    S --> P{"有父 Job?"}
-    P -->|是| UP["向上冒泡<br/>parent.childCancelled(cause)"]
-    UP --> R["到达根协程<br/>（无父 / SupervisorJob）"]
-    P -->|否，本身即根| R
-    R --> EH{"根 context 里有<br/>CoroutineExceptionHandler?"}
-    EH -->|有| CALL["调用 handleException(ctx, e)<br/>兜底处理 ✔"]
-    EH -->|没有| THREAD["交给线程<br/>UncaughtExceptionHandler"]
-
-    style F fill:#c62828,color:#ffffff
-    style H fill:#6a1b9a,color:#ffffff
-    style S fill:#e65100,color:#ffffff
-    style P fill:#37474f,color:#ffffff
-    style UP fill:#e65100,color:#ffffff
-    style R fill:#1565c0,color:#ffffff
-    style EH fill:#37474f,color:#ffffff
-    style CALL fill:#2e7d32,color:#ffffff
-    style THREAD fill:#c62828,color:#ffffff
-```
+![协程异常传播流程](images/coroutine-exception.png)
 
 🔍 **关键源码 · 异常怎么一路传播？**
 
@@ -581,19 +455,7 @@ async  启动 : 异常暂存，延迟到 await() 才抛
 
 📊 **三者对比**
 
-```mermaid
-graph TD
-    L["launch { ... }<br/>发射一个协程"] --> LJ["返回 Job<br/>（只管取消/等待）"]
-    A["async { ... }<br/>求值一个协程"] --> AD["返回 Deferred&lt;T&gt;<br/>await() 取结果"]
-    R["runBlocking { ... }<br/>桥接阻塞"] --> RB["阻塞当前线程<br/>直到结束（main/测试）"]
-
-    style L fill:#1565c0,color:#ffffff
-    style LJ fill:#1565c0,color:#ffffff
-    style A fill:#6a1b9a,color:#ffffff
-    style AD fill:#6a1b9a,color:#ffffff
-    style R fill:#e65100,color:#ffffff
-    style RB fill:#e65100,color:#ffffff
-```
+![三个协程构建器对比](images/coroutine-builders.png)
 
 🔍 **源码签名**
 
@@ -738,24 +600,7 @@ fun main() = runBlocking {
 
 📊 **四种启动模式调度时序**
 
-```mermaid
-graph TD
-    A[launch/async 创建] -->|"DEFAULT / ATOMIC"| B[立即入队 Dispatcher]
-    A -->|LAZY| C[New 状态 等待触发]
-    C -->|"start/await/join/receive"| B
-    A -->|UNDISPATCHED| D[当前线程同步执行]
-    D -->|遇到第一个挂起点| E[交还 Dispatcher 后续调度]
-    B -->|首个挂起点前| F[可取消 DEFAULT]
-    B -->|首个挂起点前| G[不可取消 ATOMIC]
-
-    style A fill:#1565c0,color:#ffffff
-    style B fill:#6a1b9a,color:#ffffff
-    style C fill:#e65100,color:#ffffff
-    style D fill:#e65100,color:#ffffff
-    style E fill:#2e7d32,color:#ffffff
-    style F fill:#2e7d32,color:#ffffff
-    style G fill:#c62828,color:#ffffff
-```
+![四种启动模式 CoroutineStart](images/coroutine-start-mode.png)
 
 💡 **扩展思考：**
 
@@ -928,33 +773,7 @@ final class GetData$1 extends SuspendLambda implements Function2<CoroutineScope,
 
 ### 6.5 全流程图
 
-```mermaid
-graph TD
-    A["launch 创建协程<br/>GetData$1(label=0)"] -->|"resumeWith(Unit)"| B["invokeSuspend case0<br/>label→1，调 requestUserInfo(this)"]
-    B --> C["requestUserInfo 内部<br/>switch case0"]
-    C --> D["delay(2000)<br/>返回 COROUTINE_SUSPENDED"]
-    D --> E["return SUSPENDED<br/>方法挂起=协程挂起"]
-    E --> F["🌀 线程释放<br/>对象保持 label 状态<br/>等 IO 完成"]
-    F --> G["delay 完成<br/>continuation.resumeWith 回调"]
-    G --> H["resumeWith 循环<br/>驱动 requestUserInfo 再进"]
-    H --> I["switch case1<br/>return 真实结果"]
-    I --> J["completion.resumeWith<br/>驱动 GetData$1 恢复"]
-    J --> K["invokeSuspend case1<br/>tvName.text=result<br/>return Unit"]
-    K --> L["协程结束 ✅<br/>Job → Completed"]
-
-    style A fill:#1565c0,color:#ffffff
-    style B fill:#6a1b9a,color:#ffffff
-    style C fill:#6a1b9a,color:#ffffff
-    style D fill:#e65100,color:#ffffff
-    style E fill:#c62828,color:#ffffff
-    style F fill:#2e7d32,color:#ffffff
-    style G fill:#e65100,color:#ffffff
-    style H fill:#6a1b9a,color:#ffffff
-    style I fill:#2e7d32,color:#ffffff
-    style J fill:#6a1b9a,color:#ffffff
-    style K fill:#2e7d32,color:#ffffff
-    style L fill:#2e7d32,color:#ffffff
-```
+![suspend 状态机全流程](images/coroutine-suspend-machine.png)
 
 📌 **关键认知（5 条）**
 
@@ -1065,25 +884,7 @@ job.cancelAndJoin()
 
 📊 **协作式取消的完整链路**
 
-```mermaid
-graph TD
-    A["外部调用 job.cancel()"] --> B["Job._state 变为 Cancelling<br/>（仅打标记，不停止代码）"]
-    B --> C{"协程代码是否走到<br/>挂起点/检查点？"}
-    C -->|"是（delay/yield/isActive检查）"| D["检测到已取消<br/>抛出 CancellationException"]
-    C -->|"否（纯循环无挂起点）"| E["⚠️ 继续执行，取消不生效<br/>直到主动检查或方法返回"]
-    D --> F["异常沿调用栈上抛<br/>被协程框架静默处理"]
-    F --> G["finally 块执行清理<br/>（需用 NonCancellable 保护挂起调用）"]
-    G --> H["Job._state 变为 Cancelled"]
-
-    style A fill:#c62828,color:#ffffff
-    style B fill:#e65100,color:#ffffff
-    style C fill:#37474f,color:#ffffff
-    style D fill:#6a1b9a,color:#ffffff
-    style E fill:#c62828,color:#ffffff
-    style F fill:#6a1b9a,color:#ffffff
-    style G fill:#2e7d32,color:#ffffff
-    style H fill:#2e7d32,color:#ffffff
-```
+![协作式取消流程](images/coroutine-cancel.png)
 
 💡 **扩展思考：**
 
@@ -1151,27 +952,7 @@ suspend fun loadProfile(id: String) {
 
 📊 **suspendCancellableCoroutine 工作原理**
 
-```mermaid
-graph TD
-    A["调用 fetchUserSuspend(id)"] --> B["suspendCancellableCoroutine { ... }"]
-    B --> C["创建 CancellableContinuation<br/>并暴露给 block"]
-    C --> D["block 内注册回调<br/>调用底层异步 API"]
-    D --> E["方法 return COROUTINE_SUSPENDED<br/>协程挂起，线程释放"]
-    E --> F{"底层 API 异步完成"}
-    F -->|成功| G["continuation.resume(value)<br/>恢复协程，带回结果"]
-    F -->|失败| H["continuation.resumeWithException(e)<br/>恢复协程，抛出异常"]
-    F -->|外部取消| I["invokeOnCancellation 回调触发<br/>取消底层请求，避免泄漏"]
-
-    style A fill:#1565c0,color:#ffffff
-    style B fill:#6a1b9a,color:#ffffff
-    style C fill:#6a1b9a,color:#ffffff
-    style D fill:#e65100,color:#ffffff
-    style E fill:#c62828,color:#ffffff
-    style F fill:#37474f,color:#ffffff
-    style G fill:#2e7d32,color:#ffffff
-    style H fill:#2e7d32,color:#ffffff
-    style I fill:#e65100,color:#ffffff
-```
+![suspendCancellableCoroutine 工作流程](images/coroutine-scc.png)
 
 🔍 **`suspendCoroutine` vs `suspendCancellableCoroutine`**
 
@@ -1252,15 +1033,7 @@ fun goodFlow(): Flow<Int> = flow {
 
 📊 **flowOn 切分上下游**
 
-```mermaid
-graph LR
-    F["flow { emit(1) }<br/>生产者代码"] -->|flowOn(IO)之前| M["map/filter<br/>中间操作符"]
-    M -->|"flowOn(Dispatchers.IO)"| C["collect { }<br/>消费者代码"]
-
-    style F fill:#1565c0,color:#ffffff
-    style M fill:#1565c0,color:#ffffff
-    style C fill:#2e7d32,color:#ffffff
-```
+![flow 上下文保留与 flowOn](images/coroutine-flow.png)
 
 > `flowOn(Dispatchers.IO)` 左边（上游，生产者+它之前的中间操作符）跑在 IO 线程；右边（下游，`collect` 所在协程的原有上下文）不受影响。
 

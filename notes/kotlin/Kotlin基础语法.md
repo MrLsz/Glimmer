@@ -91,19 +91,7 @@
 
 📊 **核心差异对比**
 
-```mermaid
-graph TD
-    J[Java] -->|需要| J1[大量样板 getter/setter]
-    J -->|有| J2[受检异常 checked exception]
-    J -->|无| J3[空安全]
-    J -->|有| J4[基本类型/包装类区分]
-    K[Kotlin] -->|省略| K1[data class 自动生成]
-    K -->|无| K2[受检异常]
-    K -->|有| K3[编译期空安全]
-    K -->|无| K4[统一类型, 编译期优化为基本类型]
-    K -->|有| K5[扩展函数/属性]
-    K -->|有| K6[协程 suspend]
-```
+![Kotlin 与 Java 主要区别](images/kotlin-vs-java.png)
 
 💡 **扩展思考：**
 
@@ -630,14 +618,7 @@ isOfType<String>("a")                    // true, 编译后保留了 T 的真实
 
 📊 **作用域函数对比**
 
-```mermaid
-graph TD
-    A[let] -->|上下文 it| A1[返回 lambda 结果]
-    B[run] -->|上下文 this| B1[返回 lambda 结果]
-    C[with] -->|上下文 this 非扩展| C1[返回 lambda 结果]
-    D[apply] -->|上下文 this| D1[返回 上下文对象本身]
-    E[also] -->|上下文 it| E1[返回 上下文对象本身]
-```
+![五大作用域函数：let / run / with / apply / also](images/kotlin-scope-functions.png)
 
 | 函数      | 上下文对象  | 返回值       | 典型用途                  |
 | ------- | ------ | --------- | --------------------- |
