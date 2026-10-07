@@ -152,6 +152,7 @@ Glimmer/
 | 15 | [App启动过程分析](notes/mobile/ios/App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
 | 16 | [import详解](notes/mobile/ios/import详解.md) | OC 查找机制、Header Map、PCH、Clang Modules；Swift 模块系统与混编互操作 |
 | 17 | [UIWindow体系分析](notes/mobile/ios/UIWindow体系分析.md) | UIScene/UIWindow/VC/NVC 层级关系、keyWindow、VC 栈管理、事件分发 |
+| 18 | [UI渲染机制原理分析](notes/mobile/ios/UI渲染机制原理分析.md) | VSync、三棵图层树、渲染管线、布局标记、RunLoop 提交、离屏渲染、掉帧优化 |
 
 ### HarmonyOS 开发体系
 
