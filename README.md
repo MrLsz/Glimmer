@@ -8,10 +8,11 @@
 Glimmer/
 ├── notes/                  # 学习笔记
 │   │  【Android 开发体系】
-│   ├── java/               # Java 语言
-│   ├── kotlin/             # Kotlin 语言
-│   ├── jvm/                # JVM 原理
 │   ├── mobile/android/     # Android 系统开发
+│   │   ├── platform/       # Android 平台相关文档
+│   │   ├── java/           # Java 语言
+│   │   ├── kotlin/         # Kotlin 语言
+│   │   └── jvm/            # JVM 原理
 │   │  【iOS 开发体系】
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
@@ -37,31 +38,31 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Java基础语法](notes/java/Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、新特性 |
-| 2 | [Java集合体系](notes/java/Java集合体系.md) | List/Map/Set/Queue、HashMap 源码、并发容器 |
-| 3 | [Java集合-List](notes/java/Java集合-List.md) | List 继承体系、ArrayList/LinkedList/Vector/Stack、CopyOnWriteArrayList |
-| 4 | [Java并发编程](notes/java/Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池 |
+| 1 | [Java基础语法](notes/mobile/android/java/Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、新特性 |
+| 2 | [Java集合体系](notes/mobile/android/java/Java集合体系.md) | List/Map/Set/Queue、HashMap 源码、并发容器 |
+| 3 | [Java集合-List](notes/mobile/android/java/Java集合-List.md) | List 继承体系、ArrayList/LinkedList/Vector/Stack、CopyOnWriteArrayList |
+| 4 | [Java并发编程](notes/mobile/android/java/Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池 |
 
 #### Kotlin
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Kotlin基础语法](notes/kotlin/Kotlin基础语法.md) | 空安全、Lambda、类与对象、委托、扩展、泛型 |
-| 2 | [Kotlin协程](notes/kotlin/Kotlin协程.md) | suspend 原理、调度器、结构化并发、Flow/Channel |
+| 1 | [Kotlin基础语法](notes/mobile/android/kotlin/Kotlin基础语法.md) | 空安全、Lambda、类与对象、委托、扩展、泛型 |
+| 2 | [Kotlin协程](notes/mobile/android/kotlin/Kotlin协程.md) | suspend 原理、调度器、结构化并发、Flow/Channel |
 
 #### JVM
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [JVM整体结构概述](notes/jvm/JVM整体结构概述.md) | JDK/JRE/JVM 关系、运行全流程、架构图、版本演进 |
-| 2 | [类加载机制一-class文件分析](notes/jvm/类加载机制一-class文件分析.md) | .java→.class 编译、Class 文件结构 |
-| 3 | [类加载机制二-类加载过程分析](notes/jvm/类加载机制二-类加载过程分析.md) | 加载→连接→初始化、clinit vs init、主动/被动引用 |
-| 4 | [类加载机制三-双亲委派机制](notes/jvm/类加载机制三-双亲委派机制.md) | 类加载器层次、双亲委派、loadClass 源码、类卸载 |
-| 5 | [程序计数器分析](notes/jvm/程序计数器分析.md) | 运行时数据区总览、程序计数器、字节码指令速查 |
-| 6 | [虚拟机栈和本地方法栈分析](notes/jvm/虚拟机栈和本地方法栈分析.md) | 虚拟机栈与栈帧、本地方法栈与 JNI |
-| 7 | [堆分析](notes/jvm/堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
-| 8 | [方法区(元空间)分析](<notes/jvm/方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
-| 9 | [JVM核心流程总结](notes/jvm/JVM核心流程总结.md) | 源码→字节码→加载→执行全流程、Animal/Dog/Main 例子、7 图 |
+| 1 | [JVM整体结构概述](notes/mobile/android/jvm/JVM整体结构概述.md) | JDK/JRE/JVM 关系、运行全流程、架构图、版本演进 |
+| 2 | [类加载机制一-class文件分析](notes/mobile/android/jvm/类加载机制一-class文件分析.md) | .java→.class 编译、Class 文件结构 |
+| 3 | [类加载机制二-类加载过程分析](notes/mobile/android/jvm/类加载机制二-类加载过程分析.md) | 加载→连接→初始化、clinit vs init、主动/被动引用 |
+| 4 | [类加载机制三-双亲委派机制](notes/mobile/android/jvm/类加载机制三-双亲委派机制.md) | 类加载器层次、双亲委派、loadClass 源码、类卸载 |
+| 5 | [程序计数器分析](notes/mobile/android/jvm/程序计数器分析.md) | 运行时数据区总览、程序计数器、字节码指令速查 |
+| 6 | [虚拟机栈和本地方法栈分析](notes/mobile/android/jvm/虚拟机栈和本地方法栈分析.md) | 虚拟机栈与栈帧、本地方法栈与 JNI |
+| 7 | [堆分析](notes/mobile/android/jvm/堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
+| 8 | [方法区(元空间)分析](<notes/mobile/android/jvm/方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
+| 9 | [JVM核心流程总结](notes/mobile/android/jvm/JVM核心流程总结.md) | 源码→字节码→加载→执行全流程、Animal/Dog/Main 例子、7 图 |
 
 #### Android
 
@@ -69,51 +70,51 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Android系统结构](notes/mobile/android/Android系统结构.md) | 六层架构：Linux 内核→HAL→运行时→Framework→应用 |
-| 2 | [Android系统启动分析](notes/mobile/android/Android系统启动分析.md) | 加电到 Launcher 的完整进程诞生链 |
-| 3 | [init进程分析](notes/mobile/android/init进程分析.md) | init PID 1：rc 解析、属性服务 |
-| 4 | [Zygote进程分析](notes/mobile/android/Zygote进程分析.md) | Zygote：fork+COW、preload 机制 |
-| 5 | [SystemServer进程分析](notes/mobile/android/system_server进程分析.md) | system_server：三批服务发布、systemReady |
-| 6 | [Launcher启动分析](notes/mobile/android/Launcher启动分析.md) | Launcher：HOME 应用、桌面加载 |
+| 1 | [Android系统结构](notes/mobile/android/platform/Android系统结构.md) | 六层架构：Linux 内核→HAL→运行时→Framework→应用 |
+| 2 | [Android系统启动分析](notes/mobile/android/platform/Android系统启动分析.md) | 加电到 Launcher 的完整进程诞生链 |
+| 3 | [init进程分析](notes/mobile/android/platform/init进程分析.md) | init PID 1：rc 解析、属性服务 |
+| 4 | [Zygote进程分析](notes/mobile/android/platform/Zygote进程分析.md) | Zygote：fork+COW、preload 机制 |
+| 5 | [SystemServer进程分析](notes/mobile/android/platform/system_server进程分析.md) | system_server：三批服务发布、systemReady |
+| 6 | [Launcher启动分析](notes/mobile/android/platform/Launcher启动分析.md) | Launcher：HOME 应用、桌面加载 |
 
 ##### Binder IPC 机制
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种结构、BC\_/BR\_ 协议 |
-| 2 | [Binder系列二-ServiceManager分析](notes/mobile/android/Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET\_CONTEXT\_MGR、handle 0 |
-| 3 | [Binder系列三-服务注册与获取过程分析](notes/mobile/android/Binder系列三-服务注册与获取过程分析.md) | flat\_binder\_object 改写、注册/获取全链路 |
-| 4 | [Binder系列四-Framework层分析](notes/mobile/android/Binder系列四-Framework层分析.md) | JNI 注册、ServiceManager 封装、AIDL 调用链 |
+| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/platform/Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种结构、BC\_/BR\_ 协议 |
+| 2 | [Binder系列二-ServiceManager分析](notes/mobile/android/platform/Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET\_CONTEXT\_MGR、handle 0 |
+| 3 | [Binder系列三-服务注册与获取过程分析](notes/mobile/android/platform/Binder系列三-服务注册与获取过程分析.md) | flat\_binder\_object 改写、注册/获取全链路 |
+| 4 | [Binder系列四-Framework层分析](notes/mobile/android/platform/Binder系列四-Framework层分析.md) | JNI 注册、ServiceManager 封装、AIDL 调用链 |
 
 ##### 四大组件
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Activity启动过程分析（上）](notes/mobile/android/Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→进程创建 |
-| 2 | [Activity启动过程分析（下）](notes/mobile/android/Activity启动过程分析（下）.md) | Activity 下：attachApplication→生命周期回调 |
-| 3 | [Broadcast基础和注册分析](notes/mobile/android/Broadcast基础和注册分析.md) | Broadcast：观察者模式、动态注册 |
-| 4 | [Broadcast发送和接收过程分析](notes/mobile/android/Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→onReceive 全链路 |
-| 5 | [Service基础与startService分析](notes/mobile/android/Service基础与startService分析.md) | Service：生命周期、startService 全链路 |
-| 6 | [Service的bindService分析](notes/mobile/android/Service的bindService分析.md) | Service：bindService 全链路、IBinder 回传 |
-| 7 | [ContentProvider基础与启动流程分析](notes/mobile/android/ContentProvider基础与启动流程分析.md) | ContentProvider：概念与启动安装全链路 |
-| 8 | [ContentProvider调用流程分析](notes/mobile/android/ContentProvider调用流程分析.md) | ContentProvider：query 调用全链路 |
+| 1 | [Activity启动过程分析（上）](notes/mobile/android/platform/Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→进程创建 |
+| 2 | [Activity启动过程分析（下）](notes/mobile/android/platform/Activity启动过程分析（下）.md) | Activity 下：attachApplication→生命周期回调 |
+| 3 | [Broadcast基础和注册分析](notes/mobile/android/platform/Broadcast基础和注册分析.md) | Broadcast：观察者模式、动态注册 |
+| 4 | [Broadcast发送和接收过程分析](notes/mobile/android/platform/Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→onReceive 全链路 |
+| 5 | [Service基础与startService分析](notes/mobile/android/platform/Service基础与startService分析.md) | Service：生命周期、startService 全链路 |
+| 6 | [Service的bindService分析](notes/mobile/android/platform/Service的bindService分析.md) | Service：bindService 全链路、IBinder 回传 |
+| 7 | [ContentProvider基础与启动流程分析](notes/mobile/android/platform/ContentProvider基础与启动流程分析.md) | ContentProvider：概念与启动安装全链路 |
+| 8 | [ContentProvider调用流程分析](notes/mobile/android/platform/ContentProvider调用流程分析.md) | ContentProvider：query 调用全链路 |
 
 ##### Window 与输入体系
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Window体系分析](notes/mobile/android/Window体系分析.md) | Window 层级、addView 全流程、Dialog/Toast |
-| 2 | [Context体系分析](notes/mobile/android/Context体系分析.md) | Context 继承体系、ContextWrapper、组件 Context 创建 |
-| 3 | [输入事件分析一-获取过程](<notes/mobile/android/输入事件分析一-获取过程.md>) | 输入系统总览、IMS、InputReader 主循环、InputMapper、点击读取 |
-| 4 | [输入事件分析二-派发过程](<notes/mobile/android/输入事件分析二-派发过程.md>) | 三队列、InputChannel、窗口同步、命中测试、派发执行、ANR |
-| 5 | [输入事件分析三-应用层处理](<notes/mobile/android/输入事件分析三-应用层处理.md>) | InputStage 七级责任链、View 树分发、FINISHED 闭环 |
+| 1 | [Window体系分析](notes/mobile/android/platform/Window体系分析.md) | Window 层级、addView 全流程、Dialog/Toast |
+| 2 | [Context体系分析](notes/mobile/android/platform/Context体系分析.md) | Context 继承体系、ContextWrapper、组件 Context 创建 |
+| 3 | [输入事件分析一-获取过程](<notes/mobile/android/platform/输入事件分析一-获取过程.md>) | 输入系统总览、IMS、InputReader 主循环、InputMapper、点击读取 |
+| 4 | [输入事件分析二-派发过程](<notes/mobile/android/platform/输入事件分析二-派发过程.md>) | 三队列、InputChannel、窗口同步、命中测试、派发执行、ANR |
+| 5 | [输入事件分析三-应用层处理](<notes/mobile/android/platform/输入事件分析三-应用层处理.md>) | InputStage 七级责任链、View 树分发、FINISHED 闭环 |
 
 ##### View 绘制与渲染
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [View绘制的三个流程](notes/mobile/android/View绘制的三个流程.md) | measure/layout/draw、requestLayout/invalidate |
-| 2 | [绘制原理深度剖析](notes/mobile/android/绘制原理深度剖析.md) | 软硬绘制、RenderNode、RenderThread、SurfaceFlinger |
+| 1 | [View绘制的三个流程](notes/mobile/android/platform/View绘制的三个流程.md) | measure/layout/draw、requestLayout/invalidate |
+| 2 | [绘制原理深度剖析](notes/mobile/android/platform/绘制原理深度剖析.md) | 软硬绘制、RenderNode、RenderThread、SurfaceFlinger |
 
 ### iOS 开发体系
 
