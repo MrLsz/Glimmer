@@ -34,7 +34,9 @@
 
 ## 二、ActivityThread 初始化与 attach
 
-Zygote fork 出 App 进程后，反射调用入口类 `ActivityThread.main`。
+Zygote fork 出 App 进程后，反射调用入口类 `ActivityThread.main`。整条链路如下：
+
+![App 进程初始化与 attach 时序图](images/activity-attach-seq.png)
 
 ### 反射调用的实现
 
@@ -155,7 +157,9 @@ boolean attachApplication(WindowProcessController app) {
 
 ## 三、realStartActivityLocked 与 ClientTransaction
 
-进程就绪后，ATMS 通过 `realStartActivityLocked` 真正启动 Activity。
+进程就绪后，ATMS 通过 `realStartActivityLocked` 真正启动 Activity。从事务创建到 App 进程执行完毕的完整链路如下：
+
+![ClientTransaction 事务跨进程执行链路](images/activity-clienttransaction-seq.png)
 
 `realStartActivityLocked` 的核心是创建 `ClientTransaction` 事务，向里添加启动消息：
 
@@ -245,7 +249,9 @@ public void execute(ClientTransactionHandler client, IBinder token, ...) {
 
 ## 五、performLaunchActivity 创建 Activity
 
-`handleLaunchActivity` 做环境准备后，调用核心的 `performLaunchActivity`。
+`handleLaunchActivity` 做环境准备后，调用核心的 `performLaunchActivity`。七步流程如下：
+
+![performLaunchActivity 创建 Activity 的七步流程](images/activity-launch-flow.png)
 
 ### handleLaunchActivity
 
@@ -389,7 +395,7 @@ Activity 启动离不开「任务栈（Task）」体系——launchMode 的处�
 
 从顶层容器到底层 Activity 实例，共分六层，构成「容器套容器」的树状结构：
 
-<img src="./images/activity-task-stack.png" width="500" alt="任务栈数据结构层次图">
+![任务栈数据结构层次图](images/activity-task-stack.png)
 
 | 层级 | 类 | 职责 | 关键字段 |
 |------|-----|------|---------|
@@ -431,9 +437,7 @@ class ActivityRecord extends ConfigurationContainer {
 
 `ActivityRecord` 的状态机（`ActivityState` 枚举）：
 
-```text
-INITIALIZING → RESUMED ⇄ PAUSED → STOPPED → FINISHING → DESTROYED
-```
+![ActivityRecord 状态机](images/activity-record-state.png)
 
 ### Task：任务栈
 

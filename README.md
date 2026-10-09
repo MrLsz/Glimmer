@@ -12,7 +12,8 @@ Glimmer/
 │   │   ├── platform/       # Android 平台相关文档
 │   │   ├── java/           # Java 语言
 │   │   ├── kotlin/         # Kotlin 语言
-│   │   └── jvm/            # JVM 原理
+│   │   ├── jvm/            # JVM 原理
+│   │   └── matrix/         # Matrix APM 源码分析
 │   │  【iOS 开发体系】
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
@@ -22,7 +23,7 @@ Glimmer/
 │   │  【通用】
 │   ├── framework-design/   # 框架设计与原理
 │   ├── algorithm/          # 算法与数据结构
-│   └── ai-ml/              # AI / 机器学习
+│   └── ai-ml/              # Python / AI / 机器学习
 ├── experience/             # 经验积累
 │   ├── troubleshooting/    # 踩坑记录 & 故障排查
 │   ├── best-practices/     # 最佳实践
@@ -63,6 +64,12 @@ Glimmer/
 | 7 | [堆分析](notes/mobile/android/jvm/堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
 | 8 | [方法区(元空间)分析](<notes/mobile/android/jvm/方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
 | 9 | [JVM核心流程总结](notes/mobile/android/jvm/JVM核心流程总结.md) | 源码→字节码→加载→执行全流程、Animal/Dog/Main 例子、7 图 |
+
+#### Matrix
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [Matrix总体架构与插件体系](notes/mobile/android/matrix/01-Matrix总体架构与插件体系.md) | 整体架构、Plugin 状态机与生命周期、Issue 上报链路、前后台与多进程生命周期体系 |
 
 #### Android
 
@@ -163,6 +170,12 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [ArkTS基础语法](notes/mobile/harmonyos/ArkTS基础语法.md) | 类型系统、类与泛型、模块、流程控制、空安全、并发、TS 差异 |
 | 2 | [ArkUI基础语法](notes/mobile/harmonyos/ArkUI基础语法.md) | 组件结构、布局容器、基础组件、渲染控制、状态装饰器 V1/V2、UI 复用 |
+
+### Python
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [Python基础语法](notes/ai-ml/Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承 MRO、迭代器生成器、内存管理 |
 
 ### 算法
 

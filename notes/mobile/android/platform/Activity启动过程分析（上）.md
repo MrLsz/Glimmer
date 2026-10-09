@@ -77,7 +77,7 @@ Activity 在 Android 应用中承担四大核心作用：
 
 Activity 的生命周期由 `Instrumentation` 调度，由 system_server 的 ATMS 通过 Binder 驱动整个流程。完整生命周期图如下：
 
-<img src="./images/activity-lifecycle-official.png" width="450" alt="Activity 生命周期">
+![Activity 生命周期](images/activity-lifecycle-official.png)
 
 七个核心回调：
 
@@ -101,7 +101,7 @@ Activity 的生命周期由 `Instrumentation` 调度，由 system_server 的 ATM
 
 整个启动过程的跨进程时序如下（本文覆盖前半程，即 App 发起 → ATMS 调度 → 进程创建）：
 
-<img src="./images/activity-start-seq.png" width="500" alt="Activity 启动跨进程时序图">
+![Activity 启动跨进程时序图](images/activity-start-seq.png)
 
 | 阶段      | 关键角色                           | 职责                                |
 | ------- | ------------------------------ | --------------------------------- |
@@ -277,7 +277,7 @@ private int startActivityAsUser(...) {
 
 ActivityStarter 的内部方法调用时序如下（自调用链展示 execute → executeRequest → startActivityInner 的完整过程）：
 
-<img src="./images/activity-starter-seq.png" width="320" alt="ActivityStarter 内部调用时序图">
+![ActivityStarter 内部调用时序图](images/activity-starter-seq.png)
 
 ### execute → executeRequest
 
@@ -388,7 +388,15 @@ int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord, ...)
 | `singleTask`     | task 内复用已有实例，清除其上所有 Activity           |
 | `singleInstance` | 独占一个 task，该 task 只能有这一个 Activity       |
 
+四种 launchMode 在任务栈中的实例化与复用行为，用图对比如下：
+
+![四种 launchMode 的 Task 栈行为对比](images/activity-launchmode-task.png)
+
 > `startActivityInner` 的复杂度在于「task 管理」——`getReusableTask` 找可复用 task、`recycleTask` 回收复用、`deliverToCurrentTopIfNeeded` 处理 singleTop、`setNewTask` 新建 task、`addOrReparentStartingActivity` 加入已有 task。这部分是 Activity 栈管理的核心。
+
+`startActivityInner` 里 task 复用的决策流程可归纳为下图——核心是先 `getReusableTask` 找可复用 task，找不到再由 `computeTargetTask` 计算目标，两者皆空才判定 `newTask`：
+
+![startActivityInner task 复用决策流程](images/activity-task-reuse-flow.png)
 
 ---
 
@@ -441,7 +449,9 @@ private Process.ProcessStartResult startViaZygote(...) {
 
 ### socket 通信与 pid 返回
 
-`attemptZygoteSendArgsAndGetResult` 通过 socket 发送参数、读取 fork 结果：
+`attemptZygoteSendArgsAndGetResult` 通过 socket 发送参数、读取 fork 结果，进程创建的完整链路如下图所示：
+
+![进程创建 socket fork 流程](images/activity-process-fork.png)
 
 ```java
 private Process.ProcessStartResult attemptZygoteSendArgsAndGetResult(
