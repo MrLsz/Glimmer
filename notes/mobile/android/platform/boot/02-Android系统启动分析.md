@@ -15,7 +15,7 @@
 
 ## 一、总览
 
-<img src="./images/boot-overview.png" width="340" alt="Android 启动总链路">
+![Android 启动总链路](images/boot-overview.png)
 
 **各阶段速览**
 
@@ -60,14 +60,7 @@ Bootloader 的核心任务分三类——硬件初始化、启动模式选择、
 
 从硬件 ROM 到最终加载内核，每一级固件都对下一级的签名做校验——任何一环失败即中止启动，信任根在芯片 Boot ROM。
 
-```text
-Boot ROM(不可改，eFuse 存公钥哈希)
-  → 验证 PBL 签名
-    → 验证 SBL 签名
-      → 验证 ABL 签名
-        → AVB 验证 boot 镜像
-          → 进入 Kernel
-```
+![Bootloader 安全启动链（Chain of Trust）](images/boot-chain-of-trust.png)
 
 信任根在芯片 Boot ROM，每一级验证下一级签名；任何一级验签失败即拒绝启动。
 
@@ -99,12 +92,7 @@ A/B 分区允许系统保留两套完整镜像——OTA 时更新「非活跃槽
 
 Linux Kernel 从自解压开始，经 start_kernel() 完整初始化所有子系统，最终通过 rest_init() 拉出 kernel_init 线程——由它来 exec init，把系统从内核态带入用户空间。
 
-```text
-自解压 → start_kernel() → rest_init()
-  → kernel_init 线程
-    → 挂载 rootfs（initramfs）
-      → exec("/init")   ← 第一个用户态进程
-```
+![Linux Kernel 启动主流程](images/kernel-start-flow.png)
 
 - `start_kernel()`：初始化内存管理、调度器、中断、定时器等核心子系统
 - `rest_init()`：创建 `kernel_init`（未来 PID 1）与 `kthreadd`（PID 2）
@@ -180,6 +168,8 @@ kernel → /init main()
 
 init 分为 FirstStage 和 SecondStage 两个阶段——FirstStage 运行在最小化环境（挂载分区+SELinux），SecondStage 才进入完整的用户空间初始化。
 
+![init 进程两阶段启动](images/init-two-stage.png)
+
 | 阶段           | 入口                  | 职责                                                     |
 | ------------ | ------------------- | ------------------------------------------------------ |
 | First stage  | `FirstStageMain()`  | 创建/挂载 `/dev`、`/proc`、`/sys`、`/system`、`/vendor`，准备早期环境 |
@@ -230,7 +220,7 @@ service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-s
 
 解析涉及的核心类关系如下——Parser 按关键字将解析委托给各 SectionParser，最终产出 Service 和 Action 对象：
 
-<img src="./images/init-rc-parser-class.png" width="510" alt="init.rc 解析器类图">
+![init.rc 解析器类图](images/init-rc-parser-class.png)
 
 ```cpp
 // system/core/init/action_manager.cpp — 解析入口
@@ -282,7 +272,7 @@ ActionManager 执行 action:
 
 action 是 init.rc 中 `on <trigger>` 定义的一组命令集合——init 按先后顺序逐个触发，从 early-init 一直走到 sys.boot_completed=1。下图是标准的 action 触发链：
 
-<img src="./images/init-chain.png" width="220" alt="init 触发链">
+![init 触发链](images/init-chain.png)
 
 ### 5. 属性服务（Property Service）
 
@@ -344,6 +334,8 @@ init → app_process
     → runSelectLoop()      # 进入循环等待 AMS 的 fork 请求
 ```
 
+![Zygote 启动时序图](images/zygote-start-seq.png)
+
 源码：`frameworks/base/core/java/com/android/internal/os/ZygoteInit.java`
 
 ### 2. 预加载（preload）
@@ -355,7 +347,7 @@ init → app_process
 
 ### 3. fork + COW（核心）
 
-<img src="./images/zygote-cow.png" width="500" alt="Zygote fork 与 COW">
+![Zygote fork 与 COW](images/zygote-cow.png)
 
 - 子进程继承 Zygote 地址空间与已加载类
 - 只读页共享，写入时才复制（Copy-On-Write）
@@ -391,7 +383,7 @@ Android 系统服务（AMS/WMS/PMS…）运行在不同进程，客户端要调�
         → 之后客户端直接与服务端 Binder 通信（不再经过 ServiceManager）
 ```
 
-<img src="./images/binder-hub.png" width="340" alt="Binder 与 ServiceManager">
+![Binder 与 ServiceManager](images/binder-hub.png)
 
 ### 3. 关键点
 
@@ -422,11 +414,13 @@ Zygote.forkSystemServer()
     → Looper.loop()              # 进入消息循环
 ```
 
+![system_server 启动时序图](images/systemserver-start-seq.png)
+
 源码：`frameworks/base/services/java/com/android/server/SystemServer.java`
 
 ### 2. 三批服务
 
-<img src="./images/system-server.png" width="340" alt="system_server 三批服务">
+![system_server 三批服务](images/system-server.png)
 
 | 批次            | 特征      | 核心服务                                  |
 | ------------- | ------- | ------------------------------------- |
@@ -482,7 +476,7 @@ AMS.startActivity(intent, LauncherComponentName)
     → AMS 调度 Activity 生命周期
 ```
 
-<img src="./images/app-launch.png" width="300" alt="App / Launcher 启动流程">
+![App / Launcher 启动流程](images/app-launch.png)
 
 **（3）Launcher 桌面加载**
 
