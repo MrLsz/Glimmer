@@ -14,7 +14,8 @@ Glimmer/
 │   │   │   ├── binder/       # Binder IPC 机制
 │   │   │   ├── component/    # 四大组件
 │   │   │   ├── window-input/ # Window 与输入体系
-│   │   │   └── view-render/  # View 绘制与渲染
+│   │   │   ├── view-render/  # View 绘制与渲染
+│   │   │   └── build-system/ # 构建与编译体系
 │   │   ├── java/           # Java 语言
 │   │   ├── kotlin/         # Kotlin 语言
 │   │   ├── jvm/            # JVM 原理
@@ -127,6 +128,12 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [View绘制的三个流程](notes/mobile/android/platform/view-render/01-View绘制的三个流程.md) | measure/layout/draw、requestLayout/invalidate |
 | 2 | [绘制原理深度剖析](notes/mobile/android/platform/view-render/02-绘制原理深度剖析.md) | 软硬绘制、RenderNode、RenderThread、SurfaceFlinger |
+
+##### 构建与编译体系
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [Android编译流程解析](notes/mobile/android/platform/build-system/01-Android编译流程解析.md) | Gradle/AGP、AAPT2 两阶段、d8/R8、签名对齐、Soong/Ninja |
 
 ### iOS 开发体系
 
