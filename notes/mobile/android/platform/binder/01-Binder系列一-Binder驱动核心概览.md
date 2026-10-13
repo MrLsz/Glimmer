@@ -23,8 +23,7 @@
 
 Linux 将进程虚拟地址划分为内核空间（高 1GB）和用户空间（低 3GB），两者隔离以实现内核安全保护。下图展示了这一划分：
 
-<img src="./images/binder-doc1-00.png" width="500" alt="Binder图解">
-
+![进程虚拟地址空间划分](images/binder-doc1-00.png)
 
 Linux 将进程的虚拟地址空间划分为两部分：高 1GB 为内核空间，低 3GB 为用户空间。内核空间是 Linux 内核的运行空间，用户空间为用户程序的运行空间。为了安全，两者隔离——用户进程不能直接操作内核。
 
@@ -38,16 +37,14 @@ Linux 将进程的虚拟地址空间划分为两部分：高 1GB 为内核空间
 ### 内存映射（mmap）
 
 mmap 将磁盘文件映射到内存，用户通过修改内存间接修改文件——原本需要两次拷贝（磁盘→页缓存→用户），映射后只需一次。下图展示了内存映射原理：
-<img src="./images/binder-doc1-02.png" width="500" alt="内存映射原理">
-
+![内存映射 mmap 原理](images/binder-doc1-02.png)
 
 mmap 将磁盘文件映射到内存，使得用户可以通过修改内存间接修改磁盘文件——原本需要两次拷贝（磁盘→页缓存→用户空间），映射后只需一次。Binder 没有物理介质，但利用 mmap 建立内核缓冲区和用户空间的映射关系来跨进程传递数据。
 
 ### 传统 IPC 的两次拷贝问题
 
 传统 IPC 需要两次拷贝：发送方 copy_from_user → 内核缓冲区 → copy_to_user → 接收方。下图展示了这一过程：
-<img src="./images/binder-doc1-01.png" width="500" alt="传统IPC两次拷贝">
-
+![传统 IPC 两次拷贝](images/binder-doc1-01.png)
 
 ```
 发送方 copy_from_user → 内核缓冲区 → copy_to_user →  接收方
@@ -57,8 +54,7 @@ mmap 将磁盘文件映射到内存，使得用户可以通过修改内存间接
 ### Binder 的一次拷贝方案
 
 Binder 通过 mmap 将内核缓冲区与接收方用户空间建立映射——发送方只需一次 copy_from_user，数据直接出现在接收方。下图对比了两次拷贝和一次拷贝的区别：
-<img src="./images/binder-doc1-03.png" width="500" alt="Binder一次拷贝">
-
+![Binder 一次拷贝原理](images/binder-doc1-03.png)
 
 ```
 ① 驱动在内核空间创建「数据接收缓存区」
@@ -86,14 +82,11 @@ Binder 机制分为三层：
 
 Binder 驱动以 misc 设备注册为 `/dev/binder`，是纯软件虚拟字符设备。它的生命周期由四个方法贯穿：`binder_init`（初始化）→ `binder_open`（打开）→ `binder_mmap`（映射）→ `binder_ioctl`（数据收发）。
 
-<img src="./images/binder-doc2-03.png" width="500" alt="Binder图解">
+![Binder 分层架构](images/binder-doc2-03.png)
 
+![Binder 驱动四大核心方法](images/binder-doc2-01.png)
 
-<img src="./images/binder-doc2-01.png" width="500" alt="Binder图解">
-
-
-<img src="./images/binder-doc2-00.png" width="500" alt="Binder图解">
-
+![系统调用到驱动方法的映射](images/binder-doc2-00.png)
 
 ### 2.1 设备初始化：binder_init
 
@@ -151,9 +144,6 @@ static const struct file_operations binder_fops = {
 static int binder_open(struct inode *nodp, struct file *filp) {
     struct binder_proc *proc;
 
-<img src="./images/binder-doc2-02.png" width="500" alt="Binder图解">
-
-
     // 在 kernel 空间分配 binder_proc
     proc = kzalloc(sizeof(*proc), GFP_KERNEL);
 
@@ -172,6 +162,9 @@ static int binder_open(struct inode *nodp, struct file *filp) {
 ```
 
 核心动作：创建 `binder_proc` 对象保存进程信息 → 加入全局哈希表 `binder_procs` → 将 proc 存入 `filp->private_data`。后续 `mmap` 和 `ioctl` 调用时，内核将同一个 `file` 结构传回驱动，驱动通过 `private_data` 取回对应的 `binder_proc`。
+
+![binder_open 流程与全局哈希链](images/binder-doc2-02.png)
+
 
 ### 2.3 内存映射：binder_mmap
 
@@ -215,7 +208,7 @@ static int binder_mmap(struct file *filp, struct vm_area_struct *vma) {
 
 `binder_update_page_range` 分配物理页并建立双重映射：
 
-<img src="./images/binder-doc2-04.png" width="500" alt="Binder mmap 物理页双重映射">
+![binder_mmap 缓冲区分配与映射调用链](images/binder-doc2-04.png)
 
 ```cpp
 static int binder_update_page_range(struct binder_proc *proc, int allocate,
@@ -235,6 +228,9 @@ static int binder_update_page_range(struct binder_proc *proc, int allocate,
 ```
 
 > 一块物理内存同时映射到内核空间和用户空间——Binder 一次拷贝的物理基础。
+
+![物理页双重映射：一次拷贝的物理基础](images/binder-dual-mapping.png)
+
 
 **一次拷贝的完整理解**：虚拟进程地址空间（`vm_area_struct`）和虚拟内核地址空间（`vm_struct`）都映射到同一块物理内存。当 Client 发送数据时，从自己的进程空间 `copy_from_user` 拷贝到内核空间——由于内核空间与 Server 进程空间共享物理页，Server 侧无需再次 `copy_to_user`，只需通过 `user_buffer_offset` 偏移即可直接读取数据。对比传统 IPC 的两次拷贝（用户→内核→用户），Binder 只需要一次。
 
@@ -489,8 +485,7 @@ struct flat_binder_object {
 
 下图汇总了 9 种数据结构之间的关系：`binder_proc` 持有线程池和实体/引用红黑树，`binder_ref` 通过 `node` 指向 `binder_node`，`binder_transaction` 携带数据在两者之间传递。
 
-<img src="./images/binder-doc3-00.png" width="500" alt="Binder图解">
-
+![Binder 核心数据结构关系总览](images/binder-doc3-00.png)
 
 ```
 Server 进程 (binder_proc)                 Client 进程 (binder_proc)
@@ -543,8 +538,7 @@ BR_（Binder Reply）是驱动返回给用户空间的响应码，在 `binder_th
 ### 发送流程：binder_thread_write
 `binder_thread_write` 是 BC_ 请求的处理入口——从用户空间读取命令码，按类型分发。`BC_TRANSACTION` 和 `BC_REPLY` 最终调用 `binder_transaction` 执行实际传输。流程图如下：
 
-<img src="./images/binder-doc4-00.png" width="500" alt="Binder图解">
-
+![binder_ioctl(BINDER_WRITE_READ) 读写交互](images/binder-doc4-00.png)
 
 ```cpp
 binder_thread_write() {
@@ -570,8 +564,7 @@ binder_thread_write() {
 
 `binder_transaction` 是通信核心——处理发送时执行：
 
-<img src="./images/binder-doc4-01.png" width="500" alt="Binder图解">
-
+![binder_transaction 核心流程](images/binder-doc4-01.png)
 
 ```cpp
 static void binder_transaction(struct binder_proc *proc,
@@ -613,8 +606,7 @@ static void binder_transaction(struct binder_proc *proc,
 
 `binder_thread_read` 是 BR_ 响应的处理入口——线程阻塞在 `wait_event` 等待工作项，收到后根据 `w->type` 生成对应的 BR 响应码返回用户空间。流程图如下：
 
-<img src="./images/binder-doc4-02.png" width="500" alt="Binder图解">
-
+![一次完整 IPC 通信时序](images/binder-doc4-02.png)
 
 ```cpp
 binder_thread_read() {
