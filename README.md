@@ -189,6 +189,12 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承 MRO、迭代器生成器、内存管理 |
 
+### AI 开发
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、符号主义→心智社会→学习范式的演进、现代 LLM 智能体 |
+
 ### 算法
 
 LeetCode :  [GLDailyCode](https://github.com/MrLsz/GLDailyCode) 项目，内容与题解可前往该项目查看。
