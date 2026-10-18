@@ -195,6 +195,7 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、符号主义→心智社会→学习范式的演进、现代 LLM 智能体 |
 | 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N-gram→Transformer 演进、自注意力/多头注意力、Decoder-Only、提示工程、分词、缩放法则与幻觉 |
+| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用、提示词设计、适用场景与对比 |
 
 ### 算法
 
