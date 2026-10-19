@@ -51,14 +51,14 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [Java基础语法](notes/mobile/android/java/01-Java基础语法.md) | 数据类型、OOP、泛型、反射、注解、异常、新特性 |
 | 2 | [Java集合体系](notes/mobile/android/java/02-Java集合体系.md) | List/Map/Set/Queue、HashMap 源码、并发容器 |
-| 3 | [Java集合-List](notes/mobile/android/java/03-Java集合-List.md) | List 继承体系、ArrayList/LinkedList/Vector/Stack、CopyOnWriteArrayList |
+| 3 | [Java集合-List](notes/mobile/android/java/03-Java集合-List.md) | List 的继承体系、ArrayList/LinkedList/Vector/ Stack、CopyOnWriteArrayList 内容 |
 | 4 | [Java并发编程](notes/mobile/android/java/04-Java并发编程.md) | 线程、JMM、synchronized、volatile、CAS、AQS、线程池 |
 
 #### Kotlin
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Kotlin基础语法](notes/mobile/android/kotlin/01-Kotlin基础语法.md) | 空安全、Lambda、类与对象、委托、扩展、泛型 |
+| 1 | [Kotlin基础语法](notes/mobile/android/kotlin/01-Kotlin基础语法.md) | 空安全、Lambda、类与对象、委托、扩展、泛型、作用域、集合、其他高级特性等 |
 | 2 | [Kotlin协程](notes/mobile/android/kotlin/02-Kotlin协程.md) | suspend 原理、调度器、结构化并发、Flow/Channel |
 
 #### JVM
@@ -73,13 +73,13 @@ Glimmer/
 | 6 | [虚拟机栈和本地方法栈分析](notes/mobile/android/jvm/06-虚拟机栈和本地方法栈分析.md) | 虚拟机栈与栈帧、本地方法栈与 JNI |
 | 7 | [堆分析](notes/mobile/android/jvm/07-堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
 | 8 | [方法区(元空间)分析](<notes/mobile/android/jvm/08-方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
-| 9 | [JVM核心流程总结](notes/mobile/android/jvm/09-JVM核心流程总结.md) | 源码→字节码→加载→执行全流程、Animal/Dog/Main 例子、7 图 |
+| 9 | [JVM核心流程总结](notes/mobile/android/jvm/09-JVM核心流程总结.md) | 源码→字节码→加载→执行全流程概括、Animal/Dog/Main 例子总结 |
 
 #### Matrix
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Matrix总体架构与插件体系](notes/mobile/android/matrix/01-Matrix总体架构与插件体系.md) | 整体架构、Plugin 状态机与生命周期、Issue 上报链路、前后台与多进程生命周期体系 |
+| 1 | [Matrix总体架构与插件体系](notes/mobile/android/matrix/01-Matrix总体架构与插件体系.md) | 整体架构、Plugin状态机与生命周期、Issue上报链路、多进程生命周期 |
 
 #### Android
 
@@ -87,7 +87,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Android系统结构](notes/mobile/android/platform/boot/01-Android系统结构.md) | 六层架构：Linux 内核→HAL→运行时→Framework→应用 |
+| 1 | [Android系统结构](notes/mobile/android/platform/boot/01-Android系统结构.md) | 六层架构：Linux 内核→HAL→运行时→Framework →应用的整体结构概览 |
 | 2 | [Android系统启动分析](notes/mobile/android/platform/boot/02-Android系统启动分析.md) | 加电到 Launcher 的完整进程诞生链 |
 | 3 | [init进程分析](notes/mobile/android/platform/boot/03-init进程分析.md) | init PID 1：rc 解析、属性服务 |
 | 4 | [Zygote进程分析](notes/mobile/android/platform/boot/04-Zygote进程分析.md) | Zygote：fork+COW、preload 机制 |
@@ -98,7 +98,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/platform/binder/01-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种结构、BC\_/BR\_ 协议 |
+| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/platform/binder/01-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种结构、BC\_/BR\_ 协议内容概览 |
 | 2 | [Binder系列二-ServiceManager分析](notes/mobile/android/platform/binder/02-Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET\_CONTEXT\_MGR、handle 0 |
 | 3 | [Binder系列三-服务注册与获取过程分析](notes/mobile/android/platform/binder/03-Binder系列三-服务注册与获取过程分析.md) | flat\_binder\_object 改写、注册/获取全链路 |
 | 4 | [Binder系列四-Framework层分析](notes/mobile/android/platform/binder/04-Binder系列四-Framework层分析.md) | JNI 注册、ServiceManager 封装、AIDL 调用链 |
@@ -107,7 +107,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Activity启动过程分析（上）](notes/mobile/android/platform/component/01-Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→进程创建 |
+| 1 | [Activity启动过程分析（上）](notes/mobile/android/platform/component/01-Activity启动过程分析（上）.md) | Activity 上：startActivity→ATMS→进程创建的详细过程分析 |
 | 2 | [Activity启动过程分析（下）](notes/mobile/android/platform/component/02-Activity启动过程分析（下）.md) | Activity 下：attachApplication→生命周期回调 |
 | 3 | [Broadcast基础和注册分析](notes/mobile/android/platform/component/03-Broadcast基础和注册分析.md) | Broadcast：观察者模式、动态注册 |
 | 4 | [Broadcast发送和接收过程分析](notes/mobile/android/platform/component/04-Broadcast发送和接收过程分析.md) | Broadcast：sendBroadcast→onReceive 全链路 |
@@ -130,14 +130,14 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [View绘制的三个流程](notes/mobile/android/platform/view-render/01-View绘制的三个流程.md) | measure/layout/draw、requestLayout/invalidate |
+| 1 | [View绘制的三个流程](notes/mobile/android/platform/view-render/01-View绘制的三个流程.md) | measure / layout / draw、requestLayout / invalidate详细过程分析，源码学习 |
 | 2 | [绘制原理深度剖析](notes/mobile/android/platform/view-render/02-绘制原理深度剖析.md) | 软硬绘制、RenderNode、RenderThread、SurfaceFlinger |
 
 ##### 构建与编译体系
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Android编译流程解析](notes/mobile/android/platform/build-system/01-Android编译流程解析.md) | Gradle/AGP、AAPT2 两阶段、d8/R8、签名对齐、Soong/Ninja |
+| 1 | [Android编译流程解析](notes/mobile/android/platform/build-system/01-Android编译流程解析.md) | Gradle/AGP、AAPT2 两阶段、d8/R8、签名对齐、Soong/Ninja、APK打包等 |
 
 ### iOS 开发体系
 
@@ -145,14 +145,14 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO |
+| 1 | [OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO、常用集合类、错误处理等 |
 | 2 | [OC多线程](notes/objective-c/02-OC多线程.md) | NSThread、GCD、NSOperation、线程安全、RunLoop |
 
 #### Swift
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、可选类型、闭包、ARC、协议泛型 |
+| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、类与结构体、可选类型、闭包、ARC、协议泛型、访问控制、与OC互操作 |
 | 2 | [Swift多线程](notes/swift/02-Swift多线程.md) | GCD、async/await、Task、Actor、多读单写 |
 
 #### iOS
@@ -161,7 +161,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [NSObject底层分析](notes/mobile/ios/runtime/01-NSObject底层分析.md) | objc_object、isa 位域、元类闭环、Tagged Pointer、alloc |
+| 1 | [NSObject底层分析](notes/mobile/ios/runtime/01-NSObject底层分析.md) | objc_object 、isa 位域、字节对齐与优化、元类闭环、Tagged Pointer、alloc等 |
 | 2 | [类的底层分析](notes/mobile/ios/runtime/02-类的底层分析.md) | objc_class 存储结构、方法调用原理 |
 | 3 | [Runtime机制分析](notes/mobile/ios/runtime/03-Runtime机制分析.md) | 消息发送转发、Method Swizzling、关联对象 |
 | 4 | [KVC机制分析](notes/mobile/ios/runtime/04-KVC机制分析.md) | 键值编码、setValue/valueForKey 查找链路、KeyPath 集合运算符 |
@@ -173,27 +173,27 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [iOS内存管理](notes/mobile/ios/foundation/01-iOS内存管理.md) | 内存分区、引用计数、ARC、weak、AutoreleasePool |
+| 1 | [iOS内存管理](notes/mobile/ios/foundation/01-iOS内存管理.md) | 内存分区、堆内存分配、引用计数、ARC、weak、循环引用、AutoreleasePool等 |
 | 2 | [RunLoop机制分析](notes/mobile/ios/foundation/02-RunLoop机制分析.md) | 事件循环、Mode、Source/Timer/Observer、线程保活 |
 
 ##### UIKit 框架
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [UIWindow体系分析](notes/mobile/ios/uikit/01-UIWindow体系分析.md) | UIScene/UIWindow/VC/NVC 层级关系、keyWindow、VC 栈管理、事件分发 |
-| 2 | [UIView体系分析](notes/mobile/ios/uikit/02-UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
+| 1 | [UIWindow体系分析](notes/mobile/ios/uikit/01-UIWindow体系分析.md) | UIScene/UIWindow/VC/NVC 层级关系、keyWindow、VC栈管理等 |
+| 2 | [UIView体系分析](notes/mobile/ios/uikit/02-UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test  |
 | 3 | [UIViewController机制分析](notes/mobile/ios/uikit/03-UIViewController机制分析.md) | view 懒加载、loadView、生命周期、容器控制器、present |
-| 4 | [UINavigationController机制分析](notes/mobile/ios/uikit/04-UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、自定义转场 |
+| 4 | [UINavigationController机制分析](notes/mobile/ios/uikit/04-UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、 |
 | 5 | [事件响应链机制分析](notes/mobile/ios/uikit/05-事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
-| 6 | [布局方法详解](notes/mobile/ios/uikit/06-布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段、方法对比 |
-| 7 | [UI渲染机制原理分析](notes/mobile/ios/uikit/07-UI渲染机制原理分析.md) | VSync、三棵图层树、渲染管线、布局标记、RunLoop 提交、离屏渲染、掉帧优化 |
+| 6 | [布局方法详解](notes/mobile/ios/uikit/06-布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段 |
+| 7 | [UI渲染机制原理分析](notes/mobile/ios/uikit/07-UI渲染机制原理分析.md) | VSync、三棵图层树、渲染管线、布局标记、RunLoop 提交、 |
 
 ##### 启动与构建
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [App启动过程分析](notes/mobile/ios/startup/01-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
-| 2 | [import详解](notes/mobile/ios/startup/02-import详解.md) | OC 查找机制、Header Map、PCH、Clang Modules；Swift 模块系统与混编互操作 |
+| 2 | [import详解](notes/mobile/ios/startup/02-import详解.md) | OC查找机制、Header Map、PCH、Clang Modules；Swift模块系统与混编互操作 |
 
 ### HarmonyOS 开发体系
 
@@ -201,22 +201,22 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [ArkTS基础语法](notes/mobile/harmonyos/01-ArkTS基础语法.md) | 类型系统、类与泛型、模块、流程控制、空安全、并发、TS 差异 |
+| 1 | [ArkTS基础语法](notes/mobile/harmonyos/01-ArkTS基础语法.md) | 类型系统、类与泛型、模块命名空间、流程控制、类型断言、空安全、并发、TS 差异 |
 | 2 | [ArkUI基础语法](notes/mobile/harmonyos/02-ArkUI基础语法.md) | 组件结构、布局容器、基础组件、渲染控制、状态装饰器 V1/V2、UI 复用 |
 
 ### Python
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承 MRO、迭代器生成器、内存管理 |
+| 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承 MRO 等 |
 
 ### AI 开发
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代 LLM 智能体 |
-| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N-gram→Transformer 演进、自注意力/多头注意力、Decoder-Only、提示工程等 |
-| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用、提示词设计 |
+| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代 LLM  |
+| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N -gram→Transformer演进、自注意力/多头注意力、Prompt |
+| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用 |
 
 ### 算法
 
