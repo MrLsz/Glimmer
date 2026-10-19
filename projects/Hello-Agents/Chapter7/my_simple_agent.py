@@ -60,7 +60,7 @@ class MySimpleAgent(SimpleAgent):
 
         #获取工具描述
         tools_description = self.tool_registry.get_tools_description()
-        if not tools_description or tools_description == "暂无可用工具"：
+        if not tools_description or tools_description == "暂无可用工具":
             return base_prompt
 
         tools_section = "\n\n## 可用工具\n"
