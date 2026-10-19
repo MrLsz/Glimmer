@@ -1,4 +1,4 @@
-# 04. RunLoop 机制分析
+# 02. RunLoop 机制分析
 
 > RunLoop 是 iOS 里绕不开的一个东西，面试常问、线上卡顿排查也经常碰到。但很多人对它的理解停在「一个 do-while 循环」这个层面。这篇从它到底解决了什么问题讲起，把线程关系、Mode、Source、Timer、Observer 这些组成部分一个个拆开，再顺着 `CFRunLoopRun` 的一次循环走一遍，最后落到 NSTimer 失效、线程保活、卡顿监控这些实际场景。术语保留英文，方便对照源码。
 
@@ -53,9 +53,9 @@ void CFRunLoopRun() {
 
 所以「有活就干、没活就睡」翻译成线程状态机，就是「运行态 ↔ 阻塞态」的来回切换，`mach_msg` 是那个既能让线程真正进阻塞态、又能把它唤醒的系统调用。
 
-![「有活就干、没活就睡」的线程状态机](images/runloop-sleep-wake.png)
+![「有活就干、没活就睡」的线程状态机](../images/runloop-sleep-wake.png)
 
-![RunLoop 的本质与线程关系](images/runloop-essence.png)
+![RunLoop 的本质与线程关系](../images/runloop-essence.png)
 
 ### 2. 与线程的关系
 
@@ -113,7 +113,7 @@ Mode 决定了「当前这一圈循环要处理哪些事件」。一个 RunLoop 
 （处理 Timer/网络）          （只处理 UI 追踪）          （恢复 Timer/网络）
 ```
 
-![Mode 的切换](images/runloop-mode.png)
+![Mode 的切换](../images/runloop-mode.png)
 
 这个切换直接解释了那个经典问题：滑动时 NSTimer 不触发了。因为 `scheduledTimerWithTimeInterval:` 默认把 Timer 加进 DefaultMode，滑动时 RunLoop 切到了 TrackingMode，Timer 留在 DefaultMode 里自然不被处理。解法见「七、实际应用」。
 
@@ -227,7 +227,7 @@ __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__
 
 **（5）Source0 vs Source1 对比**
 
-![Source0 与 Source1 的对比](images/runloop-source.png)
+![Source0 与 Source1 的对比](../images/runloop-source.png)
 
 | 维度 | Source0 | Source1 |
 | ---- | ------- | ------- |
@@ -315,7 +315,7 @@ struct __CFRunLoopMode {
 };
 ```
 
-![RunLoop 的数据结构](images/runloop-structure.png)
+![RunLoop 的数据结构](../images/runloop-structure.png)
 
 从结构里能读出几个要点：
 
@@ -330,7 +330,7 @@ struct __CFRunLoopMode {
 
 这是理解 RunLoop 的核心。整体分两层：外层是「启动」，内层是「一次循环」。先看一张总览图，再逐层往下拆。
 
-![RunLoop 一次循环的完整流程](images/runloop-cycle.png)
+![RunLoop 一次循环的完整流程](../images/runloop-cycle.png)
 
 ### 1. 外层入口：CFRunLoopRunSpecific
 
@@ -536,7 +536,7 @@ Timer 到期的唤醒，靠的是 `_timerPort` 这个内核定时器 port：
 | 各 Source1 自带的 port | 端口通信事件（触摸、进程间通信） |
 | `dispatchPort` | GCD 主队列 port（只有主线程 RunLoop 有） |
 
-![mach_msg 休眠与唤醒机制](images/runloop-machmsg.png)
+![mach_msg 休眠与唤醒机制](../images/runloop-machmsg.png)
 
 只要这几个 port 里任意一个有消息到达，`mach_msg` 就返回，`livePort` 就是那个 port。这就是「一个线程同时监听多种事件源」的底层实现。
 
@@ -573,7 +573,7 @@ enum {
 5. 手势识别器先标记、不执行；UI 的 `setNeedsLayout`/`setNeedsDisplay` 也只打标记；
 6. 到 BeforeWaiting（第 6 步），系统统一做 `_UIGestureRecognizerUpdate` 手势处理、布局绘制、`CATransaction` 提交。
 
-![触摸事件从硬件到 UI](images/runloop-touch-event.png)
+![触摸事件从硬件到 UI](../images/runloop-touch-event.png)
 
 一次触摸横跨「Source1 唤醒（第 9 步）→ 下一圈 Source0 派发（第 4 步）→ BeforeWaiting 批量（第 6 步）」，中间隔了整整一圈。这就是为什么「点一下」不是同步完成，而是等 RunLoop 转到对应步骤才响应——也是卡顿时会觉得「点了没反应」的根因。
 

@@ -183,7 +183,7 @@ s[0] = 'A';          // 崩溃！写只读内存
 
 以 `Person *p = [[Person alloc] init];` 为例，一个对象的分配要经过 **6 步**：
 
-![对象内存分配全过程](images/mem-alloc.png)
+![对象内存分配全过程](../images/mem-alloc.png)
 
 下面逐步拆解每一步。
 
@@ -615,7 +615,7 @@ objc_loadWeakRetained(&weakPtr)：
 3. **释放**：对象 `dealloc` 时调用 `weak_clear_no_lock`；
 4. **清理**：遍历该对象的 weak 指针数组，逐个置为 nil。
 
-![weak 置 nil 四步](images/mem-weak.png)
+![weak 置 nil 四步](../images/mem-weak.png)
 
 ```objc
 __weak NSString *weakStr = nil;
@@ -842,7 +842,7 @@ pop(token)：
 
 主线程的 autoreleasepool 由 RunLoop 自动创建和释放，对应三个时机：
 
-![RunLoop 与 autoreleasepool](images/mem-runloop.png)
+![RunLoop 与 autoreleasepool](../images/mem-runloop.png)
 
 ```text
 kCFRunLoopEntry         → push（建外层池）
@@ -868,7 +868,7 @@ kCFRunLoopExit          → pop（最后一次释放）
 
 两个对象互相强引用，引用计数永远无法归零，`dealloc` 不触发，内存泄漏。
 
-![循环引用](images/mem-cycle.png)
+![循环引用](../images/mem-cycle.png)
 
 ### 2. 常见场景与解决
 
@@ -944,7 +944,7 @@ iOS 7 引入**内存压缩（Memory Compression）**：内存紧张时，系统�
 - **触发时机**：内存压力达阈值时，compressor 挑选「最近最少使用」的 Dirty 页压缩；
 - **解压**：被压缩页被访问时触发缺页中断，自动解压后继续（对应用透明）。
 
-![内存压缩机制](images/mem-compress.png)
+![内存压缩机制](../images/mem-compress.png)
 
 **三个坑**：
 
@@ -1065,7 +1065,7 @@ if isKnownUniquelyReferenced(&_buffer) {
 - 引用计数为 1 → 独占，原地写；> 1 → 先拷贝再写；
 - 这正是 Swift 值类型「像值一样安全、像引用一样高效」的关键——**只读零拷贝，写入才复制**。
 
-![Copy-on-Write 写时拷贝](images/mem-cow.png)
+![Copy-on-Write 写时拷贝](../images/mem-cow.png)
 
 ### 4. 存在容器与隐式堆分配
 

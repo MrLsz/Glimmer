@@ -1,4 +1,4 @@
-# 16. iOS import 详解
+# 02. iOS import 详解
 
 > import 是 iOS 开发里写得最多、却最少被认真研究的一行代码。`#import "A.h"` 和 `#import <A.h>` 差在哪？为什么同一个头文件双引号能找到、尖括号找不到？`@import` 到底比 `#import` 强在哪？Swift 为什么同一个 Target 内不需要 import？本文从 Clang 与 Swift 两个编译器的视角，把 OC 与 Swift 的 import 机制拆开讲透：查找原理、Header Map、PCH 与 Clang Modules、模块文件格式、import 语法与属性，最后落到两语言混编的互操作通路。
 
@@ -106,7 +106,7 @@ Xcode 编译时，会把 Build Settings 里的配置转换成 Clang 编译器参
 
 Clang 用两个索引值把 SearchDirs 数组切成三个区间：
 
-![Clang SearchDirs 三区间结构](images/import-searchdirs.png)
+![Clang SearchDirs 三区间结构](../images/import-searchdirs.png)
 
 | 区间 | 索引范围 | 对应参数 | Xcode Build Setting |
 |------|---------|---------|---------------------|
@@ -221,7 +221,7 @@ main.m 中的查找结果：
 
 双引号形式的查找分三个阶段：
 
-![双引号查找三阶段流程](images/import-quote-flow.png)
+![双引号查找三阶段流程](../images/import-quote-flow.png)
 
 阶段一是 Includer 目录查找。Includer 指执行 #import 指令的那个文件，不是被编译的源文件：
 
@@ -339,7 +339,7 @@ USE_HEADERMAP=YES 时 Xcode 会生成多个 hmap，分别通过不同参数传�
 
 HEADERMAP_INCLUDES_FLAT_ENTRIES_FOR_TARGET_BEING_BUILT=YES（默认）时，当前 target 的所有头文件会以扁平化方式加入 Header Map。所谓扁平化，是给同一个头文件创建两种 key——不带目录的文件名和带目录的相对路径，都指向同一个绝对路径：
 
-![Header Map 扁平化映射与二次查找](images/import-header-map.png)
+![Header Map 扁平化映射与二次查找](../images/import-header-map.png)
 
 ```text
 // 项目结构：/Project/Network/HTTPClient.h
@@ -447,7 +447,7 @@ PCH 还保存头文件的状态信息 HeaderFileInfo，包括是否被 #import �
 
 PCH 的关键优化是懒加载：加载时并不立即反序列化所有内容，而是按需读取。它能成立，靠的是 PCH 文件的内部结构设计——不是「全加载或全不加载」的整体，而是带索引的分块结构，支持随机访问：
 
-![PCH 懒加载机制](images/import-pch-lazy.png)
+![PCH 懒加载机制](../images/import-pch-lazy.png)
 
 两阶段加载过程：
 
@@ -598,7 +598,7 @@ Module 匹配在 HeaderSearch::LookupFile 中完成：检查头文件路径是�
 
 完整判断链：
 
-![#import 自动转 Module 判断链](images/import-module-convert.png)
+![#import 自动转 Module 判断链](../images/import-module-convert.png)
 
 ### 4. 相关编译器参数
 
@@ -881,7 +881,7 @@ Swift 官方文档的定义：模块是代码分发的单一单元，一个被�
 
 两种编译模型的对比：
 
-![OC 与 Swift 编译模型对比](images/import-swift-vs-oc.png)
+![OC 与 Swift 编译模型对比](../images/import-swift-vs-oc.png)
 
 C/OC 的模型里，每个 .m 是独立编译单元，必须通过 #import 显式引入其他文件的声明；Swift 的模型里，编译器把模块内所有 .swift 文件作为整体分析，import 只用于引入外部模块。
 
@@ -993,7 +993,7 @@ import Foundation
 
 Swift 编译器用一组模块加载器查找和加载模块，按优先级排列：
 
-![Swift 模块加载器优先级](images/import-module-loaders.png)
+![Swift 模块加载器优先级](../images/import-module-loaders.png)
 
 优先级从高到低：ExplicitSwiftModuleLoader（显式指定的模块路径）→ MemoryBufferSerializedModuleLoader（内存缓冲区）→ ExplicitCASModuleLoader（CAS 缓存）→ ModuleInterfaceLoader（.swiftinterface 文件）→ ImplicitSerializedModuleLoader（隐式搜索路径）→ ClangImporter（Clang 模块，必须最后）。
 
@@ -1329,7 +1329,7 @@ canImport 不会实际加载模块，只检查模块是否存在且可导入。
 
 把两大部分的互操作内容汇总到一张全景图：
 
-![OC 与 Swift 混编互操作全景](images/import-mixed.png)
+![OC 与 Swift 混编互操作全景](../images/import-mixed.png)
 
 ### 1. Swift 调用 OC
 

@@ -1,4 +1,4 @@
-# 10. UINavigationController 机制分析
+# 04. UINavigationController 机制分析
 
 > UINavigationController 的全部机制都围绕一个「栈」展开：`viewControllers` 数组就是栈，栈顶决定屏幕上显示什么，navigationBar 只是栈的投影。push 就是入栈，pop 就是出栈，返回按钮、标题、侧滑返回手势，全是栈变化的衍生物。理解这篇的钥匙只有一把：把 UINavigationController 当成一个「自带导航栏的栈管理器」，先看懂栈怎么动，再看导航栏怎么跟着动，最后看手势和转场这两个围绕栈运转的外围机制。
 
@@ -64,7 +64,7 @@ UINavigationController.view
 
 导航栈的数据结构本身不复杂，`viewControllers` 是一个 copy 修饰的数组，index 0 是根控制器，最后一个元素是栈顶。真正需要分辨清楚的是「两个 top」：`topViewController` 和 `visibleViewController`。
 
-![](images/nav-stack.png)
+![](../images/nav-stack.png)
 
 ```objc
 @property(nullable, nonatomic, readonly, strong) UIViewController *topViewController;
@@ -142,7 +142,7 @@ UIKit 闭源，但根据官方文档描述和运行时行为，`pushViewControll
 
 push 时新旧控制器的生命周期交错执行，实测顺序是：
 
-![](images/nav-lifecycle.png)
+![](../images/nav-lifecycle.png)
 
 ```text
 A 是当前页，push B：
@@ -204,7 +204,7 @@ B.dealloc              ← 栈移除了强引用，外部也没人持有 B 时�
 
 push/pop 是导航栈内部的增删，但页面切换还有另一条完全独立的通路——present。它不属于导航控制器，而是所有 UIViewController 的通用能力：`presentViewController:animated:completion:` 把一个控制器的 view 覆盖到当前层级之上，全程不碰 `viewControllers`。理解 present 的关键同样是抓住数据结构：push 维护的是栈，present 维护的是一条 presenting/presented 单向链，两者的差异衍生出导航栏、返回方式、生命周期顺序等所有行为区别。
 
-![](images/nav-present-vs-push.png)
+![](../images/nav-present-vs-push.png)
 
 ### 1. 两套 API，两种结构
 
@@ -299,7 +299,7 @@ settings.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]
 
 导航控制器有两棵平行的栈：控制器的 `viewControllers` 栈，和导航栏内部的 `items` 栈。push/pop 一个控制器时，导航控制器同步维护这两棵栈，让导航栏内容始终「投影」栈顶控制器。
 
-![](images/nav-item-stack.png)
+![](../images/nav-item-stack.png)
 
 UINavigationBar 本身继承 UIView，但它不是被动显示的控件，它内部也维护一个 item 栈：
 
@@ -394,7 +394,7 @@ B.navigationItem.backBarButtonItem = ...;   // B 是栈顶，此时没有 backIt
 
 注意注释里的限定：「这个属性只应该用来设置手势依赖（failure requirements）」——Apple 只承诺暴露给你做手势共存，没承诺让你改它的 delegate 或 target。
 
-![](images/nav-gesture.png)
+![](../images/nav-gesture.png)
 
 ### 1. 打印它的真身
 

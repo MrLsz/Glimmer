@@ -1,4 +1,4 @@
-# 06. KVO 机制分析
+# 05. KVO 机制分析
 
 > KVO（Key-Value Observing，键值观察）是 OC 基于 KVC 实现的一套观察者模式，让一个对象能监听另一个对象某个属性的变化。这篇从用法讲起，重点拆它的底层实现 isa-swizzling（动态子类 + 重写 setter），再讲观察者信息怎么存、手动 KVO、依赖键、集合观察，最后落到几个必须注意的坑和 Swift 里的变化。上一篇 KVC 是这篇的地基，`setValue:forKey:` 会自动触发 KVO 这个点会反复用到。
 
@@ -58,11 +58,11 @@ KVO 的核心机制是 **isa-swizzling**：给对象添加观察者时，Runtime
 
 整个 KVO 从注册到收到通知，是一条「构建子类 → 改 isa → 埋点通知」的链路，一张图看全貌：
 
-![KVO 端到端总览：从 addObserver 到收到通知](images/kvo-flow.png)
+![KVO 端到端总览：从 addObserver 到收到通知](../images/kvo-flow.png)
 
 下面把这条链路拆开讲。
 
-![KVO 底层：isa-swizzling](images/kvo-isa.png)
+![KVO 底层：isa-swizzling](../images/kvo-isa.png)
 
 ### 1. 动态创建子类
 
@@ -207,7 +207,7 @@ Person *p = [[Person alloc] init];
 
 动态子类最关键的改动，是重写被观察属性的 setter。重写后的 setter 内部就三步：
 
-![KVO 重写 setter 的三步流程](images/kvo-setter.png)
+![KVO 重写 setter 的三步流程](../images/kvo-setter.png)
 
 ```objc
 - (void)setName:(NSString *)name {
@@ -272,7 +272,7 @@ typedef NS_ENUM(NSUInteger, NSKeyValueChange) {
 
 观察者信息存在被观察对象身上，链式结构：对象的 `observationInfo` 属性（声明在 `NSObject` 上）→ `NSKeyValueObservationInfo` 对象 → 一组 `NSKeyValueObservance` 记录。
 
-![KVO 观察者信息的存储结构](images/kvo-observationinfo.png)
+![KVO 观察者信息的存储结构](../images/kvo-observationinfo.png)
 
 `NSKeyValueObservationInfo` 里就是个 `observances` 数组，装着所有观察关系：
 

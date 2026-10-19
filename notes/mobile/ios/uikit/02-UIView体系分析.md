@@ -1,4 +1,4 @@
-# 11. UIView 体系分析
+# 02. UIView 体系分析
 
 > 屏幕上能看到、能摸到的一切，最终都是 UIView。但 UIView 从来不是一个孤立的对象——它同时活在三棵树上：视图树（决定位置与层级）、图层树（决定渲染成什么样子）、响应者链（决定事件由谁处理）。而这三棵树要真正落到一块屏幕上，还得经过 UIWindow 这道门；要被管理，就离不开 UIViewController 这个宿主。这篇顺着「一个 view 从诞生、布局、渲染、上屏到响应一次点击」这条线，把 UIView 自身体系、UIWindow、UIViewController 的衔接、事件响应串成一个整体。理解它的钥匙只有一把：UIView 把「在哪、长什么样、谁来响应」三种职责打包在一个类里，每种职责背后各有一棵树、一套机制。
 
@@ -43,7 +43,7 @@
 
 第三重，UIResponder 的一员。UIView 继承自 UIResponder，意味着它能参与响应者链、接收触摸事件、成为第一响应者（弹出键盘的前提）。这对应第八章。
 
-![UIView 三重身份](images/view-three-trees.png)
+![UIView 三重身份](../images/view-three-trees.png)
 
 为什么一个类要同时背三种职责？因为三者总是同时变化：你把一个按钮从 A 位置挪到 B 位置，改的是视图树几何；给它加圆角，动的是图层属性；点击它弹回调，走的是响应链。苹果的答案是把它们统一到一个对象上，让开发者面对一个类就能完成全部工作——代价是 UIView 的头文件被拆成了十几个 category（Geometry、Hierarchy、Rendering、Animation、GestureRecognizers、ConstraintBasedLayout……），本文的章节划分基本就沿着这些 category 走。
 
@@ -77,7 +77,7 @@ frame.size    = bounds.size（无 transform 时）
 frame.origin  = center - bounds.size / 2（无 transform 时）
 ```
 
-![frame 与 bounds](images/view-geometry.png)
+![frame 与 bounds](../images/view-geometry.png)
 
 frame 和 bounds 的区别是最经典的问题，答案可以压缩成一句话：frame 是「别人眼中的我」，bounds 是「我自己眼中的世界」。由此推出几个实用结论：
 
@@ -201,7 +201,7 @@ Auto Layout 的机制核心是约束求解：每条约束是一个线性关系�
 
 不管用哪代布局方案，最终都汇入同一条更新流水线。UIKit 把整个视图更新拆成三个阶段，每个阶段遵循同一个「标记 → 等 RunLoop → 批量执行」的延迟模式：
 
-![布局三阶段](images/view-layout-pass.png)
+![布局三阶段](../images/view-layout-pass.png)
 
 三个阶段的回调与触发方法：
 
@@ -274,7 +274,7 @@ UIWindow 是 UIView 的子类，这一点决定了它的本质：window 没有�
 
 从 App 到屏幕的完整链路是：UIApplication（进程级单例）→ UIWindowScene（iOS 13+，一个 UI 场景，持有若干 window）→ UIWindow → rootViewController → view 树。
 
-![window 层级](images/view-window-hierarchy.png)
+![window 层级](../images/view-window-hierarchy.png)
 
 iOS 13 的 scene 机制是 window 体系的分水岭。此前一个 App 只有一个 window 概念（UIApplication.shared.windows）；引入 UIScene 后，「一个 UI 实例」被抽象成 UIWindowScene，每个 scene 持有自己的 windows 数组和 keyWindow——这是 iPad 多窗口、外接屏幕的基础。相应地，window 的创建也改为绑定 scene：
 
@@ -361,7 +361,7 @@ Window 接手后的第一步是命中测试（Hit-Testing）——从树根往�
 }
 ```
 
-![hit-test 与响应者链](images/view-hit-test.png)
+![hit-test 与响应者链](../images/view-hit-test.png)
 
 五个由这段逻辑直接推出的行为规则，每一个都对应一类真实需求：
 

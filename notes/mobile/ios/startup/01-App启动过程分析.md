@@ -1,4 +1,4 @@
-# 15. iOS App 启动过程分析
+# 01. iOS App 启动过程分析
 
 > 本文分析 iOS App 从点击图标到首帧显示的完整启动过程。先给出冷启动、热启动、预热启动三种类型的全景对比，再沿冷启动主线深入 Pre-main 阶段（内核加载可执行文件、dyld 加载动态库、Rebase/Bind、ObjC 与 Swift Runtime 初始化、+load、Initializers）与 main 阶段（UIApplicationMain、AppDelegate 回调、首帧渲染），最后覆盖 dyld 版本演进、启动优化关键节点与常见面试问题。启动优化的一切手段，都建立在对这条链路的理解之上。
 
@@ -26,7 +26,7 @@ iOS 应用的启动分为三种类型，性能表现和内部流程差异很大�
 
 三种类型的流程对比：
 
-![](images/launch-three-types.png)
+![](../images/launch-three-types.png)
 
 冷启动是唯一完整执行 Pre-main 与 main 两大阶段的类型，也是启动优化的主要关注点，后面几章均围绕冷启动展开。
 
@@ -34,7 +34,7 @@ iOS 应用的启动分为三种类型，性能表现和内部流程差异很大�
 
 Pre-main 阶段指从用户点击 App 图标到 main 函数执行之前的过程，主要由 dyld（动态链接器）负责。完整流程如下：
 
-![](images/launch-cold-flow.png)
+![](../images/launch-cold-flow.png)
 
 注意一个细节：主线程并不是 main 函数里创建的，而是内核 fork 创建进程时同步创建的第一个线程。Pre-main 的所有工作都在这条主线程上串行执行，这也是 Pre-main 耗时直接拖慢启动的原因。
 
@@ -119,7 +119,7 @@ dyld 的工作流程：
 | Rebase（重定位） | 指向 Mach-O 内部的指针 | 编译时地址加上 ASLR 偏移量（slide） |
 | Bind（绑定） | 指向 Mach-O 外部的指针 | 查符号表，绑定到正确的外部符号地址 |
 
-![](images/launch-rebase-bind.png)
+![](../images/launch-rebase-bind.png)
 
 一个典型例子：指向自己全局变量的指针属于内部指针，走 Rebase，只需一次加法；而调用 objc_msgSend 这样的外部函数，符号引用属于外部指针，走 Bind，需要查符号表找到真实地址。Rebase 的开销主要取决于 __DATA 段内需要修正的指针数量，Bind 还要额外付出符号查找的成本。
 

@@ -1,4 +1,4 @@
-# 07. Block 底层分析
+# 06. Block 底层分析
 
 > Block 本质上是一个 OC 对象，底层是带 `isa` 指针的 C 结构体，同时内嵌一个函数指针 `FuncPtr` 指向真正的执行代码。这篇先讲它是什么（结构体本质 + 三种类型），再讲 copy 做了什么、变量怎么被捕获、`__block` 怎么实现、循环引用怎么形成和打破，最后落到「Block 属性为什么要用 `copy`」和编译运行的完整流程。前面 KVC 是「字符串找方法」的间接访问，Block 是「带捕获变量的函数对象」，两条线索分别撑起 OC 的两个底层机制。
 
@@ -83,7 +83,7 @@ struct __main_block_impl_0 {
 
 ## 二、Block 的本质：结构体
 
-![Block 底层：结构体本质](images/block-struct.png)
+![Block 底层：结构体本质](../images/block-struct.png)
 
 ### 1. 通用实现 `__block_impl`
 
@@ -205,7 +205,7 @@ void (*block)(void) = (void (*)())&__main_block_impl_0(
 
 ## 三、Block 的三种类型
 
-![Block 的三种类型](images/block-types.png)
+![Block 的三种类型](../images/block-types.png)
 
 Block 按 `isa` 指向的类和存储位置分三种：
 
@@ -271,7 +271,7 @@ ARC 下绝大多数 Block 实际都是 Malloc Block，赋值给 `__strong` 变�
 
 ## 四、Block 的 copy 操作
 
-![_Block_copy 的三个分支](images/block-copy.png)
+![_Block_copy 的三个分支](../images/block-copy.png)
 
 Block 的内存管理靠 `copy`，`copy` 走哪个分支由 `Flags` 决定：
 
@@ -449,7 +449,7 @@ struct __Block_byref_a_0 {
 
 ### 2. `__forwarding` 的精妙设计
 
-![__block 变量的 __forwarding 指针](images/block-forwarding.png)
+![__block 变量的 __forwarding 指针](../images/block-forwarding.png)
 
 `__forwarding` 存在的目的只有一个：保证无论从栈还是堆访问 `a`，最终操作的都是同一份数据。
 
@@ -556,7 +556,7 @@ self.manager.completionBlock = ^{
 
 ### 3. 解决方案
 
-![Block 循环引用与打破](images/block-cycle.png)
+![Block 循环引用与打破](../images/block-cycle.png)
 
 **方案一：`__weak` + `__strong`（推荐）**
 

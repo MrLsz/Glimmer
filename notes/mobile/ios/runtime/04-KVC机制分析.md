@@ -1,4 +1,4 @@
-# 05. KVC 机制分析
+# 04. KVC 机制分析
 
 > KVC（Key-Value Coding，键值编码）是 OC 里一套用字符串 key 间接访问对象属性的机制，定义在 `NSKeyValueCoding` 协议中，`NSObject` 默认遵循。这篇从它是什么讲起，重点拆 `setValue:forKey:` 和 `valueForKey:` 两条查找链路（面试最常问的地方），再讲 KeyPath 与集合运算符、类型转换的坑、异常处理，最后落到实际应用、它跟 KVO 的关系，以及 Swift 里两种 KVC 的差别。
 
@@ -52,7 +52,7 @@ NSString *name = [person valueForKey:@"name"];  // KVC 取值
 
 `[obj setValue:value forKey:@"name"]` 内部不是简单找 `setName:` 就完事，它有一套固定的查找顺序，走不通就一层层往下退，直到最后抛异常。整体流程如下：
 
-![setValue:forKey: 的查找流程](images/kvc-set.png)
+![setValue:forKey: 的查找流程](../images/kvc-set.png)
 
 拆开看每一步。
 
@@ -111,7 +111,7 @@ _name → _isName → name → isName
 
 `[obj valueForKey:@"name"]` 的查找顺序比 set 多一道「集合代理方法」，其余结构一样：
 
-![valueForKey: 的查找流程](images/kvc-get.png)
+![valueForKey: 的查找流程](../images/kvc-get.png)
 
 ### 1. 第一步：查找 getter 方法
 
@@ -183,7 +183,7 @@ NSArray *people = @[p1, p2, p3];
 NSArray *cities = [people valueForKeyPath:@"address.city"];
 ```
 
-![KeyPath 嵌套访问与集合运算符](images/kvc-keypath.png)
+![KeyPath 嵌套访问与集合运算符](../images/kvc-keypath.png)
 
 ### 2. 集合运算符
 

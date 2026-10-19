@@ -1,4 +1,4 @@
-# 17. UIWindow 体系分析
+# 01. UIWindow 体系分析
 
 > 屏幕上的一切内容都活在一条固定的层级链上：UIApplication → UIWindowScene → UIWindow → rootViewController → view 树。UIScene 是 iOS 13 之后新增的一层，把「一个 UI 实例」从 App 里抽象出来，iPad 多窗口、外接屏都建在它上面；UIWindow 是 view 树的根，负责上屏与事件入口；UIViewController 是挂在 window 上的内容宿主；UINavigationController 则是 VC 之上最常用的栈管理器。这篇沿这条链从上往下讲，把每一层「是什么、管什么、和相邻层怎么衔接」讲清楚，最后用整个第六章回答一个核心问题：页面之间的栈到底是怎么管理的。
 
@@ -21,7 +21,7 @@
 
 先把整条链画出来，后面每一章拆其中一节。
 
-![iOS 13+ 的 UIKit 层级](images/window-scene-hierarchy.png)
+![iOS 13+ 的 UIKit 层级](../images/window-scene-hierarchy.png)
 
 从上到下四层，各自的职责一句话说清：
 
@@ -68,7 +68,7 @@ session 是「系统侧的记录」，负责告诉 App「现在有哪些 scene�
 
 scene 有自己独立的生命周期状态机，跟 App 的生命周期并行运转：
 
-![UIScene 生命周期与 SceneDelegate](images/window-scene-delegate.png)
+![UIScene 生命周期与 SceneDelegate](../images/window-scene-delegate.png)
 
 SceneDelegate 的五个核心回调对应状态机的五次迁移：
 
@@ -132,7 +132,7 @@ iOS 13 后创建 window 的唯一正路是 `initWithWindowScene:`——window �
 
 window 的行为绕不开三个关键词，混在一起容易糊涂，拆开看各管一件事：
 
-![key / visible / level](images/window-key-visible.png)
+![key / visible / level](../images/window-key-visible.png)
 
 keyWindow 是「接收输入的资格」：键盘弹给 key window 里成为第一响应者的控件，触摸事件由 UIApplication 优先派发给 key window。一个 scene 同一时刻只有一个 keyWindow。iOS 15 起，查询入口从废弃的 `UIApplication.shared.keyWindow` 换成 `UIWindowScene.keyWindow`：
 
@@ -171,7 +171,7 @@ hud.rootViewController = [[HUDViewController alloc] init];
 
 window 挂上 rootViewController，VC 体系才算真正落地。这一步赋值内部做的事值得单独画出来：
 
-![rootViewController 赋值后的骨架建立](images/window-rootvc.png)
+![rootViewController 赋值后的骨架建立](../images/window-rootvc.png)
 
 四步逐一说：
 
@@ -191,7 +191,7 @@ rootViewController 还有一个行为细节：给 window 换 rootVC（直接再�
 
 window 体系里，VC 的身份需要放回四套关系里看。同一个 UIViewController 同时活在四条互不干扰的线上：
 
-![VC 的四套关系](images/window-vc-stack.png)
+![VC 的四套关系](../images/window-vc-stack.png)
 
 四套关系各自的数据结构和维护 API：
 
@@ -232,7 +232,7 @@ pop 家族三兄弟覆盖三种回退场景：popViewControllerAnimated: 弹栈�
 
 栈一变，涉及的两个 VC 的生命周期方法就按固定次序交错执行，这个次序是面试高频题：
 
-![push / pop 与生命周期联动](images/window-vc-stack-lifecycle.png)
+![push / pop 与生命周期联动](../images/window-vc-stack-lifecycle.png)
 
 push 的序列（A 在栈里，push B）：
 
@@ -366,7 +366,7 @@ UIWindow
 
 window 体系讲完结构，用一次触摸的完整路径把四层串起来——事件是检验「层级关系是否理解」的最好考题。
 
-![一次触摸的分发路径](images/window-event-dispatch.png)
+![一次触摸的分发路径](../images/window-event-dispatch.png)
 
 ```text
 物理触摸 → 系统收集 → UIApplication.sendEvent:（找到所属 scene）

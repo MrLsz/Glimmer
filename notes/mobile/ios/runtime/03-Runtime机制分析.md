@@ -184,7 +184,7 @@ imp(obj, @selector(doSomething));   // 直接调用，省去 cache 查找与转�
 
 一条消息从发出到找到实现（或进入转发），完整路径：
 
-![消息发送 8 步流程](images/rt-msgsend.png)
+![消息发送 8 步流程](../images/rt-msgsend.png)
 
 {width="414"}
 
@@ -349,7 +349,7 @@ while (cls) {
 | 快速转发   | `forwardingTargetForSelector:`                       | 把消息转交给另一个对象（组合/代理）            |
 | 完整转发   | `methodSignatureForSelector:` + `forwardInvocation:` | 完全控制调用（多播 / NSUndoManager）    |
 
-![消息转发完整流程](images/rt-forward.png)
+![消息转发完整流程](../images/rt-forward.png)
 
 ```text
 方法未找到
@@ -551,7 +551,7 @@ Method Swizzling 是 Runtime 最出名的应用：**运行期交换两个方法�
 
 方法在类里存成 `method_t`（`SEL + types + IMP`）。Swizzling 的本质是：**交换两个 method_t 的 IMP 指针**。
 
-![Method Swizzling 原理](images/rt-swizzle.png)
+![Method Swizzling 原理](../images/rt-swizzle.png)
 
 ```text
 交换前：methodA → IMP_A      methodB → IMP_B
@@ -639,7 +639,7 @@ Method Swizzling 是 Runtime 最出名的应用：**运行期交换两个方法�
 
 关联对象的数据**不存对象里**，而是存在 Runtime 维护的一个**全局哈希表**里：
 
-![关联对象底层结构](images/rt-assoc.png)
+![关联对象底层结构](../images/rt-assoc.png)
 
 ```text
 AssociationsManager（全局单例）

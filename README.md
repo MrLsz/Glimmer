@@ -24,6 +24,10 @@ Glimmer/
 │   ├── objective-c/        # Objective-C 语言
 │   ├── swift/              # Swift 语言
 │   ├── mobile/ios/         # iOS 开发
+│   │   ├── runtime/        # 语言与运行时
+│   │   ├── foundation/     # 系统底层机制
+│   │   ├── uikit/          # UIKit 框架
+│   │   └── startup/        # 启动与构建
 │   │  【HarmonyOS 开发体系】
 │   ├── mobile/harmonyos/   # ArkTS / ArkUI / Ability
 │   │  【通用】
@@ -153,26 +157,43 @@ Glimmer/
 
 #### iOS
 
+##### 语言与运行时
+
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [iOS内存管理](notes/mobile/ios/01-iOS内存管理.md) | 内存分区、引用计数、ARC、weak、AutoreleasePool |
-| 2 | [类的底层分析](notes/mobile/ios/02-类的底层分析.md) | objc_class 存储结构、方法调用原理 |
-| 3 | [Runtime机制分析](notes/mobile/ios/03-Runtime机制分析.md) | 消息发送转发、Method Swizzling、关联对象 |
-| 4 | [RunLoop机制分析](notes/mobile/ios/04-RunLoop机制分析.md) | 事件循环、Mode、Source/Timer/Observer、线程保活 |
-| 5 | [KVC机制分析](notes/mobile/ios/05-KVC机制分析.md) | 键值编码、setValue/valueForKey 查找链路、KeyPath 集合运算符 |
-| 6 | [KVO机制分析](notes/mobile/ios/06-KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、手动 KVO |
-| 7 | [Block底层分析](notes/mobile/ios/07-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
-| 8 | [NSObject底层分析](notes/mobile/ios/08-NSObject底层分析.md) | objc_object、isa 位域、元类闭环、Tagged Pointer、alloc |
-| 9 | [UIViewController机制分析](notes/mobile/ios/09-UIViewController机制分析.md) | view 懒加载、loadView、生命周期、容器控制器、present |
-| 10 | [UINavigationController机制分析](notes/mobile/ios/10-UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、自定义转场 |
-| 11 | [UIView体系分析](notes/mobile/ios/11-UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
-| 12 | [事件响应链机制分析](notes/mobile/ios/12-事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
-| 13 | [反射机制分析](notes/mobile/ios/13-反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
-| 14 | [布局方法详解](notes/mobile/ios/14-布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段、方法对比 |
-| 15 | [App启动过程分析](notes/mobile/ios/15-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
-| 16 | [import详解](notes/mobile/ios/16-import详解.md) | OC 查找机制、Header Map、PCH、Clang Modules；Swift 模块系统与混编互操作 |
-| 17 | [UIWindow体系分析](notes/mobile/ios/17-UIWindow体系分析.md) | UIScene/UIWindow/VC/NVC 层级关系、keyWindow、VC 栈管理、事件分发 |
-| 18 | [UI渲染机制原理分析](notes/mobile/ios/18-UI渲染机制原理分析.md) | VSync、三棵图层树、渲染管线、布局标记、RunLoop 提交、离屏渲染、掉帧优化 |
+| 1 | [NSObject底层分析](notes/mobile/ios/runtime/01-NSObject底层分析.md) | objc_object、isa 位域、元类闭环、Tagged Pointer、alloc |
+| 2 | [类的底层分析](notes/mobile/ios/runtime/02-类的底层分析.md) | objc_class 存储结构、方法调用原理 |
+| 3 | [Runtime机制分析](notes/mobile/ios/runtime/03-Runtime机制分析.md) | 消息发送转发、Method Swizzling、关联对象 |
+| 4 | [KVC机制分析](notes/mobile/ios/runtime/04-KVC机制分析.md) | 键值编码、setValue/valueForKey 查找链路、KeyPath 集合运算符 |
+| 5 | [KVO机制分析](notes/mobile/ios/runtime/05-KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、手动 KVO |
+| 6 | [Block底层分析](notes/mobile/ios/runtime/06-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
+| 7 | [反射机制分析](notes/mobile/ios/runtime/07-反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
+
+##### 系统底层机制
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [iOS内存管理](notes/mobile/ios/foundation/01-iOS内存管理.md) | 内存分区、引用计数、ARC、weak、AutoreleasePool |
+| 2 | [RunLoop机制分析](notes/mobile/ios/foundation/02-RunLoop机制分析.md) | 事件循环、Mode、Source/Timer/Observer、线程保活 |
+
+##### UIKit 框架
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [UIWindow体系分析](notes/mobile/ios/uikit/01-UIWindow体系分析.md) | UIScene/UIWindow/VC/NVC 层级关系、keyWindow、VC 栈管理、事件分发 |
+| 2 | [UIView体系分析](notes/mobile/ios/uikit/02-UIView体系分析.md) | 三重身份、几何坐标、视图树、布局渲染、UIWindow、hit-test 响应链 |
+| 3 | [UIViewController机制分析](notes/mobile/ios/uikit/03-UIViewController机制分析.md) | view 懒加载、loadView、生命周期、容器控制器、present |
+| 4 | [UINavigationController机制分析](notes/mobile/ios/uikit/04-UINavigationController机制分析.md) | 导航栈、push/pop 流程、UINavigationBar、侧滑返回手势、自定义转场 |
+| 5 | [事件响应链机制分析](notes/mobile/ios/uikit/05-事件响应链机制分析.md) | 触摸全链路、hit-test、手势分发、UIControl、响应者链 |
+| 6 | [布局方法详解](notes/mobile/ios/uikit/06-布局方法详解.md) | Frame/Auto Layout/StackView、Cassowary 求解、更新三阶段、方法对比 |
+| 7 | [UI渲染机制原理分析](notes/mobile/ios/uikit/07-UI渲染机制原理分析.md) | VSync、三棵图层树、渲染管线、布局标记、RunLoop 提交、离屏渲染、掉帧优化 |
+
+##### 启动与构建
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [App启动过程分析](notes/mobile/ios/startup/01-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
+| 2 | [import详解](notes/mobile/ios/startup/02-import详解.md) | OC 查找机制、Header Map、PCH、Clang Modules；Swift 模块系统与混编互操作 |
 
 ### HarmonyOS 开发体系
 
@@ -193,9 +214,9 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、符号主义→心智社会→学习范式的演进、现代 LLM 智能体 |
-| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N-gram→Transformer 演进、自注意力/多头注意力、Decoder-Only、提示工程、分词、缩放法则与幻觉 |
-| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用、提示词设计、适用场景与对比 |
+| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代 LLM 智能体 |
+| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N-gram→Transformer 演进、自注意力/多头注意力、Decoder-Only、提示工程等 |
+| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用、提示词设计 |
 
 ### 算法
 

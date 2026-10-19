@@ -1,4 +1,4 @@
-# 08. NSObject 底层分析
+# 01. NSObject 底层分析
 
 > 从「所有对象的根」NSObject 出发，讲清三个层次的问题：NSObject 在内存里到底是个什么（objc_object 结构体）、isa 指针从纯指针到 Non-Pointer 位域如何演进、以及 isa 走位 / Tagged Pointer / alloc / dealloc / 内存对齐这些围绕「对象」展开的机制。重点回答：为什么 OC 里「万物皆对象」能成立，对象从创建到销毁的每一步运行时做了什么。
 
@@ -61,7 +61,7 @@ private:
 
 这里有一个贯穿全文的关键认知：**objc_object 是所有对象的公共底座**。实例对象是「objc_object + 实例变量」，类对象是「objc_object + superclass/cache/bits」。无论实例、类还是元类，第一块内存都是 isa，运行时靠它统一完成消息派发——这就是「万物皆对象」的底层基础。
 
-![NSObject 本质：万物皆对象的起点](images/nsobj-essence.png)
+![NSObject 本质：万物皆对象的起点](../images/nsobj-essence.png)
 
 三句话概括这张图：
 
@@ -143,7 +143,7 @@ union isa_t {
 };
 ```
 
-![isa_t 64 位位域划分](images/nsobj-isa-bitfield.png)
+![isa_t 64 位位域划分](../images/nsobj-isa-bitfield.png)
 
 三个关键设计点：
 
@@ -182,7 +182,7 @@ union isa_t {
 - 类对象继承链：`SubClass → SuperClass → … → NSObject → nil`；
 - 元类继承链：`SubClass 元类 → SuperClass 元类 → … → 根元类 → NSObject 类对象 → nil`。
 
-![isa 走位与 superclass 走位闭环](images/nsobj-isa-graph.png)
+![isa 走位与 superclass 走位闭环](../images/nsobj-isa-graph.png)
 
 ### 2. 一个刻意的设计：根元类的 superclass 指向 NSObject 类
 
@@ -238,7 +238,7 @@ Tagged Pointer 的 64 位空间被划分为三部分：
 | bit 62~60 | 类型标签 | 标识对象类型（3 位，可编码 8 种） |
 | bit 59~0 | 数据载荷 | 存储实际的值（60 位） |
 
-![Tagged Pointer 的 64 位布局](images/nsobj-tagged.png)
+![Tagged Pointer 的 64 位布局](../images/nsobj-tagged.png)
 
 类型标签的常见映射：
 
@@ -345,7 +345,7 @@ Tagged Pointer 的性能收益更显著，因为它完全跳过了堆分配、�
             └─ 慢速路径：objc_msgSend(cls, @selector(alloc))   // 类重写了 alloc
 ```
 
-![alloc 底层调用链路](images/nsobj-alloc.png)
+![alloc 底层调用链路](../images/nsobj-alloc.png)
 
 下面是每一层的源码和它到底做了什么。
 
@@ -724,7 +724,7 @@ release（引用计数 -1）
                  └─ free(obj)                          // 释放内存
 ```
 
-![dealloc 底层销毁流程](images/nsobj-dealloc.png)
+![dealloc 底层销毁流程](../images/nsobj-dealloc.png)
 
 这条链的关键是 `rootDealloc()` 里的**快速/慢速路径分流**，以及慢速路径里 `objc_destructInstance` 的**三步清理**。下面逐层拆开。
 

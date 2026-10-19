@@ -1,4 +1,4 @@
-# 09. UIViewController 机制分析
+# 03. UIViewController 机制分析
 
 > 一个控制器从 `init` 走到 `dealloc`，它手里那棵 view 树其实只经历一件事：从无到有、从加载到显示、从隐藏到销毁。这篇就围绕这一条时间线展开，把 view 的懒加载、`loadView` 的三条来源、生命周期方法、布局回调、内存警告、容器父子关系、present/dismiss 这些看似零散的知识点，全部挂到「view 的一生」这条主线上。理解它的钥匙只有一把：`view` 是懒加载的，生命周期方法全是 UIKit 在固定时机替你回调的，你只负责在对应节点上挂逻辑。
 
@@ -83,7 +83,7 @@ UIKit 闭源，但根据官方文档和运行时行为，`view` 的 getter 逻�
 
 ### 2. 全景图
 
-![view 属性的懒加载机制](images/vc-view-lazy.png)
+![view 属性的懒加载机制](../images/vc-view-lazy.png)
 
 ### 3. 判断 / 触发加载的三个 API
 
@@ -150,7 +150,7 @@ if (self.isViewLoaded && self.view.window != nil) {
 
 ### 1. 默认实现的三步判定
 
-![loadView 默认实现的三种来源](images/vc-loadview-source.png)
+![loadView 默认实现的三种来源](../images/vc-loadview-source.png)
 
 按优先级从高到低：
 
@@ -245,7 +245,7 @@ storyboard 实例化的控制器走的是归档反序列化，跟普通 `init` �
 
 ### 1. 全景图与出场序列
 
-![UIViewController 生命周期全景](images/vc-lifecycle.png)
+![UIViewController 生命周期全景](../images/vc-lifecycle.png)
 
 首次显示的标准出场序列：
 
@@ -506,7 +506,7 @@ UINavigationController、UITabBarController、UIPageViewController 的本质都�
 
 ### 2. addChildViewController 四步
 
-![容器控制器：addChildViewController 全流程](images/vc-container.png)
+![容器控制器：addChildViewController 全流程](../images/vc-container.png)
 
 标准装配四步：
 
