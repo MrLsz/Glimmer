@@ -204,13 +204,13 @@ Glimmer/
 | 1 | [ArkTS基础语法](notes/mobile/harmonyos/01-ArkTS基础语法.md) | 类型系统、类与泛型、模块命名空间、流程控制、类型断言、空安全、并发、TS 差异 |
 | 2 | [ArkUI基础语法](notes/mobile/harmonyos/02-ArkUI基础语法.md) | 组件结构、布局容器、基础组件、渲染控制、状态装饰器 V1/V2、UI 复用 |
 
-### Python
+### AI 开发
+
+#### Python
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承 MRO 等 |
-
-### AI 开发
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
