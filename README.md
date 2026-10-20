@@ -214,10 +214,10 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代 LLM  |
-| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N -gram→Transformer演进、自注意力/多头注意力、Prompt |
-| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct/Plan-and-Solve/Reflection 三大范式原理、工具调用 |
-| 4 | [学习Hello-Agents：低代码平台与Agent框架](<notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md>) | 低代码平台四价值、Coze/Dify/FastGPT/n8n 对比选型、框架四价值、AutoGen/AgentScope/CAMEL/LangGraph、2026 新格局与选型 |
+| 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代LLM  |
+| 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N -gram→Transformer演进、自/多头注意力、Prompt |
+| 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct / Plan-and-Solve / Reflection三大范式原理、工具等 |
+| 4 | [学习Hello-Agents：低代码与Agent框架](<notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md>) | 低代码平台、、AutoGen/AgentScope/CAMEL/LangGraph |
 
 ### 算法
 
