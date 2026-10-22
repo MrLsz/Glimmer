@@ -145,7 +145,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO、常用集合类、错误处理等 |
+| 1 | [01-OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO、常用集合类、错误处理等 |
 | 2 | [OC多线程](notes/objective-c/02-OC多线程.md) | NSThread、GCD、NSOperation、线程安全、RunLoop |
 
 #### Swift
