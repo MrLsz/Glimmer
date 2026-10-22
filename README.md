@@ -168,6 +168,7 @@ Glimmer/
 | 5 | [KVO机制分析](notes/mobile/ios/runtime/05-KVO机制分析.md) | isa-swizzling、重写 setter、观察者存储、手动 KVO |
 | 6 | [Block底层分析](notes/mobile/ios/runtime/06-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
 | 7 | [反射机制分析](notes/mobile/ios/runtime/07-反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
+| 8 | [load与initialize分析](notes/mobile/ios/runtime/08-load与initialize分析.md) | 调用时机与底层源码、直调 vs 消息发送、Category/继承行为差异、Swizzling 时机 |
 
 ##### 系统底层机制
 
