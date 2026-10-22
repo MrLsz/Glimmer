@@ -146,13 +146,13 @@ Glimmer/
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [01-OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO、常用集合类、错误处理等 |
-| 2 | [OC多线程](notes/objective-c/02-OC多线程.md) | NSThread、GCD、NSOperation、线程安全、RunLoop |
+| 2 | [02-OC多线程](notes/objective-c/02-OC多线程.md) | NSThread、GCD、NSOperation、线程安全、RunLoop |
 
 #### Swift
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、类与结构体、可选类型、闭包、ARC、协议泛型、访问控制、与OC互操作 |
+| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、字符串、可选类型、集合与COW、闭包、高阶函数、类与结构体、方法派发、ARC、协议泛型、错误处理、与OC互操作 |
 | 2 | [Swift多线程](notes/swift/02-Swift多线程.md) | GCD、async/await、Task、Actor、多读单写 |
 
 #### iOS

@@ -44,16 +44,7 @@ Objective-C 的灵活性来自运行时动态派发，代价是大量错误只�
 
 ### 3. 编译流程
 
-```text
-.swift 源文件
-   │  swiftc 前端解析
-   ▼
-Swift 中间语言（SIL）—— Swift 独有优化层
-   ▼
-LLVM IR —— 通用优化
-   ▼
-机器码 + Mach-O
-```
+![Swift 编译流程：SIL 是关键中间层](images/swift-compile-flow.png)
 
 > **SIL（Swift Intermediate Language）** 是 Swift 编译的关键中间产物：ARC 的引用计数插入、泛型特化、值类型语义、协议见证表生成，大量工作在 SIL 层完成。这也是 Swift 编译比纯 LLVM 语言更「重」的原因。
 
@@ -99,6 +90,56 @@ let c: Float = 3.14 // 显式 Float
 
 - 语句末尾分号可省略，只有一行内写多条语句时才需分号分隔；
 - 命名几乎可包含任意 Unicode 字符（含中文），但数字不能开头、不能含空白。
+
+### 4. 运算符重载
+
+```swift
+struct Vector2D { var x = 0.0, y = 0.0 }
+
+static func + (lhs: Vector2D, rhs: Vector2D) -> Vector2D {
+    Vector2D(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+}
+
+let v = Vector2D(x: 1, y: 2) + Vector2D(x: 3, y: 4)   // (4, 6)
+```
+
+运算符本质是特殊名字的函数：自定义类型重载运算符，要在类型内声明 `static func`，参数习惯命名 `lhs / rhs`（左右操作数）。`==` 这类要求「值比较语义」的运算符，通常通过遵守 `Equatable` 让编译器自动合成。Swift 也允许定义全新运算符（如 `operator +++`），但可读性代价大，日常慎用。
+
+### 5. typealias 与嵌套类型
+
+```swift
+typealias Handler = (Int) -> String        // 给复杂类型起个短名
+typealias Grid = [[Int]]
+
+struct ChessGame {
+    enum Player { case black, white }      // 嵌套类型：类型里的类型
+    struct Position { var row: Int; var col: Int }
+}
+let p = ChessGame.Player.white             // 用外层类型限定访问
+```
+
+typealias 是「类型别名」，给冗长的函数类型、泛型类型起个可读的名字，它不是新类型，别名和原类型完全等价、可互换。嵌套类型把「只在某个上下文里有意义」的类型收进外层类型里，避免全局命名污染——`ChessGame.Player` 比一个游离的 `Player` 更清晰地表达了归属关系。
+
+### 6. 断言 assert / precondition
+
+```swift
+assert(age >= 0, "年龄不能为负")     // 只在 Debug 生效，Release 编译时被优化掉
+precondition(index >= 0, "越界")    // Debug / Release 都生效
+```
+
+两者都用于「程序员的逻辑错误」，不是「可恢复的异常」（那是 throw 的职责）。区别在发布行为：`assert` 只在调试期检查，发布版被整段编译掉、零开销；`precondition` 永远生效，用于「不满足就说明程序有 bug」的关键前置条件。用它们比「让错误静默传播」更容易在开发期暴露问题。
+
+### 7. 版本判断 #available
+
+```swift
+if #available(iOS 15.0, *) {
+    useNewAPI()   // 只有 iOS 15+ 才走这里
+} else {
+    fallback()    // 低版本走兜底实现
+}
+```
+
+iOS 系统 API 会随版本增减，老系统上调新 API 会直接崩溃。`#available` 是「编译期 + 运行期双重检查」：编译器知道某 API 的最低系统版本，`#available` 包裹的代码只在运行期确认系统版本达标后才执行，`else` 分支则给低版本兜底。它是做系统兼容、渐进升级的标准手段。`@available` 是它的「声明版」——标注某个类/方法自身的最低系统版本，让编译器在别处调用时自动提示。
 
 ---
 
@@ -148,6 +189,30 @@ let (n, a, _) = person // 解构，_ 忽略某元素
 ```
 
 > 判断标准：**元组是临时的，结构体是正式的**。数据需要被反复使用、携带逻辑时，升级成 `struct`。
+
+### 6. String：字符串
+
+```swift
+let name = "Tom"
+let greeting = "Hello, \(name)"     // 字符串插值
+let multi = """
+    多行字符串字面量，
+    以结束符的缩进为基准对齐
+    """
+for ch in "abc" { print(ch) }       // 逐字符遍历（Character）
+```
+
+String 是值类型（struct），赋值即拷贝，同样享受 COW 优化，用法上和集合一致。它把 Unicode 当一等公民：`count` 数的是「字素簇」（grapheme cluster）而非字节，一个 emoji 也算 1 个字符。这与 NSString 按 UTF-16 编码单元计数不同——桥接后 `nsString.length` 和 `string.count` 可能不相等，混编时留意这个差异。字符串插值 `\(expr)` 在编译期展开，支持任意表达式，比手拼 `%@` / `format` 更安全（类型由编译器检查）。
+
+```swift
+let s = "Hello, Swift"
+s.hasPrefix("Hello")        // true
+s.hasSuffix("Swift")        // true
+s.split(separator: ",")     // ["Hello", " Swift"]，返回 Substring
+s.prefix(5)                 // "Hello" 类型的 Substring
+```
+
+几个常用操作里藏着一个容易忽略的点：`split` / `prefix` / `suffix` 返回的是 `Substring`，不是 `String`。Substring 是与原字符串共享底层存储的轻量视图，好处是切片零拷贝、性能好；代价是它会「钉住」原字符串的内存，长期持有子串（比如存进数组当 key 用）要显式 `String(sub)` 转回 String，否则原字符串的内存迟迟得不到释放。
 
 ---
 
@@ -231,6 +296,18 @@ var phone: String! = "138..."
 | 隐式解析 `String!` | 初始化后必定有值（如 @IBOutlet） | 赋值前访问崩溃 |
 
 > **口诀**：`!` 是「危险逃生舱」，正道是 `if let` / `guard let` / `??`。滥用 `!` 等于回到 OC 时代「错了就崩」。
+
+### 5. 可选上的 map / flatMap
+
+```swift
+let opt: Int? = 5
+opt.map { $0 * 2 }        // Int? = 10，有值就变换、nil 就保持 nil
+
+let nested: Int?? = 5
+nested.flatMap { $0 }     // Int? = 5，展平一层
+```
+
+可选的 map / flatMap 与集合上的语义完全一致：有值就对包裹的值应用闭包、返回仍是可选，nil 则整个表达式短路为 nil。`if let` 是「解包后手动处理」，`map` 是「声明式地变换」，配合 `??` 能写成一条链式流水线：`user.profile.map { $0.name } ?? "未设置"`。
 
 ---
 
@@ -335,6 +412,31 @@ default: break
 
 若确需贯穿，用 `fallthrough` 显式声明。
 
+### 3. guard：提前退出
+
+```swift
+func process(_ input: String?) {
+    guard let text = input, !text.isEmpty else { return }  // 不满足就退出
+    // text 在后续代码中可直接使用（已解包）
+}
+```
+
+guard 与 if let 的区别不只是「正反写」：guard 的 else 分支**必须退出当前作用域**（return / throw / continue / break），编译器强制执行，保证了「不满足条件的路径不会泄漏到后续代码」；且解包后的变量在 guard 之后的整个作用域可用，比 if let 的大括号作用域更宽。深层嵌套的场景用它做「卫语句」——把所有不合法情况排在函数开头逐个拦截，主逻辑保持零缩进。
+
+### 4. 模式匹配的更多形态
+
+```swift
+enum Result { case success(Int); case failure(Error) }
+let r = Result.success(42)
+
+if case .success(let value) = r { print(value) }   // if case：单分支匹配
+
+let list: [Int?] = [1, nil, 3, nil]
+for case let .some(v) in list { print(v) }          // for case：只遍历匹配项
+```
+
+switch 之外，`if case` 和 `for case` 把「模式匹配」带进了单分支场景：`if case` 相当于「只有一个 case 的 switch」，`for case` 则让循环只处理符合某形状的元素（上面自动跳过了所有 nil）。配合 `where` 还能进一步过滤，适合写「只关心某种形态」的精简逻辑。
+
 ---
 
 ## 七、函数与闭包
@@ -409,6 +511,41 @@ func register(handler: @escaping () -> Void) {
 
 `@escaping` 不是可有可无的注解：它告诉编译器「闭包会逃出函数作用域、返回后才执行」，编译器据此做不同的生命周期管理，也让「闭包可能持有 self 更久」在签名里显式可见。
 
+### 6. 高阶函数：map / filter / reduce
+
+```swift
+let nums = [1, 2, 3, 4, 5]
+
+nums.map { $0 * 2 }                     // [2,4,6,8,10]   一一变换
+nums.filter { $0 % 2 == 0 }             // [2,4]          筛选
+nums.reduce(0, +)                       // 15             聚合
+nums.compactMap { $0 > 3 ? $0 : nil }   // [4,5]          变换并去掉 nil
+```
+
+这四个函数是 Swift 函数式的日常入口，底层都是 for 循环的封装，但把「怎么遍历」和「对每个元素做什么」解耦：map 管变换、filter 管筛选、reduce 管聚合，组合起来像一条数据流的管道，比嵌套 for 循环更接近意图本身。易混点有两个：可选数组做变换要去 nil 用 `compactMap`；`flatMap` 用在「集合的集合扁平化」和「可选的可选展平」，语义和 compactMap 不同别混用。它们都是对集合的不可变操作——返回新集合、不动原集合，和值类型的哲学一致。
+
+### 7. 自动闭包 @autoclosure
+
+```swift
+func myAssert(_ condition: @autoclosure () -> Bool) {
+    if debugEnabled && !condition() { fatalError() }
+}
+myAssert(2 > 1)   // 调用处不用写花括号，表达式被自动包成闭包
+```
+
+`@autoclosure` 让调用方省去闭包的花括号，参数表达式被编译器自动包装成闭包、延迟到真正调用时才求值。好处有两个：一是调用点更干净（`myAssert(2 > 1)` 而不是 `myAssert({ 2 > 1 })`）；二是延迟求值——`condition()` 只在函数体内被调用时才计算，`&&` / `||` 的短路、`assert` 在 Release 下「不求值」都是靠它实现的。代价是「求值时机被隐藏」，滥用会让人误以为参数在传入那一刻就算好了。
+
+### 8. 可丢弃返回值 @discardableResult
+
+```swift
+@discardableResult
+func appendLog(_ line: String) -> Bool { ... }
+
+appendLog("x")   // 不接收返回值也不警告
+```
+
+有的函数返回值「顺便给你，但大多数调用者不在乎」（比如返回是否成功的 Bool）。默认情况下忽略返回值会触发编译警告，`@discardableResult` 告诉编译器「这个返回值允许被丢弃」，忽略它时不再告警。它常见于返回 `@discardableResult func` 的链式 API（如 UI 布局、配置方法），让调用方「想用返回值就用、不想用就无视」。
+
 ---
 
 ## 八、枚举
@@ -455,6 +592,24 @@ enum Barcode 的内存
 
 > 枚举常被用来做**状态机**：case 穷举状态、关联值携带状态数据、switch 驱动状态转移，编译器的穷尽检查保证「不漏处理某个状态」。
 
+### 4. 递归枚举 indirect
+
+```swift
+indirect enum ArithmeticExpression {
+    case number(Int)
+    case addition(ArithmeticExpression, ArithmeticExpression)   // case 关联自身类型
+}
+
+func evaluate(_ e: ArithmeticExpression) -> Int {
+    switch e {
+    case .number(let n): return n
+    case .addition(let a, let b): return evaluate(a) + evaluate(b)
+    }
+}
+```
+
+枚举是值类型，大小由「最大的 case」决定；一旦 case 的关联值又包含自己（如表达式树的节点包含子节点），就会陷入「无限大小」的矛盾。`indirect`（可加在枚举整体或单个 case 前）告诉编译器：这个 case 的值放到堆上、通过指针间接引用，于是「树」结构就能被枚举表示出来。递归枚举是构建 AST、表达式求值器这类树形结构的惯用手法。
+
 ---
 
 ## 九、类与结构体
@@ -485,20 +640,7 @@ print(c2.n)   // 10 —— c1/c2 指向同一实例
 
 ### 2. 内存布局（底层）
 
-```text
-struct（值类型，栈上）          class（引用类型）
-┌─────────────┐              ┌─────────────┐
-│ 字段值直接存 │              │ 栈：指针    │
-│ 无引用计数   │              └──────┬──────┘
-└─────────────┘                     ▼
-                           ┌─────────────────┐
-                           │ 堆：refCount     │ ← 引用计数
-                           ├─────────────────┤
-                           │ isa             │ ← 类型信息
-                           ├─────────────────┤
-                           │ 属性值           │
-                           └─────────────────┘
-```
+![值类型 vs 引用类型：内存布局](images/swift-value-ref-layout.png)
 
 - 值类型直接存值，**无引用计数、无堆分配**（小对象），拷贝即复制字段；
 - 引用类型栈上存指针，堆上存对象（含引用计数 + isa），赋值是「指针复制 + 计数 +1」。
@@ -514,6 +656,8 @@ struct（值类型，栈上）          class（引用类型）
 - 需要**共享可变状态**。
 
 > **经验法则**：默认用 struct，确需引用语义或继承时才用 class。
+
+补两个和「同一性」相关的点。`===` 判断「两个引用指向同一个堆实例」（引用相等），`==` 判断「值相等」（内容相等），类默认不实现 `==`、struct 也不自动实现 `==`（需遵守 `Equatable`，Swift 4.1 起对 struct 可自动合成）。另外「不可变性」在两类类型上的含义不同：`let` 声明的 class 实例，属性依然能改——因为 let 锁住的是「引用不可再指向别的实例」，不锁实例内部状态；而 `let` 的 struct 实例整体不可变，任何属性都不能改。这正是「值类型更容易推理」的体现之一。
 
 ---
 
@@ -549,14 +693,54 @@ var steps = 0 {
 }
 ```
 
-让「值变化」这个事件可被监听。注意 `didSet` 里 `steps` 已是新值，`oldValue` 才是旧值。
+让「值变化」这个事件可被监听。注意 `didSet` 里 `steps` 已是新值，`oldValue` 才是旧值。一个经典易错点：**属性观察器在初始化期间不触发**——构造器里给存储属性赋初值，不会走 `willSet` / `didSet`。因为那时对象还没完全初始化，观察器也还没「上岗」。想让「初始化时也做一次同样的处理」，得把那段逻辑抽成方法，在构造器里显式调用一次。同理，`lazy` 属性第一次被访问赋值时会触发观察器（因为那发生在对象初始化完成之后）。
 
-### 4. 类型属性与属性包装器
+### 4. 类型属性
 
 ```swift
 struct S { static let shared = "s" }   // static 类型属性
 class C { class var shared: String { "c" } }  // class 可被子类重写
 ```
+
+类型属性（static / class）属于类型本身而非实例，所有实例共享一份。`static` 和 `class` 的区别：`class` 只能用在 class 里，且**允许子类重写**（配合 `class func` 实现「类级多态」）；`static` 不允许重写。类型属性是「懒加载」的——首次访问才初始化，且线程安全，常用来做单例：`static let shared = S()`。
+
+### 5. 属性包装器 @propertyWrapper
+
+```swift
+@propertyWrapper
+struct Clamped {
+    private var value: Int
+    private let range: ClosedRange<Int>
+    init(wrappedValue: Int, _ range: ClosedRange<Int>) {
+        self.range = range
+        self.value = min(max(wrappedValue, range.lowerBound), range.upperBound)
+    }
+    var wrappedValue: Int {
+        get { value }
+        set { value = min(max(newValue, range.lowerBound), range.upperBound) }
+    }
+}
+
+struct Player {
+    @Clamped(wrappedValue: 0, 0...100) var hp: Int
+    // 读写 hp 时自动把值钳制到 0...100
+}
+```
+
+属性包装器把「属性读写时的一段通用逻辑」（这里是范围钳制）抽成可复用的类型，用 `@包装器名` 标注到属性上，读写该属性时自动套用这段逻辑。它的价值是消灭「多个属性共享同一种存取行为」的重复代码——SwiftUI 的 `@State`、`@Published`、`@EnvironmentObject` 全都是属性包装器。包装器的核心是 `wrappedValue`（被包装的值）和可选的 `projectedValue`（`$属性名` 拿到的投影值）。
+
+### 6. KeyPath 键路径
+
+```swift
+struct Person { var name: String; var age: Int }
+let nameKey = \Person.name            // KeyPath<Person, String>
+let p = Person(name: "Tom", age: 18)
+let n = p[keyPath: nameKey]           // "Tom"
+
+[person1, person2].sorted(by: \.age)  // 键路径当比较器
+```
+
+KeyPath 把「访问某个属性」这件事本身变成一个**值**，可以存起来、传出去、当参数。它对应 OC 的 KVC，但类型安全——编译器知道键路径两端的类型，写错属性名直接编译报错（KVC 用字符串 key 是运行期才崩）。日常用途：`sorted(by: \.age)` 用键路径做排序、数据映射、以及 KVO 的现代 API（见十八章）。
 
 ---
 
@@ -590,6 +774,8 @@ class Dog: Animal { @objc dynamic func bark() {} }// 消息派发
 ```
 
 > **理解要点**：Swift 默认用「最快的派发」——值类型和 final 方法直接调用，class 普通方法走虚表（编译期建 vtable），只有显式 `@objc dynamic` 才退化到 OC 的消息派发（支持运行时替换）。这就是 Swift 比 OC 快的原因之一。
+
+![Swift 方法派发的三种方式](images/swift-dispatch-modes.png)
 
 ### 3. subscript 下标
 
@@ -648,6 +834,8 @@ class Person {
 }
 ```
 
+构造器还可能是「失败」的：`init?` 表示初始化可能不成功，失败时返回 nil。典型场景如 `Int("abc")` 返回 `Int?`、`Planet(rawValue: 99)` 返回 nil。可失败构造器内部用 `return nil` 表示失败，它与可选类型天然衔接——「可能构造不出来」被显式建模进了类型系统，调用方被迫处理 nil 分支，而不是拿到一个半成品对象。
+
 ### 4. 析构器 deinit
 
 ```swift
@@ -657,6 +845,19 @@ class Resource {
     }
 }
 ```
+
+### 5. required init
+
+```swift
+class Base {
+    required init() {}   // 要求所有子类都必须实现这个构造器
+}
+class Sub: Base {
+    required init() {}   // 子类实现时必须同样写 required 呼应
+}
+```
+
+`required` 标记的构造器强制「每个子类都必须实现它」（子类实现时也要写 `required`，除非类本身已经是 `final`）。它常用于「协议要求构造器」或「工厂模式想用基类类型统一创建实例」的场景，保证沿继承链的每一层都能用这个签名构造。
 
 ---
 
@@ -679,6 +880,8 @@ a.tenant = p      // Apartment 强引用 Person
 ```
 
 引用计数只能处理「树形」引用关系，对象图一旦出现**环**，计数就失效。Swift 的解法是 `weak` 和 `unowned` 两种「不增加计数」的引用来主动断环。
+
+![ARC 循环引用与 weak 断环](images/swift-arc-cycle.png)
 
 ### 3. weak 与 unowned
 
@@ -735,6 +938,17 @@ closure = { [weak self] in
 
 > **捕获列表本质**：在闭包创建时，指定「用哪种引用方式捕获变量」。`[weak self]` 最常用——即使 self 已销毁也只会得到 nil，不会崩溃。
 
+捕获列表不止 weak 一种写法，它的完整形态是：
+
+```swift
+closure = { [weak self, unowned owner] in ... }          // 可同时捕获多个、各自指定修饰
+let n = 10
+closure = { [n] in print(n) }                            // 按值捕获：拷贝当前值，之后外部改动不影响
+closure = { [weak weakSelf = self] in print(weakSelf?.name) }  // 重命名
+```
+
+按值捕获 `[n]` 是把「闭包创建那一刻的值」拷进去，之后外部变量再怎么变都不影响闭包内；重命名 `[weak weakSelf = self]` 解决「可选绑定的 self 在闭包里要强制解包」的尴尬。理解捕获列表的这几种形式，就掌握了处理闭包引用关系的全部工具。
+
 ---
 
 ## 十四、可选链与类型转换
@@ -757,6 +971,19 @@ let addr = person.residence?.address
 | `as!` | 强制向下转型 | 失败崩溃 |
 
 向下转型之所以「不安全」，是因为「父类引用指向的对象」未必是目标子类型——类型系统无法在编译期保证。`as?` 用可选类型显式化，`as!` 是「我确定」的强制断言。
+
+### 3. Any 与 AnyObject
+
+```swift
+var anything: Any = 42       // 任何类型（含值类型、函数、闭包）
+anything = "text"
+anything = SomeStruct()
+
+var objects: [AnyObject] = [] // 只能装引用类型（class 实例）
+objects.append(MyClass())
+```
+
+`Any` 是所有类型的「公共超类型」——值类型、引用类型、函数、闭包都能装进去；`AnyObject` 则只接受 class 实例，对应 OC 的 `id`。两者都抹掉了具体类型，拿回原值必须用 `as?` / `as!` 转回。它们属于「逃逸类型系统的后门」，用于 JSON 解析、动态容器这类「运行期才知道类型」的场景，代价是失去编译期类型检查——能用泛型表达的地方就别退回 `Any`。
 
 ---
 
@@ -792,16 +1019,7 @@ extension Shape {
 
 一个「协议类型」的变量，底层是一个 **existential container（存在性容器）**，固定 5 个 word：
 
-```text
-协议类型变量（5 word）
-┌─────────────────────┐
-│ value buffer（3 word）│ ← 小值直接内联存这里，大值堆分配
-├─────────────────────┤
-│ 类型元数据            │ ← 运行时识别实际类型
-├─────────────────────┤
-│ 协议见证表 witness    │ ← 指向具体实现的函数指针
-└─────────────────────┘
-```
+![协议存在性容器（5 word）](images/swift-existential-container.png)
 
 > **要点**：把值赋给协议类型变量会「装箱」（包装进容器），调用协议方法时通过 witness table 间接派发。这就是为什么「协议类型」的方法调用比「具体类型」慢一点，也是「泛型」比「协议」性能更好的原因（见下）。
 
@@ -824,6 +1042,37 @@ protocol Container {
 ```
 
 关联类型解决「协议想引用一个『由遵守者决定』的类型」的问题，是泛型协议的基础。
+
+### 6. 不透明类型 some
+
+```swift
+func makeShape() -> some Shape { return Circle() }   // 返回「某个遵守 Shape 的具体类型」
+```
+
+`some Shape` 表示「返回某个遵守 Shape 的具体类型，但调用方不用知道具体是哪个」——编译器在内部知道真实类型（所以能优化、能返回带关联类型的协议），调用方只看到 Shape 接口。它解决了「协议带 associatedtype 时不能直接拿协议当返回类型」的限制（`-> Shape` 会报错，`-> some Shape` 可以）。SwiftUI 的 `some View` 就是最典型的应用：一个返回 `some View` 的 body，编译期知道它到底是个 VStack 还是别的，运行期对调用方保持抽象。
+
+### 7. 泛型约束 where
+
+```swift
+func allMatch<T: Sequence>(_ seq: T) -> Bool where T.Element: Equatable { ... }
+
+extension Array where Element: Equatable { ... }   // 只对「元素可判等」的数组生效
+```
+
+`where` 给泛型加「更复杂的、尖括号里写不下」的约束——比如约束 `T.Element` 遵守某协议、约束两个类型参数相等（`T.Item == U.Item`）等。它最常见的用法是协议扩展里的「条件扩展」：`extension Array where Element: Equatable` 只给「元素可判等的数组」添加方法，其他数组看不到这个方法。
+
+### 8. 协议继承与 Self
+
+```swift
+protocol Animal { }
+protocol Pet: Animal { }          // 协议可继承协议，且可多继承
+
+protocol Copyable {
+    func copy() -> Self           // Self 指「最终遵守者的具体类型」
+}
+```
+
+协议可以继承一个或多个协议，遵守 `Pet` 就同时获得了 `Animal` 的要求。`Self` 在协议里表示「最终实现该协议的那个具体类型」，让方法签名能引用「当前类型」——`func copy() -> Self` 在 struct A 里就返回 A、在 struct B 里返回 B，这是协议导向编程里表达「返回和我同类型实例」的关键，也是「协议不能直接当返回类型、要用 some」的根源之一。
 
 ---
 
@@ -866,6 +1115,20 @@ func process() {
 
 > `defer` 解决「多分支返回时资源清理易遗漏」的问题，把「清理」紧挨「获取资源」写。
 
+### 3. Result 类型
+
+```swift
+enum Result<Success, Failure: Error> {
+    case success(Success)
+    case failure(Failure)
+}
+
+func fetch(_ url: String, completion: (Result<Data, Error>) -> Void) { ... }
+// 调用方：switch 或 .get()，两种结果都显式处理
+```
+
+Result 把「成功值」和「错误」打包成一个枚举，让异步回调不必再靠「两个可选参数 + 约定谁非空」的脆弱做法，类型层面就强制调用方处理两种结果。Swift 5.5 的 async/await 进一步把异步错误处理统一回 `try await` + throws 的同步语法，逐步取代回调 + Result 的写法，但理解 Result 是理解这套演进的中间一环。
+
 ---
 
 ## 十七、访问控制
@@ -879,6 +1142,8 @@ func process() {
 | `private` | 当前声明作用域内 | 最严格 |
 
 > **关键设计**：`open` 与 `public` 的区分——`public` 是「给你用，不许你改」，`open` 才是「允许继承重写」。这让库作者能精确控制「哪些 API 稳定、哪些允许扩展」。日常开发默认 `internal` 即可。
+
+`private` 与 `fileprivate` 的区别值得再抠一下：`private` 只在「声明所在的 `{}` 作用域」内可见，`fileprivate` 在整个文件内可见。Swift 4 之前 `private` 就是 `fileprivate` 语义，现在两者分开——一个 class 内部的 private 成员，同文件里它的 extension 访问不到，要改成 `fileprivate` 才行。日常优先用 `private`（作用域越小越安全），只有「同文件多处需要共享」才放宽到 `fileprivate`。
 
 ---
 
@@ -929,3 +1194,12 @@ Swift 的方法派发与 OC 的消息机制不同，想让 OC 调用 Swift 成�
 - **协议类型走存在性容器**（5 word 装箱），泛型是编译期特化（更快）。
 - **类型转换**：`is` 判断、`as?` 安全、`as!` 强制。
 - **访问控制默认 `internal`**，跨模块开放扩展点用 `open`。
+- **String 是值类型**：count 数字素簇（emoji 也是 1），与 NSString.length 的 UTF-16 计数不同。
+- **高阶函数四件套**：map 变换、filter 筛选、reduce 聚合、compactMap 去 nil；都返回新集合、不动原集合。
+- **可失败构造器 `init?`**：`Int("abc")` 返回 `Int?`，构造失败显式建模进类型。
+- **assert 只在 Debug 生效**，precondition 永远生效；`@discardableResult` 允许丢弃返回值。
+- **属性观察器初始化期间不触发**：构造器赋初值不走 willSet/didSet；lazy 首次赋值才触发。
+- **Substring 与原字符串共享存储**：长期持有需 `String(sub)` 转回，否则钉住原字符串内存。
+- **@autoclosure 延迟求值**：参数被自动包成闭包，调用时才算；`@propertyWrapper` 复用属性读写逻辑，KeyPath 是类型安全的 KVC。
+- **some 不透明类型**：返回「某个遵守协议的具体类型」，调用方只见接口；`indirect` 让枚举表示递归树结构。
+- **Any 兜底一切、AnyObject 只装 class**：都要 `as?`/`as!` 转回，能上泛型就别退回 Any。
