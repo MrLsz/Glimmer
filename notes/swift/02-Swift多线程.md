@@ -36,6 +36,8 @@ iOS 中每个 App 是一个进程，主线程（Main Thread）负责 UI。**所�
 
 > 单核 CPU 只有并发没有并行；多核 CPU 才能真并行。GCD / async-await 让你只关心「并发」，是否「并行」由系统按核数调度。
 
+![并发 vs 并行：单核切换 vs 多核同时](images/swift-concurrency-parallel.png)
+
 ### 3. 同步 / 异步、串行 / 并发
 
 这是两个正交维度，必须彻底分清：
@@ -117,6 +119,8 @@ print("这行通常先执行")
 | **并发队列** | 阻塞当前线程，任务在**当前线程**执行（退化为串行，无并发意义） | 不阻塞，任务在**多个线程**并发执行 |
 | **主队列** | 主线程调用 → **死锁**；子线程调用 → 阻塞子线程、任务回主线程执行 | 不阻塞，任务排到主队列末尾，等主线程空闲执行 |
 
+![队列 × 同步/异步 组合矩阵](images/swift-queue-matrix.png)
+
 记忆要点：
 
 1. **sync 不开启新线程**：同步任务直接在当前线程执行（并发队列下 sync 也因此退化为串行）。
@@ -155,6 +159,8 @@ q.async {
     }
 }
 ```
+
+![sync 死锁：主线程 sync 主队列的循环等待](images/swift-deadlock.png)
 
 **不会死锁的情况**：子线程 sync 主队列、sync 到「非当前」的队列、sync 到并发队列，都不会死锁。
 
@@ -214,6 +220,8 @@ q.async(flags: .barrier) {
 }
 q.async { /* 读 3，等写操作完成才执行 */ }
 ```
+
+![dispatch_barrier 多读单写：读并发、写独占](images/swift-barrier.png)
 
 **易错点**：
 
@@ -395,6 +403,8 @@ func fetchUser() async throws -> User {
 
 编译器会把 async 函数翻译成**状态机**：每个 `await` 都是一个挂起点，挂起时保存局部状态，恢复时接着跑。这与 Kotlin 协程的 `suspend` 是同一套「CPS 转换 + 状态机」思想。
 
+![挂起（await）≠ 阻塞（sync）](images/swift-suspend-block.png)
+
 ### 4. Task：任务的载体
 
 async 函数不能凭空运行，必须放进一个 **Task**：
@@ -497,6 +507,8 @@ actor BankAccount {
 ```
 
 Actor 方法在 `await` 处会**挂起并让出**，挂起期间其他任务可以进入 actor。若在 `await` 前后都依赖某个「读到的状态」，恢复后这个状态可能已经变了。**Actor 隔离了数据竞争，但没隔离逻辑竞态**——`await` 之间的代码要假设状态可能已变化。
+
+![Actor 数据隔离与可重入陷阱](images/swift-actor.png)
 
 ### 9. Sendable：编译器级数据竞争检查
 
