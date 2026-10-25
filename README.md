@@ -195,6 +195,7 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [App启动过程分析](notes/mobile/ios/startup/01-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
 | 2 | [import详解](notes/mobile/ios/startup/02-import详解.md) | OC查找机制、Header Map、PCH、Clang Modules；Swift模块系统与混编互操作 |
+| 3 | [Mach-O文件格式分析](notes/mobile/ios/startup/03-Mach-O文件格式分析.md) | Mach-O 格式、Segment/Section、静态与动态库、Rebase/Bind、dyld 装载 |
 
 ### HarmonyOS 开发体系
 
