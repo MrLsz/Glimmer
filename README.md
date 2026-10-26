@@ -71,9 +71,9 @@ Glimmer/
 | 4 | [类加载机制三-双亲委派机制](notes/mobile/android/jvm/04-类加载机制三-双亲委派机制.md) | 类加载器层次、双亲委派、loadClass 源码、类卸载 |
 | 5 | [程序计数器](notes/mobile/android/jvm/05-程序计数器分析.md) | 运行时数据区总览、程序计数器、字节码指令速查 |
 | 6 | [虚拟机栈和本地方法栈](notes/mobile/android/jvm/06-虚拟机栈和本地方法栈分析.md) | 虚拟机栈与栈帧、本地方法栈与 JNI |
-| 7 | [堆分](notes/mobile/android/jvm/07-堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
+| 7 | [堆分析](notes/mobile/android/jvm/07-堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
 | 8 | [方法区(元空间)](<notes/mobile/android/jvm/08-方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
-| 9 | [JVM核心流程总结](notes/mobile/android/jvm/09-JVM核心流程总结.md) | 源码→字节码→加载→执行全流程概括、Animal/Dog/Main 例子总结 |
+| 9 | [JVM核心流程总结](notes/mobile/android/jvm/09-JVM核心流程总结.md) | 源码→字节码→加载→执行全流程概括、Animal/Dog/Main 的总结 |
 
 #### Matrix
 
@@ -98,7 +98,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/platform/binder/01-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7 种结构、BC\_/BR\_ 协议内容概览 |
+| 1 | [Binder系列一-Binder驱动核心概览](notes/mobile/android/platform/binder/01-Binder系列一-Binder驱动核心概览.md) | 一次拷贝原理、4 大方法、7种结构、BC\_/BR\_ 协议的概览 |
 | 2 | [Binder系列二-ServiceManager分析](notes/mobile/android/platform/binder/02-Binder系列二-ServiceManager分析.md) | SM 启动三阶段、SET\_CONTEXT\_MGR、handle 0 |
 | 3 | [Binder系列三-服务注册与获取过程分析](notes/mobile/android/platform/binder/03-Binder系列三-服务注册与获取过程分析.md) | flat\_binder\_object 改写、注册/获取全链路 |
 | 4 | [Binder系列四-Framework层分析](notes/mobile/android/platform/binder/04-Binder系列四-Framework层分析.md) | JNI 注册、ServiceManager 封装、AIDL 调用链 |
@@ -130,7 +130,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [View绘制的三大流程](notes/mobile/android/platform/view-render/01-View绘制的三个流程.md) | measure / layout/draw、requestLayout/ nvalidate详细过程分析，源码学习 |
+| 1 | [View绘制的三大流程](notes/mobile/android/platform/view-render/01-View绘制的三个流程.md) | measure/layout/draw、requestLayout/ nvalidate详细过程分析，源码学习 |
 | 2 | [View绘制原理深度剖析](notes/mobile/android/platform/view-render/02-绘制原理深度剖析.md) | 软硬绘制、RenderNode、RenderThread、SurfaceFlinger |
 
 ##### 构建与编译体系
@@ -145,14 +145,14 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category、Block、KVC/KVO、常用集合类、错误处理等 |
+| 1 | [OC基础语法](notes/objective-c/01-OC基础语法.md) | 类、对象、内存管理、消息、Category 、Block、KVC/KVO、常用集合类、错误处理 |
 | 2 | [OC多线程总结](notes/objective-c/02-OC多线程.md) | NSThread、GCD、NSOperation、线程安全、RunLoop |
 
 #### Swift
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、字符串、可选类型、集合与COW、闭包、高阶函数、类与结构体、等 |
+| 1 | [Swift基础语法](notes/swift/01-Swift基础语法.md) | 类型系统、字符串、可选类型、集合与 COW、闭包、高阶函数、类与结构体、 |
 | 2 | [Swift多线程语法总结](notes/swift/02-Swift多线程.md) | GCD、async/await、Task、Actor、多读单写 |
 
 #### iOS
@@ -213,15 +213,17 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承MRO、映射 |
+| 1 | [Python基础语法](notes/ai-ml/01-Python基础语法.md) | 对象模型、可变/ 不可变、深浅拷贝、序列与切片、推导式、装饰器、多继承MRO、 |
+
+#### 学习Hello-Agents框架
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代LLM  |
-| 2 | [Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N -gram→Transformer演进、自/多头注意力、Prompt |
-| 3 | [Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct / Plan-and-Solve / Reflection三大范式原理、工具调用 |
-| 4 | [Hello-Agents：低代码平台与Agent框架](<notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md>) | 低代码平台四价值、Coze/Dify/FastGPT/n8n、框架四价值、AutoGen/AgentScope/CAMEL/LangGraph、2026 新格局与选型 |
-| 5 | [Hello-Agents：Memory](<notes/ai-ml/06-学习Hello-Agents：Memory.md>) | 记忆三大维度与三种形态、四类记忆、RAG 实现形式、记忆评估、2026 记忆框架选型 |
+| 1 | [Hello-Agents：智能体及其发展史](notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md) | 智能体定义与类型、Agent Loop、智能体演进、现代 LLM |
+| 2 | [Hello-Agents：大语言模型基础](notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md) | N-gram→Transformer 演进、自/多头注意力、Prompt |
+| 3 | [Hello-Agents：智能体经典范式](notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md) | ReAct / Plan-and-Solve / Reflection 三大范式原理、工具调用 |
+| 4 | [Hello-Agents：低代码平台与Agent框架](notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md) | 低代码平台四价值、Coze/Dify/FastGPT/n8n、框架四价值、AutoGen/AgentScope/CAMEL/LangGraph、2026 新格局与选型 |
+| 5 | [Hello-Agents：Memory](notes/ai-ml/06-学习Hello-Agents：Memory.md) | 记忆三大维度与三种形态、四类记忆、RAG 实现形式、记忆评估、记忆框架等 |
 
 ### 算法
 
