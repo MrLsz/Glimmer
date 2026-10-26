@@ -328,7 +328,7 @@ struct __CFRunLoopMode {
 
 ## 四、RunLoop 的运行流程
 
-这是理解 RunLoop 的核心。整体分两层：外层是「启动」，内层是「一次循环」。先看一张总览图，再逐层往下拆。
+这是理解 RunLoop 的核心。整体分两层：外层是「启动」，内层是「一次循环」。真正要搞懂的是内层那一圈——它本质上只干两件事：在固定的时间点「通知」Observer，在固定的时间点「处理」事件。这一章先把总览图看清楚，分清哪一步是通知、哪一步是处理、哪里会判断分支，再逐层往下拆，最后用两个小节专门回答「什么时候通知、什么时候处理」。
 
 ![RunLoop 一次循环的完整流程](../images/runloop-cycle.png)
 
@@ -386,7 +386,7 @@ static int32_t __CFRunLoopRun(CFRunLoopRef rl, CFRunLoopModeRef rlm,
 
 ### 3. 一次循环的完整源码
 
-把 `__CFRunLoopRun` 的核心逻辑按「循环体前段 → 休眠 → 唤醒处理 → 退出判断」拆成四段，就对应前面的 12 步。下面是精简过的版本，去掉了锁、voucher、超时定时器等不影响主线的细节：
+把 `__CFRunLoopRun` 的核心逻辑按「循环体前段 → 休眠 → 唤醒处理 → 退出判断」拆成四段。源码注释沿用「步骤 2~12」的细粒度编号（步骤 1 是进入循环），总览图里的 ①~⑧ 是这些步骤的归并：①=步骤 2~3、②=步骤 4、③④⑤=步骤 6~8、⑥⑦=步骤 9~10、⑧=步骤 11~12，中间的「是否需要休眠」菱形对应步骤 5。下面是精简过的版本，去掉了锁、voucher、超时定时器等不影响主线的细节：
 
 **第一段：进入循环 + 处理 block/Source0（步骤 2~4）**
 
@@ -515,7 +515,80 @@ static int32_t __CFRunLoopRun(CFRunLoopRef rl, CFRunLoopModeRef rlm,
 
 退出判断是「按顺序短路」的：先看 `HandledSource`，再看超时，再看 `Stopped`，最后看 Mode 是否空了。顺序很重要——`stopAfterHandle` 的分支优先级最高，只要处理过一个事件就返回，后面的条件都不再判断。
 
-### 4. 休眠与唤醒的底层：mach_msg + mk_timer
+### 4. 什么时候通知：Observer 的六个时机
+
+Observer 是 RunLoop 的「通知机制」。它跟 Source / Timer 不一样——不是「被处理」，而是在运行流程的固定时间点「被回调」，用来观察 RunLoop 走到哪一步了。一共六个时间点，定义在 `CFRunLoopActivity` 枚举里：
+
+```c
+typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
+    kCFRunLoopEntry          = (1UL << 0),  // 进入循环
+    kCFRunLoopBeforeTimers   = (1UL << 1),  // 处理 Timer 前
+    kCFRunLoopBeforeSources  = (1UL << 2),  // 处理 Source 前
+    kCFRunLoopBeforeWaiting  = (1UL << 5),  // 休眠前
+    kCFRunLoopAfterWaiting   = (1UL << 6),  // 唤醒后
+    kCFRunLoopExit           = (1UL << 7),  // 退出循环
+};
+```
+
+六个时机分两类——外层两个、内层四个：
+
+| 时机 | 在循环里的位置 | 发几次 | 典型用途 |
+| ---- | ---- | ---- | ---- |
+| `Entry` | 进入循环前 | 一次 | Observer 初始化自己的状态 |
+| `BeforeTimers` | 每圈处理 Timer 前 | 每圈 | 卡顿监控的起始标记点 |
+| `BeforeSources` | 每圈处理 Source0 前 | 每圈 | 卡顿监控的起始标记点 |
+| `BeforeWaiting` | 每圈休眠前 | 每圈 | UIKit 批量处理手势 / 布局 / CATransaction |
+| `AfterWaiting` | 每圈被唤醒后 | 每圈 | 卡顿监控的结束标记点 |
+| `Exit` | 退出循环后 | 一次 | 收尾清理 |
+
+几个容易踩坑的点，单独说：
+
+**外层两个只发一次。** `Entry` 和 `Exit` 是 `CFRunLoopRun` / `CFRunLoopRunSpecific` 在进入和退出整个 RunLoop 时发的，不是 `__CFRunLoopRun` 每圈发。所以一个 RunLoop 从启动到停止，`Entry` 和 `Exit` 各只回调一次；而 `BeforeTimers` 到 `AfterWaiting` 这四个，才是「每一圈都回调」。
+
+**通知是有条件的，不是每圈必发。** 源码里都是 `if (rlm->_observerMask & kCFRunLoopBeforeTimers)` 这样的位掩码判断——只有当前 Mode 里真的注册了对应状态的 Observer，`__CFRunLoopDoObservers` 才会执行。也就是说，Observer 通知不是无条件广播，而是「谁注册了谁才被叫」。
+
+**`BeforeWaiting` / `AfterWaiting` 还多一个条件 `!poll`。** 当 `poll` 为真（这圈有 Source0 待处理、或 GCD 主队列有消息），意味着这一圈不休眠，「休眠前」「唤醒后」这两个状态自然就不存在，这两个通知就被跳过。这正好对应总览图里「是否需要休眠」判断走「是」的那条旁路。
+
+**`BeforeWaiting` 是最特殊的一个。** 它不只是「回调一个函数」，而是 UIKit 把这一圈攒下来的脏活集中处理掉的时机——`_UIGestureRecognizerUpdate` 处理手势、视图布局绘制、`CATransaction` 提交，都挤在休眠前这一下完成。这也是它叫「before waiting」的原因：休眠前先把该干的干完，然后才安心睡。
+
+### 5. 什么时候处理：五类事件的先后
+
+「处理」和「通知」相反，它是 RunLoop 真正消费事件的环节。一圈里会被处理的事件一共五类：Block、Source0、Timer、GCD 主队列、Source1。它们的处理时机不在一处，而是分两批，中间隔着一个休眠：
+
+第一批在循环前段（还没休眠），处理「不需要等内核消息」的事件：
+
+1. Block——每圈开头先跑（`__CFRunLoopDoBlocks`）；
+2. Source0——接着处理（`__CFRunLoopDoSources0`）；
+3. Block——如果这圈处理过 Source0，补跑一轮。
+
+第二批在唤醒后（`handle_msg`），根据 `livePort` 判断是谁叫醒的，走对应分支：
+
+4. Timer 到期（`livePort == timerPort`）→ `__CFRunLoopDoTimers`；
+5. GCD 主队列有任务（`livePort == dispatchPort`）→ `_dispatch_main_queue_callback_4CF`；
+6. Source1 端口事件（`livePort == 某个 Source1 的 port`）→ `__CFRunLoopDoSource1`；
+7. 最后再跑一轮 Block（`__CFRunLoopDoBlocks`）。
+
+用一张表把五类事件的「谁提交、什么时候被处理」对齐：
+
+| 事件 | 谁提交 | 什么时候被处理 | 处理函数 |
+| ---- | ---- | ---- | ---- |
+| Block | `CFRunLoopPerformBlock` | 每圈开头 / Source0 后 / 唤醒后，共三处 | `__CFRunLoopDoBlocks` |
+| Source0 | `CFRunLoopSourceSignal`（触摸、performSelector 等） | 循环前段 | `__CFRunLoopDoSources0` |
+| Timer | `CFRunLoopTimer` 到点（内核 mk_timer 唤醒） | 唤醒后 | `__CFRunLoopDoTimers` |
+| GCD 主队列 | `dispatch_async(主队列)` | 唤醒后 | `_dispatch_main_queue_callback_4CF` |
+| Source1 | 内核端口消息（触摸、进程间通信） | 唤醒后 | `__CFRunLoopDoSource1` |
+
+几个关键结论：
+
+**Source0 和 Block 在休眠前处理，Timer / GCD / Source1 在唤醒后处理。** 这是两批，时间上隔着一次 `mach_msg` 休眠。记住这条，就能解释很多现象。
+
+**Block 最特殊，三处都可能被跑。** 因为它不是「事件源」，而是「顺便要干的活」——RunLoop 会在每圈的空档尽量把它清掉：进循环先清一次，处理完 Source0 再清一次，唤醒后收尾再清一次。所以 `CFRunLoopPerformBlock` 提交的 block 不用等太久。
+
+**GCD 主队列任务响应最快。** 第二段源码里，休眠前会先探测一次 GCD 主队列，只要有任务排队就 `goto handle_msg` 直接跳过休眠去处理，不用把这一圈剩下的活干完再睡。这是 `dispatch_async(主队列)` 能及时响应的保证。
+
+**触摸要跨一圈，正是这两批的体现。** 触摸先通过 Source1 唤醒 RunLoop（第二批的第 6 项），Source1 回调里再把它包成一个 Source0，`CFRunLoopSourceSignal` 加 `CFRunLoopWakeUp`；等下一圈转到「循环前段」时，才在 Source0 阶段（第一批的第 2 项）真正派发出去。这个「跨一圈」在第 8 节会完整串起来。
+
+### 6. 休眠与唤醒的底层：mach_msg + mk_timer
 
 这里澄清一个流传很广的误解：不少人以为 `mach_msg` 的 `timeout` 参数被设置成「下一个 Timer 的剩余时间」，到点自动醒。实际上 CF 不是这么干的——从第二段源码能看出来，`mach_msg` 的 timeout 传的是 `TIMEOUT_INFINITY`（无限等，只有 poll 时才传 0）。
 
@@ -540,7 +613,7 @@ Timer 到期的唤醒，靠的是 `_timerPort` 这个内核定时器 port：
 
 只要这几个 port 里任意一个有消息到达，`mach_msg` 就返回，`livePort` 就是那个 port。这就是「一个线程同时监听多种事件源」的底层实现。
 
-### 5. 返回值 retVal 的含义
+### 7. 返回值 retVal 的含义
 
 `retVal` 一共四种取值：
 
@@ -562,22 +635,22 @@ enum {
 
 看懂这四个值，第五节「启动方式」为什么表现各异就有答案了：`CFRunLoopRun()` 外层是 `do-while` 检查 `retVal`，所以能被 `CFRunLoopStop` 停；`[NSRunLoop run]` 外层是 `while(1)`，压根不看 `retVal`，所以停不下来。
 
-### 6. 触摸事件在运行流程中的位置
+### 8. 触摸事件在运行流程中的位置
 
-前面一直讲抽象分支，这里用一个真实事件把第 4、6、9 步串起来，Source0 和 Source1 的配合就清楚了：
+前面第 4、5 节分别讲了「通知」和「处理」的时机，这里用一个真实事件把 Source1、Source0、BeforeWaiting 串起来，两批处理的配合就清楚了：
 
 1. 硬件触摸 → 系统进程 `IOHIDEventSystem` 封装成 `IOHIDEvent`；
-2. 系统通过 mach port 给 App 主线程的 Source1 发消息，RunLoop 被唤醒（第 9 步）；
+2. 系统通过 mach port 给 App 主线程的 Source1 发消息，RunLoop 被唤醒（对应第二批的 Source1 分支）；
 3. Source1 回调 `__IOHIDEventSystemClientQueueCallback` 里，把事件再封装成一个 Source0，`CFRunLoopSourceSignal` 标记 + `CFRunLoopWakeUp` 手动唤醒；
-4. 下一圈，RunLoop 在「处理 Source0」阶段（第 4 步）把这个事件派发出去，`UIApplication sendEvent` → hit-test → 响应链；
+4. 下一圈，RunLoop 在「循环前段处理 Source0」阶段（第一批的第 2 项）把这个事件派发出去，`UIApplication sendEvent` → hit-test → 响应链；
 5. 手势识别器先标记、不执行；UI 的 `setNeedsLayout`/`setNeedsDisplay` 也只打标记；
-6. 到 BeforeWaiting（第 6 步），系统统一做 `_UIGestureRecognizerUpdate` 手势处理、布局绘制、`CATransaction` 提交。
+6. 到 BeforeWaiting（`kCFRunLoopBeforeWaiting` 通知），系统统一做 `_UIGestureRecognizerUpdate` 手势处理、布局绘制、`CATransaction` 提交。
 
 ![触摸事件从硬件到 UI](../images/runloop-touch-event.png)
 
-一次触摸横跨「Source1 唤醒（第 9 步）→ 下一圈 Source0 派发（第 4 步）→ BeforeWaiting 批量（第 6 步）」，中间隔了整整一圈。这就是为什么「点一下」不是同步完成，而是等 RunLoop 转到对应步骤才响应——也是卡顿时会觉得「点了没反应」的根因。
+一次触摸横跨「Source1 唤醒 → 下一圈 Source0 派发 → BeforeWaiting 批量」，中间隔了整整一圈。这就是为什么「点一下」不是同步完成，而是等 RunLoop 转到对应步骤才响应——也是卡顿时会觉得「点了没反应」的根因。
 
-回到这张总览图，12 步里最值得反复琢磨的是 6-7-8 这段「休眠」。它不是简单地「没事件就睡」，而是先抓住 BeforeWaiting 这个时机把手势、UI、内存都批量处理掉，再去 mach_msg 睡。理解了这一点，卡顿监控为什么要盯 BeforeSources 和 AfterWaiting 这两个状态，也就有答案了。
+回到这张总览图，最值得反复琢磨的是 ③④⑤ 这段「休眠」。它不是简单地「没事件就睡」，而是先抓住 BeforeWaiting 这个时机把手势、UI、内存都批量处理掉，再去 mach_msg 睡。理解了这一点，卡顿监控为什么要盯 BeforeSources 和 AfterWaiting 这两个状态，也就有答案了。
 
 ---
 
@@ -670,7 +743,7 @@ _thread = [[NSThread alloc] initWithBlock:^{
 - **Source0 不能唤醒 RunLoop**（要配 `CFRunLoopWakeUp`），Source1 基于 mach port 能主动唤醒。
 - **Source0/Source1 是同一结构** `__CFRunLoopSource`，靠 `_context.version` 区分（0 无 port / 1 有 port）；回调入口宏 `__CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE0/1_PERFORM_FUNCTION__`。
 - **CADisplayLink 由 VSync 驱动**，与屏幕刷新同步；NSTimer 由 CFRunLoopTimer 驱动，精度较低。
-- **运行流程 12 步**：处理事件 → BeforeWaiting（手势/UI/内存批量）→ mach_msg 休眠 → 唤醒处理。
+- **一次循环 = 通知 + 处理**：每圈先在固定时间点通知 Observer（BeforeTimers / BeforeSources / BeforeWaiting / AfterWaiting），再在固定时间点处理事件（Block → Source0 → 休眠 → Timer/GCD/Source1 → Block）。
 - **mach_msg 的 timeout 传 TIMEOUT_INFINITY**，Timer 到期靠内核 `mk_timer`（`_timerPort`）唤醒，不是靠 timeout 超时。
 - **retVal 四种值**：Finished(1 空 Mode) / Stopped(2 被 stop) / TimedOut(3 超时) / HandledSource(4 处理过一个事件)。
 - **BeforeWaiting 三件事**：手势识别、UI 布局绘制（CATransaction）、AutoreleasePool 释放重建。

@@ -169,7 +169,6 @@ Glimmer/
 | 6 | [Block底层分析](notes/mobile/ios/runtime/06-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
 | 7 | [反射机制](notes/mobile/ios/runtime/07-反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
 | 8 | [load与initialize区别](notes/mobile/ios/runtime/08-load与initialize分析.md) | 调用时机与底层源码、直调 vs消息发送、Category/继承行为差异、Swizzling时机 |
-| 9 | [Framework详解](notes/mobile/ios/runtime/09-Framework详解.md) | 目录结构与Umbrella/Module、静态/动态与LTO、链接加载dyld、CocoaPods打包 |
 
 ##### 系统底层机制
 
@@ -197,6 +196,7 @@ Glimmer/
 | 1 | [App启动过程分析](notes/mobile/ios/startup/01-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
 | 2 | [import背后的机制要点](notes/mobile/ios/startup/02-import详解.md) | OC查找机制、Header Map、PCH、Clang Modules、Swift模块系统、混编操作 |
 | 3 | [Mach-O文件格式](notes/mobile/ios/startup/03-Mach-O文件格式分析.md) | Mach-O 格式、Segment/Section、静态与动态库、Rebase/Bind、dyld 装载 |
+| 4 | [Framework详解](notes/mobile/ios/runtime/09-Framework详解.md) | 目录结构与Umbrella/Module、静态/动态与LTO、链接加载dyld、CocoaPods打包 |
 
 ### HarmonyOS 开发体系
 
