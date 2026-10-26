@@ -20,3 +20,7 @@ Desktop.ini
 # Temp files
 *.tmp
 *.temp
+projects/Hello-Agents/Chapter7/__pycache__
+projects/Hello-Agents/.env
+projects/Hello-Agents/memory_data
+projects/Hello-Agents/.venv312

@@ -219,7 +219,8 @@ Glimmer/
 | 1 | [学习Hello-Agents：智能体及其发展史](<notes/ai-ml/02-学习Hello-Agents：智能体及其发展史.md>) | 智能体定义与类型、Agent Loop、智能体演进、现代LLM  |
 | 2 | [学习Hello-Agents：大语言模型基础](<notes/ai-ml/03-学习Hello-Agents：大语言模型基础.md>) | N -gram→Transformer演进、自/多头注意力、Prompt |
 | 3 | [学习Hello-Agents：智能体经典范式](<notes/ai-ml/04-学习Hello-Agents：智能体经典范式.md>) | ReAct / Plan-and-Solve / Reflection三大范式原理、工具调用 |
-| 4 | [学习Hello-Agents：低代码与Agent框架](<notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md>) | 低代码平台、、AutoGen/AgentScope/CAMEL/LangGraph |
+| 4 | [学习Hello-Agents：低代码平台与Agent框架](<notes/ai-ml/05-学习Hello-Agents：低代码平台与Agent框架.md>) | 低代码平台四价值、Coze/Dify/FastGPT/n8n、框架四价值、AutoGen/AgentScope/CAMEL/LangGraph、2026 新格局与选型 |
+| 5 | [学习Hello-Agents：Memory](<notes/ai-ml/06-学习Hello-Agents：Memory.md>) | 记忆三大维度与三种形态、四类记忆、RAG 实现形式、记忆评估、2026 记忆框架选型 |
 
 ### 算法
 
