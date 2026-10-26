@@ -169,6 +169,7 @@ Glimmer/
 | 6 | [Block底层分析](notes/mobile/ios/runtime/06-Block底层分析.md) | Block 本质、__block_impl 结构体、三种类型、copy/捕获/循环引用 |
 | 7 | [反射机制分析](notes/mobile/ios/runtime/07-反射机制分析.md) | OC Runtime 内省与动态操作、Swift Mirror、类型编码、应用场景 |
 | 8 | [load与initialize分析](notes/mobile/ios/runtime/08-load与initialize分析.md) | 调用时机与底层源码、直调 vs 消息发送、Category/继承行为差异、Swizzling 时机 |
+| 9 | [Framework详解](notes/mobile/ios/runtime/09-Framework详解.md) | 目录结构与 Umbrella/Module、Swift 混编、静态/动态与 LTO、构建、链接加载与 dyld、签名、CocoaPods 打包、XCFramework、二进制兼容、面试问题 |
 
 ##### 系统底层机制
 
