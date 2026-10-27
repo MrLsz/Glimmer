@@ -108,6 +108,131 @@ iOS 13 之后 AppDelegate 只保留两件事：进程级生命周期（applicati
 
 一个实际的兼容问题：老项目迁移 iOS 13+ 时，如果 Info.plist 里没有 UIApplicationSceneManifest，系统走老路径，AppDelegate 继续管 window，程序也能跑。所以有些项目「半迁移」状态下两套代码并存，排查启动问题时先看这个 manifest 有没有配。
 
+### 4. scene 的配置：Info.plist 与 UISceneConfiguration
+
+scene 不是凭空出现的，它的「出生规格」由两处共同决定：Info.plist 里的静态声明，和运行时返回的 UISceneConfiguration 对象。
+
+Info.plist 的 UIApplicationSceneManifest 是一份声明表，告诉系统这个 App 支持哪些场景、每个场景用什么 delegate、有没有 storyboard：
+
+```xml
+<key>UIApplicationSceneManifest</key>
+<dict>
+    <key>UIApplicationSupportsMultipleScenes</key>
+    <true/>
+    <key>UISceneConfigurations</key>
+    <dict>
+        <key>UIWindowSceneSessionRoleApplication</key>
+        <array>
+            <dict>
+                <key>UISceneConfigurationName</key>
+                <string>Default Configuration</string>
+                <key>UISceneDelegateClassName</key>
+                <string>SceneDelegate</string>
+                <key>UISceneStoryboardFile</key>
+                <string>Main</string>
+            </dict>
+        </array>
+        <key>UIWindowSceneSessionRoleExternalDisplay</key>
+        <array>
+            <dict>
+                <key>UISceneConfigurationName</key>
+                <string>External Display</string>
+                <key>UISceneDelegateClassName</key>
+                <string>ExternalSceneDelegate</string>
+            </dict>
+        </array>
+    </dict>
+</dict>
+```
+
+三个关键字段的作用：
+
+| 字段 | 作用 |
+| ---- | ---- |
+| `UIApplicationSupportsMultipleScenes` | 是否支持多场景。YES 才允许 iPad 多窗口，老 App 迁移多窗口时加这个开关 |
+| `UISceneConfigurations` | 按 role 分组：Application（主窗口）、ExternalDisplay（外接屏） |
+| 每个配置里的 `UISceneConfigurationName` | 配置名，运行时按这个名字去取对应的 UISceneConfiguration |
+
+运行时侧，AppDelegate 的回调返回一个 UISceneConfiguration，系统拿它去实例化 scene 和 delegate：
+
+```objc
+- (UISceneConfiguration *)application:(UIApplication *)application
+    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                                  options:(UISceneConnectionOptions *)options {
+    if (connectingSceneSession.role == UISceneSessionRoleExternalDisplay) {
+        return [UISceneConfiguration configurationWithName:@"External Display"
+                                               sessionRole:connectingSceneSession.role];
+    }
+    return [UISceneConfiguration configurationWithName:@"Default Configuration"
+                                           sessionRole:connectingSceneSession.role];
+}
+```
+
+UISceneConfiguration 的四个核心属性：
+
+```objc
+@interface UISceneConfiguration : NSObject
+@property(nonatomic, readonly, copy) NSString *name;              // 与 plist 里名字对应
+@property(nonatomic, readonly) UISceneSessionRole role;            // Application / ExternalDisplay
+@property(nonatomic, strong) Class sceneClass;                     // 默认 UIWindowScene
+@property(nonatomic, strong) Class delegateClass;                  // 默认 SceneDelegate
+@property(nonatomic, strong, nullable) UIStoryboard *storyboard;   // 关联 storyboard（可选）
+@end
+```
+
+一个容易踩的坑：`configurationWithName:` 传的名字必须和 Info.plist 里某个 `UISceneConfigurationName` 完全一致，否则系统找不到对应配置直接崩溃。纯代码建 UI（不用 storyboard）时，`UISceneDelegateClassName` 要写、`UISceneStoryboardFile` 留空，否则系统会去找一个不存在的 Main.storyboard。
+
+### 5. UISceneActivationState：四种激活状态
+
+scene 当前「处于什么阶段」用 UISceneActivationState 描述，四种取值：
+
+```c
+typedef NS_ENUM(NSInteger, UISceneActivationState) {
+    UISceneActivationStateUnattached         = -1,  // 未连接：已注册但尚未激活
+    UISceneActivationStateForegroundActive   = 0,   // 前台活跃：可交互、收事件
+    UISceneActivationStateForegroundInactive = 1,   // 前台非活跃：可见但不可交互
+    UISceneActivationStateBackground         = 2,   // 后台：不可见
+};
+```
+
+这四种状态正好对应第 2 节生命周期状态机里的四个节点，迁移时机和回调一一对应：
+
+| 状态迁移 | 触发回调 |
+| ---- | ---- |
+| Unattached → ForegroundInactive | `scene:willConnectToSession:options:` |
+| ForegroundInactive → ForegroundActive | `sceneDidBecomeActive:` |
+| ForegroundActive → ForegroundInactive | `sceneWillResignActive:` |
+| ForegroundInactive → Background | `sceneDidEnterBackground:` |
+| 任一状态 → Unattached | `sceneDidDisconnect:` |
+
+判断「现在哪个 scene 在最前面」就是遍历 connectedScenes 找 activationState 等于 ForegroundActive 的那个——第三章取 keyWindow 的代码里就是这么干的。理解这个枚举，也就理解了为什么多场景下不能用「App 是否 active」判断「当前窗口是否可交互」：active 是 per-scene 的，两个并排窗口一个 active 一个 inactive。
+
+### 6. UIWindowScene：scene 与 window 的绑定
+
+UIScene 是抽象基类，日常打交道的是它的子类 UIWindowScene——只有带 window 的 scene 才对普通 App 有意义。UIWindowScene 持有这个 scene 下的所有 window 和屏幕信息：
+
+```objc
+@interface UIWindowScene : UIScene
+@property(nonatomic, readonly) NSArray<UIWindow *> *windows;       // 该 scene 下的所有 window
+@property(nonatomic, readonly) UIScreen *screen;                    // 关联的屏幕
+@property(nonatomic, readonly) UICoordinateSpace *coordinateSpace;  // 坐标空间
+@property(nonatomic, readonly) UIWindowSceneSizeRestrictions *sizeRestrictions; // 尺寸限制
+@property(nonatomic, readonly, nullable) UIWindow *keyWindow;       // iOS 15+ 取 keyWindow 入口
+@end
+```
+
+几个字段的语义：`screen` 决定 window 画在哪块屏（主屏还是外接屏，外接屏场景拿到的 UIWindowScene 的 screen 就是外接那块）；`coordinateSpace` 是 window 坐标的顶层基准，第三章会讲到 safeAreaInsets 从这里下发；`keyWindow` 是 iOS 15 之后官方推荐的 keyWindow 查询入口，替代废弃的 `UIApplication.keyWindow`。
+
+window 与 scene 的绑定是强制的：iOS 13 之后创建 window 必须走 `initWithWindowScene:`，把 window 从出生就钉在某个 scene 上。这也是 delegate 协议分层的意义——`UISceneDelegate` 本身没有 window 属性，只有它的子协议 `UIWindowSceneDelegate` 才有：
+
+```objc
+@protocol UIWindowSceneDelegate <UISceneDelegate>
+@property(nullable, nonatomic, strong) UIWindow *window;
+@end
+```
+
+所以模板里的 SceneDelegate 声明成遵循 UIWindowSceneDelegate，才能 `self.window = ...`；这也是「建 window」这步必须发生在 scene 的 willConnect 回调里的原因——此时 UIWindowScene 已经就绪，可以用它初始化 window。
+
 ## 三、UIWindow：view 树的根与事件入口
 
 ### 1. 本质：UIView 的子类
@@ -166,6 +291,79 @@ hud.rootViewController = [[HUDViewController alloc] init];
 ```
 
 更准确的说法：想让 window 显示但不抢 key，不调 makeKeyAndVisible，直接把它 addSubview 到另一个 window（或设 hidden = NO 且挂上 rootVC 后调 becomeKeyWindow 之外的路）。头文件注释给过原话：「To make the window visible without becoming key, just use UIView's hidden property」。实际操作里，把 HUD window 的 hidden 设为 NO 并挂好 rootVC，它就显示在 level 决定的位置，不碰 keyWindow 的归属。
+
+### 4. 作为 UIView 的特殊行为：frame、坐标与撑满
+
+UIWindow 是 UIView 的子类，但它的 frame 和布局行为跟普通 view 不一样，几个点值得单独记住：
+
+window 的 frame 不由 Auto Layout 决定。它没有 superview，frame 由绑定的 scene / screen 决定——主屏 window 就是整块屏幕大小，外接屏 window 是外接屏大小。给 window 加约束、调 translatesAutoresizingMaskIntoConstraints 都没有意义。
+
+window 的坐标是全局基准。它是最顶层的坐标空间，跨 window 的坐标换算要用 UIView 的两个转换方法：
+
+```objc
+// 把一个点在两个 window 之间转换
+CGPoint p = [view convertPoint:CGPointZero toWindow:anotherWindow];
+CGPoint back = [anotherWindow convertPoint:p fromWindow:view.window];
+```
+
+rootViewController 的 view 会自动撑满 window。设了 rootViewController 之后，rootVC 的 view 会自动 resize 成 window 大小，不需要手动设 frame 或约束。这也解释了为什么 App 的根页面不需要写 frame 就能铺满屏幕。
+
+### 5. makeKeyAndVisible 与 key 切换
+
+makeKeyAndVisible 是 window 上最常用的方法，它内部其实就两件事：`hidden = NO` 让它可见，`becomeKeyWindow` 让它成为 key。真正值得展开的是 key 的切换机制——key 是唯一的，新的上位、旧的就得让位：
+
+```objc
+[hud makeKeyAndVisible];          // hud 成为 key，原主 window 自动 resignKeyWindow
+[mainWindow makeKeyAndVisible];   // 想收回来，让主 window 再成为 key
+```
+
+`becomeKeyWindow` 会触发当前 scene 里旧 keyWindow 的 `resignKeyWindow`，这两个回调成对出现。而 `resignKeyWindow` 会连带让旧 window 里的第一响应者 resign——也就是键盘会收起来。所以「弹一个抢 key 的 HUD」会打断用户正在进行的输入，这正是第 3 节说 HUD 通常只 visible、不抢 key 的另一个理由。
+
+还有一条约束：只有 visible（hidden = NO）的 window 才能成为 key。对一个 hidden 的 window 调 becomeKeyWindow 不生效，这是排查「为什么这个 window 没成为 key」时要先查的点。
+
+### 6. sendEvent: 与 UIWindow 子类化
+
+UIWindow 的 `sendEvent:` 是触摸事件进到 window 后的入口，UIApplication 把事件路由到所属 window 后，window 的 sendEvent: 再往下走 hitTest 和分发。子类化 UIWindow 重写这个方法，是很多「全局事件处理」的实现基础：
+
+```objc
+@implementation MyWindow
+- (void)sendEvent:(UIEvent *)event {
+    // 所有事件分发前统一处理：全局埋点、触摸检测、防抓屏等
+    if (event.type == UIEventTypeTouches) {
+        // 拿到触摸做想做的事
+    }
+    [super sendEvent:event];   // 必须调 super，否则事件不再往下分发
+}
+@end
+```
+
+子类化 UIWindow 的常见用途：
+
+| 用途 | 做法 |
+| ---- | ---- |
+| 全链路事件埋点 | 重写 `sendEvent:` 记录所有触摸 |
+| 扩展视图响应区域 | 重写 `hitTest:withEvent:` 扩大命中范围 |
+| 屏蔽某个区域触摸 | 重写 `hitTest:withEvent:` 对特定点返回 nil |
+| 摇一摇 / 边缘手势 | 在 `sendEvent:` 里识别 motion 事件 |
+
+两个坑。第一，重写 `sendEvent:` 必须调 super，否则事件全丢，整个界面点不动。第二，要用子类化 window，创建时就得用它——SceneDelegate 里 `self.window = [[MyWindow alloc] initWithWindowScene:ws]`，不能先建 UIWindow 再指望它变子类。
+
+### 7. 第一响应者与键盘
+
+window 体系的「输入」终点是第一响应者，keyWindow 决定键盘和输入事件流给谁：
+
+- keyWindow 里的第一响应者才能接收键盘输入；
+- 键盘（inputView）弹给 keyWindow 的 firstResponder；
+- keyWindow 切换会让 firstResponder 连带 resign。
+
+```objc
+[textField becomeFirstResponder];  // 弹键盘
+[textField resignFirstResponder];  // 收键盘
+```
+
+一个常见坑：textField 所在的 window 不是 keyWindow 时，键盘弹不出来，或者已经弹出的键盘会收起。比如弹了个抢 key 的 HUD，正在输入的 textField 因为所在 window resignKeyWindow 而自动 resign，键盘就收了。这也是「HUD 只 visible、不抢 key」这条原则的第三个落点。
+
+window 本身继承 UIResponder，也能成为 firstResponder，但实际极少这么用——输入焦点通常交给具体的输入控件，window 只负责把「谁是 key」这件事定下来。
 
 ## 四、rootViewController：window 与 VC 的粘连点
 
