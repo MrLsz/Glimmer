@@ -146,6 +146,12 @@ CGRect rOnScreen = [b convertRect:b.bounds toView:nil];
 
 subviews 数组的顺序就是视觉层级：下标 0 在最底层，末尾在最上层。后 addSubview 的 view 天然盖在先添加的上面——这就是为什么「用 addSubview 轮播的弹窗」总是盖住旧内容。六个层级操作 API 表达的都是同一件事：调整子视图在 subviews 数组里的位置。
 
+先看树本身长什么样。任意一棵上屏的视图树都以 UIWindow 为根，往下按 superview/subviews 一层层生长：每个 view 的 superview 唯一，subviews 是个数组，window 属性则是「这条 superview 链是否最终接到某个 UIWindow 上」的直接答案。从任何一个叶子往上走，经过若干层 superview 必然到达 window——走到底都不是 window，说明这棵子树根本没上屏。
+
+subviews 数组顺序其实同时决定了三件事。一是视觉层级，就是上面说的。二是渲染次序：绘制时按下标从小到大画，后添加的自然盖在先添加的上面，「顺序即层级」的根源就在这里。三是 hit-test 的遍历次序：命中测试按倒序遍历 subviews，从末尾往前找，最先检查的正是视觉上最上层的那个（详见第八章）。同一个数组，渲染正着走、事件倒着走，两端行为完全对称。
+
+![视图树与挂载回调](../images/view-tree-mount.png)
+
 三个容易踩的细节：
 
 细节一，addSubview 一个已经有父视图的 view，它会被先从旧父视图移除，再挂到新父视图。UIKit 里一个 view 同一时刻只能有一个 superview，不需要手动 removeFromSuperview。这个特性也被用来「转移」视图，但注意转移会触发完整的挂载回调流程（见下文）。
@@ -166,6 +172,22 @@ subviews 数组的顺序就是视觉层级：下标 0 在最底层，末尾在�
 - (void)willMoveToWindow:(nullable UIWindow *)newWindow;
 - (void)didMoveToWindow;
 ```
+
+六个钩子不是各自独立触发的，一次 addSubview 会把它们串成一条固定顺序的链：
+
+```objc
+// addSubview: 触发的回调顺序（父视图只收 didAddSubview:，其余都是子视图收到）
+[father addSubview:child];
+// 1. child  → willMoveToSuperview:   newSuperview 为 father
+// 2. father → didAddSubview:         child
+// 3. child  → didMoveToSuperview
+// 4. child  → willMoveToWindow:      整条链接到 window 时才继续
+// 5. child  → didMoveToWindow
+```
+
+顺序里有两个要点。第一，didAddSubview 回调父视图，发生在 child 的 didMoveToSuperview 之前——想在容器里对新子视图做统一设置（统一背景、统一手势），didAddSubview 是最早的时机，但此刻 child 还没完成挂载，别在里面触碰依赖挂载状态的逻辑。第二，willMoveToWindow:/didMoveToWindow 只在挂载链真正接到 window 时才触发：把 view 挂到一个本身不在 window 上的父视图里，前三个回调照常走，后两个不会来。
+
+removeFromSuperview 是同一条链的反向：child 先收到 willMoveToSuperview:（参数 nil），父视图收到 willRemoveSubview:，随后依次 didMoveToSuperview、willMoveToWindow:（nil）、didMoveToWindow。把 view 从 A 父视图直接 addSubview 到 B 父视图的「转移」，等于先走一遍完整卸载、再走一遍完整挂载，两套回调全部触发——didMoveToWindow 里若有启动定时器之类的逻辑，转移一次就重复执行一次，这正是第十章陷阱五的根源。
 
 六个钩子里 `didMoveToWindow` 的地位最特殊。`window` 属性是 view 挂载链路的终点——只要这一串 superview 链最终接到了某个 UIWindow 上，window 属性就非 nil。反过来说，一个 view 创建之后即使设好了 frame、加好了子视图，只要没挂到 window 上，它就没有真正「上屏」，`didMoveToWindow` 也不会触发。实际开发里这几个场景都依赖它：在 `didMoveToWindow` 里启动 CADisplayLink（因为它只在真正显示时触发，且离开窗口时 window 变 nil 可以顺便停掉）、判断视图是否在可见窗口里、监控视图的全局挂载时机（Method Swizzling 埋点常用）。
 
@@ -220,7 +242,13 @@ Auto Layout 的机制核心是约束求解：每条约束是一个线性关系�
  display */
 ```
 
-`layoutSubviews` 的触发时机需要单独记，它不会因为改了个属性就立刻执行，以下是完整清单：addSubview 首次显示、bounds 变化（含 frame.size 变化）、子视图增删、UIScrollView 滚动（bounds.origin 变化）、设备旋转、setNeedsLayout 标记后的下一个周期、layoutIfNeeded 强制触发。`layoutIfNeeded` 的招牌用法是约束动画——修改约束只是打了标记，真正改 frame 的是 layoutSubviews，把它塞进动画 block 里才能让 frame 变化被动画系统捕获：
+布局流水线里的三个核心方法值得单独说透，分工一句话：setNeedsLayout 是记账的，layoutSubviews 是干活的，layoutIfNeeded 是催账的。
+
+先看 `setNeedsLayout`。它不碰任何布局计算，只给这个 view 打一个「需要重新布局」的脏标记（内部把 needsLayout 置 YES），真正的工作留给下一个布局周期。所以连续调十次 setNeedsLayout 和调一次效果完全一样——标记可合并，这正是「标记 → 等 RunLoop → 批量执行」延迟模式的价值：把一帧里散落的多次变更收敛成一次布局计算，避免重复跑 layoutSubviews。纯 frame 布局（不用 Auto Layout）的 view 同样走这条路：改 frame 或 bounds 之后，系统内部会替你调 setNeedsLayout，不需要自己操心。
+
+再看 `layoutSubviews`，它才是真正干活的地方，但默认实现是空的——系统调用它，是给你一个「把子视图摆到正确位置」的机会。它的触发时机需要单独记，不会因为改个属性就立刻执行，完整清单有七类：addSubview 首次显示、bounds 变化（含 frame.size 变化）、子视图增删、UIScrollView 滚动（bounds.origin 变化）、设备旋转、setNeedsLayout 标记后的下一个周期、layoutIfNeeded 强制触发。七类看着杂，本质只有两种：要么自身几何变了（bounds/frame/旋转），要么子视图集合变了（增删/首次挂载），滚动不过是 bounds.origin 变化的特例。重写 layoutSubviews 有三条铁律：不要主动调用它（想刷新用 setNeedsLayout）；不要在它里面改约束（会重新标记布局形成无限循环，见第十章陷阱三）；子视图的最终 frame 在这里读才准确，更早的时机（比如 viewDidLoad）拿到的是零或旧值。
+
+最后是 `layoutIfNeeded`，它和 setNeedsLayout 相反，是「立刻、同步」地把标记兑现：这个 view 及其子树若有脏标记，就从调用处开始递归执行 layoutSubviews；没有标记，直接返回什么都不做。约束动画的原理就藏在这里——改 constraint.constant 只是打了标记，真正把 frame 改掉的是 layoutSubviews，把它塞进动画 block 里让 frame 变化落在动画上下文内，才是约束动画的标准姿势：
 
 ```objc
 // 约束动画的标准写法
@@ -230,29 +258,39 @@ self.heightConstraint.constant = 200;
 }];
 ```
 
+三个方法的配合关系一张图说清：
+
+![布局触发流程](../images/view-layout-trigger.png)
+
 布局体系里还有一组「参考区域」API，处理刘海屏、灵动岛、Home Indicator、键盘遮挡这些问题：`safeAreaInsets`/`safeAreaLayoutGuide`（系统安全区）、`layoutMargins`/`layoutMarginsGuide`（内容边距，preservesSuperviewLayoutMargins 可级联）、`keyboardLayoutGuide`（iOS 15+，跟随键盘）。它们本质都是 UILayoutGuide——不参与渲染的「占位矩形」，把「留出多少空」从 view 布局里解耦出来。新项目约束应该锚定 safeAreaLayoutGuide 而不是硬编码状态栏高度。
 
 ## 五、绘制与渲染：UIView 与 CALayer 的分工
 
-布局确定了每个 view 的几何，接下来是把内容真正画出来。这一章是「身份二：CALayer 的包装」的展开。
+布局确定了每个 view 的几何，接下来是把内容真正画出来。这一章是「身份二：CALayer 的包装」的展开，先把关系钉死，再看 CALayer 怎么运作。
 
-UIView 与 CALayer 是一对一绑定：view 持有 layer，layer 把 view 当作 delegate（UIView 遵循 CALayerDelegate 协议）。两者分工明确——CALayer 属于 QuartzCore，负责视觉呈现（contents 位图、圆角、阴影、边框、动画），而且这份实现在 macOS 和 iOS 间共享；UIView 属于 UIKit，负责平台特有的交互（触摸、手势、响应链、Auto Layout）。layer 管画、view 管交互，这就是为什么 `cornerRadius`、`shadowOpacity` 这些属性只能去 `view.layer` 上设置——UIView 根本没暴露它们。
+![UIView 与 CALayer 的关系](../images/view-layer-relation.png)
 
-自定义绘制走 `drawRect:`，但这个方法的正确认知比它的名气更重要：
+CALayer 是 QuartzCore 里的绘图模型对象，它才是真正被渲染系统处理的东西。一个 view 之所以能被看见，是因为它内部有一个 layer，layer 上有一块位图（contents）和一套视觉属性（圆角、阴影、边框、动画）——layer 是「画布」，view 是包在画布外面管交互的壳。两者的绑定是一对一的：view 持有 layer（`layer` 属性恒非 nil），layer 把 view 当作自己的 delegate（UIView 实现了 CALayerDelegate）。分工由此非常干脆：view 属于 UIKit、管交互（触摸、手势、响应链、Auto Layout）；layer 属于 QuartzCore、管视觉，而且这套实现在 macOS 和 iOS 之间共享。`cornerRadius`、`shadowOpacity` 这些只能去 `view.layer` 上设置，正是因为 UIView 根本没暴露它们。
 
-第一，绝大多数 view 不需要重写它。UILabel、UIImageView 的内容都不走 drawRect:，而是直接设置 layer.contents（一个 CGImage）。只有「系统没有对应控件、需要用 Core Graphics 手画」的场景才用它。
+CALayer 怎么运作，看两条链：
 
-第二，不要主动调用它，用 `setNeedsDisplay` 标记，系统在下个绘制周期回调。头文件里 `drawRect:` 没有任何调用时机注释，但 setNeedsDisplayInRect: 支持区域级重绘。
+![渲染链与绘制链](../images/view-render-pipeline.png)
 
-第三，空实现是负资产。drawRect: 会被触发 layer 创建一块与 view 同尺寸的 backing store（位图内存），一个空的重写等于白养一块内存。所以「重写了 drawRect: 但里面什么都不画」这种代码应该直接删掉。
+渲染链是每个 view 上屏的必经之路，无论你是否重写 drawRect:：CPU 侧算好布局、生成 layer 树的属性，提交给 Render Server（独立进程 backboardd），GPU 侧合成上屏。这条链上的高频性能坑是离屏渲染——GPU 需要先在屏幕外缓冲区合成再 paste 回屏幕，典型诱因是「圆角 + masksToBounds + 有内容的子图层」和带模糊/描边的 shadow（圆角 + backgroundColor 的组合有优化路径不会离屏，叠上 contents 就会）；检测用模拟器的 Color Off-screen Rendered，优化用预生成圆角图、CAShapeLayer 遮罩、shadowPath。
 
-绘制回调链路是理解 UIView 与 CALayer 协作的最佳切片：`[view setNeedsDisplay]` 内部转调 `[layer setNeedsDisplay]` → 下个绘制周期 layer 调 `display` → 作为 delegate 的 UIView 收到 `drawLayer:inContext:` → UIView 在这个回调里把 context 设为当前，再调你重写的 `drawRect:`。也就是说，你的 drawRect: 代码画的是 layer 的内容，UIView 只是中间的转接板。
+绘制链只在你重写 drawRect: 时发生，它是理解两者协作的最佳切片：`[view setNeedsDisplay]` 内部转调 `[layer setNeedsDisplay]`，下个绘制周期 layer 调 `display`，作为 delegate 的 UIView 收到 `drawLayer:inContext:` 并把 context 设为当前，再调你重写的 `drawRect:`。你的代码画的是 layer 的 contents，UIView 只是转接板。关于 drawRect: 本身，三个认知比它的名气更重要：绝大多数 view 不需要重写它（UILabel、UIImageView 的内容直接走 layer.contents）；不要主动调用，用 `setNeedsDisplay` 标记（setNeedsDisplayInRect: 支持区域级重绘）；空实现是负资产——重写会触发 layer 创建一块与 view 同尺寸的 backing store 位图内存，什么都不画等于白养一块内存，直接删掉。
 
-渲染的完整链路比绘制更长：CPU 侧（布局计算、drawRect: 文本排版）准备好 layer 树的属性，提交给 Render Server（独立进程 backboardd 体系），GPU 侧再做合成上屏。这个链路里有一个高频性能概念——离屏渲染：GPU 需要先在屏幕外缓冲区合成再 paste 回屏幕。典型诱因是「同时设置圆角 + masksToBounds + 有内容的子图层」、带模糊/描边的 shadow。系统对圆角 + backgroundColor + clipsToBounds 的组合有优化路径不会离屏，但圆角叠上 contents（如 imageView）就会。检测手段是模拟器的 Color Off-screen Rendered 选项；优化思路是预生成圆角图片、用 CAShapeLayer 做遮罩、shadowPath 显式声明阴影形状。
+动画上的差异值得单独记：独立的 CALayer 改可动画属性会自动产生 0.25 秒隐式动画，UIView 却没有——因为 UIView 作为 delegate 在 `actionForLayer:forKey:` 里返回 NSNull，主动屏蔽了隐式动画。UIView 的动画全部走 `animateWithDuration:` 家族（block 语法，内部转成 CAAnimation 提交），iOS 17 后新增了 `animateWithSpringDuration:bounce:` 弹簧接口。理解「UIView 关掉了 layer 的隐式动画」，就明白为什么在动画 block 内直接改 view.layer 属性会「意外地」继承动画上下文。
 
-动画这块，UIView 与 CALayer 还有一组有意思的差异：独立的 CALayer 修改可动画属性会自动产生 0.25 秒的隐式动画，而 UIView 的属性修改没有——因为 UIView 作为 delegate 在 `actionForLayer:forKey:` 里返回了 NSNull，主动屏蔽了隐式动画。UIView 的动画全部走 `animateWithDuration:` 家族（block 语法，内部转成 CAAnimation 提交），iOS 17 后还新增了 `animateWithSpringDuration:bounce:...` 弹簧动画接口。理解「UIView 关掉了 layer 的隐式动画」这一层，就明白为什么直接操作 view.layer 改属性有时会「意外地」带动画（在动画 block 内直接改 layer 属性会继承动画上下文）。
+渲染相关的高频展示控制属性收成一张表：
 
-渲染相关的属性还有一组高频使用的展示控制：`contentMode`（内容在 bounds 里的摆放方式，默认 ScaleToFill 拉伸、AspectFit 等比留白、AspectFill 等比裁切、Redraw 表示 bounds 变化时调 setNeedsDisplay 重绘）、`clipsToBounds`（裁掉超出 bounds 的子视图，注意它只管视觉裁剪、不影响第八章的事件判定）、`alpha`/`hidden`（前者参与合成、子视图继承透明度，后者纯隐藏且连锁跳过事件）、`opaque`（声明不透明可让合成器跳过下层混合，drawRect: 场景下的性能开关）。
+| 属性 | 作用 | 备注 |
+|------|------|------|
+| contentMode | 内容在 bounds 里的摆放方式 | 默认 ScaleToFill 拉伸；AspectFit 等比留白；AspectFill 等比裁切；Redraw 在 bounds 变化时触发重绘 |
+| clipsToBounds | 裁掉超出 bounds 的子视图 | 只管视觉裁剪，不影响第八章的事件判定 |
+| alpha | 透明度 | 参与合成、子视图继承；alpha≤0.01 时 hit-test 跳过 |
+| hidden | 隐藏 | 纯隐藏且连锁跳过事件 |
+| opaque | 不透明声明 | 让合成器跳过下层混合，drawRect: 场景的性能开关 |
 
 ## 六、UIWindow：view 树上屏的最后一站
 
