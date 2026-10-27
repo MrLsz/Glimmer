@@ -1,6 +1,6 @@
 # 03. UIViewController 机制分析
 
-> 一个控制器从 `init` 走到 `dealloc`，它手里那棵 view 树其实只经历一件事：从无到有、从加载到显示、从隐藏到销毁。这篇就围绕这一条时间线展开，把 view 的懒加载、`loadView` 的三条来源、生命周期方法、布局回调、内存警告、容器父子关系、present/dismiss 这些看似零散的知识点，全部挂到「view 的一生」这条主线上。理解它的钥匙只有一把：`view` 是懒加载的，生命周期方法全是 UIKit 在固定时机替你回调的，你只负责在对应节点上挂逻辑。
+> 一个控制器从 `init` 走到 `dealloc`，它手里那棵 view 树其实只经历一件事：从无到有、从加载到显示、从隐藏到销毁。这篇就围绕这一条时间线展开，把 view 的懒加载、`loadView` 的三条来源、生命周期方法、布局回调、容器父子关系、present/dismiss 这些看似零散的知识点，全部挂到「view 的一生」这条主线上。理解它的钥匙只有一把：`view` 是懒加载的，生命周期方法全是 UIKit 在固定时机替你回调的，你只负责在对应节点上挂逻辑。
 
 ## 目录
 
@@ -9,11 +9,10 @@
 - [三、loadView：view 的三条来源](#三loadviewview-的三条来源)
 - [四、生命周期全流程](#四生命周期全流程)
 - [五、布局回调与尺寸变化](#五布局回调与尺寸变化)
-- [六、内存警告与 view 卸载](#六内存警告与-view-卸载)
-- [七、容器控制器：childViewController](#七容器控制器childviewcontroller)
-- [八、present 与 dismiss](#八present-与-dismiss)
-- [九、常用 API 速查](#九常用-api-速查)
-- [十、常见陷阱](#十常见陷阱)
+- [六、容器控制器：childViewController](#六容器控制器childviewcontroller)
+- [七、present 与 dismiss](#七present-与-dismiss)
+- [八、常用 API 速查](#八常用-api-速查)
+- [九、常见陷阱](#九常见陷阱)
 - [附：高频速记](#附高频速记)
 
 ---
@@ -54,7 +53,7 @@ UIViewController 继承自 UIResponder，是 MVC 里那个 C。它的职责可�
 
 第二个，UIViewController 本身是 UIResponder。这意味着它能参与响应链：view 上没被拦截的触摸事件会沿着视图层级往上冒，最后能传到控制器。所以你可以在控制器里重写 `touchesBegan:withEvent:`、`motionEnded:withEvent:`（摇一摇）这类 UIResponder 的方法。这是它跟普通 UIView 之外另一个常被忽略的身份。
 
-再补一个贯穿全文的认知：一个屏幕背后就是一个控制器。UINavigationController、UITabBarController、UISplitViewController 这些「壳」本身也是 UIViewController 的子类，它们跟普通控制器唯一的区别是「里面还装着别的控制器」——这正是第七章要讲的容器能力。把这一点记住，就不会觉得容器控制器是什么特殊的存在。
+再补一个贯穿全文的认知：一个屏幕背后就是一个控制器。UINavigationController、UITabBarController、UISplitViewController 这些「壳」本身也是 UIViewController 的子类，它们跟普通控制器唯一的区别是「里面还装着别的控制器」——这正是第六章要讲的容器能力。把这一点记住，就不会觉得容器控制器是什么特殊的存在。
 
 ## 二、view 的懒加载机制
 
@@ -279,7 +278,7 @@ viewWillDisappear → viewDidDisappear → （不再被引用时）dealloc
 
 `loadView` 在第三章讲过，负责把 view 造出来，这里不再重复。
 
-`viewDidLoad` 在 view 加载完成后调用。每个「加载轮次」里只执行一次——除非 view 被卸载后又重新加载（见第六章）。它是做「一次性 UI 装配」的标准位置：add 子视图、设约束、配数据源。
+`viewDidLoad` 在 view 加载完成后调用。每个「加载轮次」里只执行一次——除非你手动把 `self.view` 置 nil 强制重载，否则不会再次触发。它是做「一次性 UI 装配」的标准位置：add 子视图、设约束、配数据源。
 
 ```objc
 - (void)viewDidLoad {
@@ -361,7 +360,7 @@ A viewWillAppear → B viewWillDisappear
 - 新控制器的 appear 先于旧控制器的 disappear。语义上就是「新页面盖上来，旧的退出去」，跟视觉动画一致。
 - will / did 成对出现，且新旧两个控制器的回调彼此穿插，不是「A 全部走完再走 B」。
 
-不同容器行为有差异：present 的顺序与 push 类似（第八章详述），而 UITabBarController 切 tab 只对「新选中的子控制器」转发 appear 系列，被切走的那个收到 disappear。
+不同容器行为有差异：present 的顺序与 push 类似（第七章详述），而 UITabBarController 切 tab 只对「新选中的子控制器」转发 appear 系列，被切走的那个收到 disappear。
 
 ### 5. appearance 状态与手动转发
 
@@ -378,7 +377,7 @@ A viewWillAppear → B viewWillDisappear
 [child endAppearanceTransition];                            // 相当于 viewDidDisappear
 ```
 
-`beginAppearanceTransition:animated:` 会触发 `viewWillAppear:`/`viewWillDisappear:`，`endAppearanceTransition` 触发 `viewDidAppear:`/`viewDidDisappear:`。这套 API 是给「自己写容器控制器」的人用的，配合第七章的 `addChildViewController` 一起构成自定义容器的完整拼图。
+`beginAppearanceTransition:animated:` 会触发 `viewWillAppear:`/`viewWillDisappear:`，`endAppearanceTransition` 触发 `viewDidAppear:`/`viewDidDisappear:`。这套 API 是给「自己写容器控制器」的人用的，配合第六章的 `addChildViewController` 一起构成自定义容器的完整拼图。
 
 ### 6. viewDidLoad 与 viewWillAppear 的区别
 
@@ -440,6 +439,18 @@ self.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 0, 50, 0);  // 底部再留 
 
 `additionalSafeAreaInsets` 常用于自定义容器：容器在父视图里给自己预留了导航栏/工具栏的高度，通过它把这块区域追加到 child 的 safe area 里，child 布局时就能自动避开。注意它生效的前提是 `viewSafeAreaInsetsDidChange` 被触发后系统会重新计算。
 
+另一个常跟 safe area 混淆的是 `edgesForExtendedLayout`，它管的是「view 要不要延伸到系统栏下面」。默认 `UIRectEdgeAll`（四边都延伸）：view 从屏幕最顶端开始铺，直接顶到导航栏、标签栏的下面，再靠 safe area 的 insets 把内容从栏下面「让」出来。设成 `UIRectEdgeNone`，view 就整体从导航栏下方开始、到标签栏上方结束，不钻到栏底下：
+
+```objc
+// 默认：view 铺满屏幕，内容靠 safeAreaInsets 避开系统栏
+self.edgesForExtendedLayout = UIRectEdgeAll;
+
+// 不想钻到栏下面：view 从导航栏下方开始
+self.edgesForExtendedLayout = UIRectEdgeNone;
+```
+
+配套的 `extendedLayoutIncludesOpaqueBars` 决定「导航栏不透明时是否也延伸」，默认 NO——栏不透明就自动不延伸，因为栏后面的内容反正看不见。另外 iOS 11 之前用 `automaticallyAdjustsScrollViewInsets`（默认 YES）让 scrollView 自动加 contentInset 避开栏，iOS 11 起由 UIScrollView 的 `contentInsetAdjustmentBehavior` 接管，两者解决的是同一个「滚动内容别被栏挡住」的问题。
+
 ### 4. 旋转与尺寸变化回调
 
 屏幕旋转、多任务分屏改变尺寸时，走的是 `viewWillTransitionToSize:withTransitionCoordinator:`：
@@ -459,42 +470,25 @@ self.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 0, 50, 0);  // 底部再留 
 
 `coordinator` 允许你在旋转动画的「过程中」和「结束后」分别挂逻辑，做到跟系统动画同步，而不是等旋转完再突兀地跳一下。这个方法替代了老旧的 `didRotateFromInterfaceOrientation:` 系列。
 
-## 六、内存警告与 view 卸载
-
-内存警告这块是历史遗留知识的重灾区，iOS 6 前后行为完全不同，得分版本讲。
-
-### 1. iOS 6 之前的卸载循环
-
-内存吃紧时系统向 app 发内存警告，每个控制器收到 `didReceiveMemoryWarning`。iOS 6 之前的默认实现：如果 view 不在窗口层级上（superview 为 nil），就把 view 释放掉，随后回调 `viewWillUnload` / `viewDidUnload`。下次显示时重新走 `loadView` + `viewDidLoad`。
-
-这就是「加载循环 / 卸载循环」双循环的由来，也是「viewDidLoad 可能执行多次」这个说法的历史出处——在旧系统里，view 被卸载再加载，`viewDidLoad` 确实会再跑一次。
-
-### 2. iOS 6 之后：不再自动卸载
-
-iOS 6 起，系统不再主动释放控制器的 view，`viewWillUnload` / `viewDidUnload` 直接废弃。原因也直白：屏幕越换越大，重新加载 view 的成本（磁盘 IO、重新解码、重建约束）往往高于多占的那点内存，来回卸载反而引发性能问题。
-
-所以现代写法里，`didReceiveMemoryWarning` 只干一件事：释放能重建的缓存。
+旋转回调之外，控制器还有三个「旋转开关」决定要不要转、能转成什么方向。注意它们的询问对象是「最顶层的容器」（如 UINavigationController），子控制器单独重写往往不生效，要连同容器一起重写：
 
 ```objc
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // 释放可重建的缓存（图片缓存、临时数据），不要动 view
-    self.imageCache = nil;
+- (BOOL)shouldAutorotate {
+    return YES;   // 是否允许自动旋转
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAllButUpsideDown;   // 支持的方向
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationPortrait;   // 呈现时首选方向
 }
 ```
 
-### 3. 手动触发 view 重载
+`viewWillTransitionToSize:withTransitionCoordinator:` 只有在前两个开关「允许旋转、且当前方向受支持」时才会被触发，所以旋转「没反应」多半是开关没放对层级。
 
-虽然系统不再自动卸载，但你可以手动把 `self.view` 置 nil 来主动释放，下次访问时重新走一遍加载流程：
-
-```objc
-// 主动释放 view，下次访问 self.view 会重新 loadView + viewDidLoad
-self.view = nil;
-```
-
-这带来的副作用就是「viewDidLoad 会不会多次调用」的完整答案：正常不会，除非你自己把 view 置 nil 强制重载。置 nil 前要确认 view 不在窗口层级上（否则释放正在显示的内容会出问题），而且所有依赖 view 的引用都要能重建。
-
-## 七、容器控制器：childViewController
+## 六、容器控制器：childViewController
 
 UINavigationController、UITabBarController、UIPageViewController 的本质都是容器控制器：自己管理一组子控制器，按规则切换展示。iOS 5 把这套能力开放出来，任何 UIViewController 都能当容器。这一章讲清楚容器 API 怎么用，以及生命周期转发背后的机制。
 
@@ -583,9 +577,9 @@ UISplitViewController *split = self.splitViewController;           // 所在的�
 - UISplitViewController：主从分栏，`viewControllers` 是主/从两个控制器。
 - UIPageViewController：翻页，用 `setViewControllers:direction:animated:` 切换。
 
-它们都维护自己的 `childViewControllers`，并在切换时自动转发生命周期。理解了第七章的机制，再看这些容器就不会觉得神秘。
+它们都维护自己的 `childViewControllers`，并在切换时自动转发生命周期。理解了这一章的机制，再看这些容器就不会觉得神秘。
 
-## 八、present 与 dismiss
+## 七、present 与 dismiss
 
 模态呈现是控制器的另一组核心关系，独立于容器父子关系。这一章把 present 的关系、样式、生命周期讲透。
 
@@ -660,7 +654,19 @@ vcB.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
 
 注意 `PartialCurl` 只支持全屏样式，配合 pageSheet 会无效甚至崩溃。
 
-### 5. dismiss 到底 dismiss 谁
+### 5. definesPresentationContext：谁当呈现的上下文
+
+`UIModalPresentationCurrentContext` 和 `OverCurrentContext` 这两种样式，呈现范围是「最近一个声明了 `definesPresentationContext` 的控制器」。默认一个控制器的 `definesPresentationContext` 是 NO，present 的上下文会一路向上溯到 window 根；把它设为 YES，就等于告诉系统「在我这里截断，present 只盖住我的范围」：
+
+```objc
+self.definesPresentationContext = YES;
+vcB.modalPresentationStyle = UIModalPresentationCurrentContext;
+[self presentViewController:vcB animated:YES completion:nil];
+```
+
+典型用途是自定义半透明容器：希望 present 出来的控制器只覆盖容器这一层，而不是整个 window。配套的 `providesPresentationContextTransitionStyle` 决定转场动画是否也在该上下文内进行。没设 `definesPresentationContext` 时，CurrentContext 样式会退化成覆盖整个 window，跟预期不符——这是自定义转场里常见的坑。
+
+### 6. dismiss 到底 dismiss 谁
 
 `dismissViewControllerAnimated:completion:` 的语义容易搞混。谁调用它、它 dismiss 谁，规则是：
 
@@ -675,7 +681,7 @@ vcB.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
 
 一句话：dismiss 作用于「最近一次 present 的呈现链」，从发起方执行。
 
-### 6. present 的生命周期顺序
+### 7. present 的生命周期顺序
 
 present B 时（与 push 规律一致，新的先 appear）：
 
@@ -693,7 +699,7 @@ A viewWillAppear → B viewWillDisappear
 
 记忆口诀统一：appear 永远先于 disappear，不管 push 还是 present。
 
-## 九、常用 API 速查
+## 八、常用 API 速查
 
 前面按机制讲完了主线，这一章把散落在控制器里的高频 API 集中过一遍，每个都给出典型用法。
 
@@ -808,7 +814,7 @@ self.isMovingFromParentViewController;  // 正在脱离某个父容器
 }
 ```
 
-## 十、常见陷阱
+## 九、常见陷阱
 
 最后把最容易踩的坑收拢一遍，每个都按「现象 → 原因 → 解法」讲。
 
@@ -851,11 +857,13 @@ self.isMovingFromParentViewController;  // 正在脱离某个父容器
 - `beginAppearanceTransition:animated:` / `endAppearanceTransition`：自定义容器手动触发 child 的 appear/disappear。
 - `viewWillLayoutSubviews` / `viewDidLayoutSubviews`：首次布局与每次尺寸/约束变化都触发，拿最终 frame 和 safe area 在 did 里。
 - `setNeedsLayout` 打标记，`layoutIfNeeded` 立刻布局；`viewSafeAreaInsetsDidChange` / `additionalSafeAreaInsets` 管 safe area。
-- 旋转走 `viewWillTransitionToSize:withTransitionCoordinator:`，coordinator 可同步动画。
-- 内存警告：iOS 6 前自动卸载 view + `viewDidUnload`；iOS 6 后不卸载、该 API 废弃，`didReceiveMemoryWarning` 只清缓存；`self.view = nil` 可手动重载。
+- `edgesForExtendedLayout` 默认 `UIRectEdgeAll` 铺满屏幕（内容靠 safe area 避开）；`UIRectEdgeNone` 从导航栏下方开始；`extendedLayoutIncludesOpaqueBars` 管不透明栏是否延伸；iOS 11 起 scrollView 用 `contentInsetAdjustmentBehavior` 接管自动 inset。
+- 旋转走 `viewWillTransitionToSize:withTransitionCoordinator:`，coordinator 可同步动画；三个旋转开关 `shouldAutorotate` / `supportedInterfaceOrientations` / `preferredInterfaceOrientationForPresentation` 由最顶层容器决定。
+- `didReceiveMemoryWarning` 只释放可重建的缓存、不要动 view；现代系统不再自动卸载 view，`self.view = nil` 可手动强制重载。
 - 容器四步：addChildViewController → addSubview → didMoveToParentViewController（add 不用手动 willMove）；remove 对称：willMove:nil → removeFromSuperview → removeFromParentViewController；`moveToParentViewController:` 一步到位。
 - addChild 后生命周期自动转发给可见 child；裸 addSubview 拼控制器收不到生命周期回调。
 - 容器关系：`parentViewController`/`childViewControllers` 是直接父子，`navigationController`/`tabBarController`/`splitViewController` 是最近祖先。
 - present 关系：`presentedViewController` / `presentingViewController` 互指；dismiss 作用于整个 present 链。
 - `modalPresentationStyle` 默认值 iOS 13 起由 fullScreen 改为 automatic（iPhone 解析为 pageSheet），背景未盖满时 presenting 的 disappear 不触发。
+- `definesPresentationContext = YES` 让当前控制器成为 present 的上下文，决定 CurrentContext / OverCurrentContext 样式盖住的范围。
 - 判断过渡状态：`isBeingPresented` / `isBeingDismissed` / `isMovingToParentViewController` / `isMovingFromParentViewController`。
