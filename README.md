@@ -211,7 +211,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP/MVVM/MVI、Flux/Redux/Elm/TCA、Clean/洋葱、VIPER/RIBs |
+| 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP /MVVM/MVI、Flux/Redux /Elm/TCA、Clean / 洋葱、VIPER/RIBs等 |
 
 ### AI 开发
 
