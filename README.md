@@ -194,9 +194,9 @@ Glimmer/
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [App启动过程分析](notes/mobile/ios/startup/01-App启动过程分析.md) | 冷/热/预热启动、Pre-main 七步、dyld 演进、main 阶段、启动优化 |
-| 2 | [import背后的机制要点](notes/mobile/ios/startup/02-import详解.md) | OC查找机制、Header Map、PCH、Clang Modules、Swift模块系统、混编操作 |
+| 2 | [import背后的机制要点](notes/mobile/ios/startup/02-import详解.md) | OC查找机制、Header Map、Clang Modules、Swift模块系统、混编操作 |
 | 3 | [Mach-O文件格式](notes/mobile/ios/startup/03-Mach-O文件格式分析.md) | Mach-O 格式、Segment/Section、静态与动态库、Rebase/Bind、dyld 装载 |
-| 4 | [Framework详解](notes/mobile/ios/runtime/09-Framework详解.md) | 目录结构与Umbrella/Module、静态/动态与LTO、链接加载dyld、CocoaPods打包 |
+| 4 | [Framework详解](notes/mobile/ios/runtime/09-Framework详解.md) | 目录结构与Umbrella/Module、静态 / 动态与LTO、链接加载dyld、CocoaPods |
 
 ### HarmonyOS 开发体系
 
@@ -211,7 +211,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP/MVVM/MVI、Flux/Redux/Elm/TCA、Clean/洋葱/六边形、VIPER/RIBs |
+| 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP/MVVM/MVI、Flux/Redux/Elm/TCA、Clean/洋葱、VIPER/RIBs |
 
 ### AI 开发
 
