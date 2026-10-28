@@ -207,6 +207,12 @@ Glimmer/
 | 1 | [ArkTS基础语法](notes/mobile/harmonyos/01-ArkTS基础语法.md) | 类型系统、类与泛型、模块命名空间、流程控制、类型断言、空安全、并发、TS 差异等 |
 | 2 | [ArkUI基础语法](notes/mobile/harmonyos/02-ArkUI基础语法.md) | 组件结构、布局容器、基础组件、渲染控制、状态装饰器 V1/V2、UI 复用 |
 
+### 框架设计与原理
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP/MVVM/MVI、Flux/Redux/Elm/TCA、Clean/洋葱/六边形、VIPER/RIBs |
+
 ### AI 开发
 
 #### Python
