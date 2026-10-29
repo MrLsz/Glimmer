@@ -32,6 +32,7 @@ Glimmer/
 │   ├── mobile/harmonyos/   # ArkTS / ArkUI / Ability
 │   │  【通用】
 │   ├── framework-design/   # 框架设计与原理
+│   ├── cross-platform/     # 移动端跨平台技术方案
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # Python / AI / 机器学习
 ├── experience/             # 经验积累
@@ -212,6 +213,12 @@ Glimmer/
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [移动端主流架构思想概览](notes/framework-design/01-移动端主流架构思想概览.md) | MVC/MVP /MVVM/MVI、Flux/Redux /Elm/TCA、Clean / 洋葱、VIPER/RIBs等 |
+
+### 跨平台
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform、uni-app/Taro 深度对比 |
 
 ### AI 开发
 
