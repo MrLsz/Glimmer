@@ -218,7 +218,7 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform、uni-app/Taro 深度对比 |
+| 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform等深度对比 |
 
 ### AI 开发
 
