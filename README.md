@@ -32,7 +32,7 @@ Glimmer/
 │   ├── mobile/harmonyos/   # ArkTS / ArkUI / Ability
 │   │  【通用】
 │   ├── framework-design/   # 框架设计与原理
-│   ├── cross-platform/     # 移动端跨平台技术方案
+│   ├── cross-platform/     # 跨平台/跨端技术方案
 │   ├── algorithm/          # 算法与数据结构
 │   └── ai-ml/              # Python / AI / 机器学习
 ├── experience/             # 经验积累
@@ -220,6 +220,7 @@ Glimmer/
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform等深度对比 |
+| 2 | [Kuikly跨端框架总览](notes/cross-platform/02-Kuikly跨端框架总览.md) | Kuikly 总体框架结构、代码目录、核心机制、布局引擎、打包与动态化 |
 
 ### AI 开发
 
