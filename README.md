@@ -13,6 +13,7 @@ Glimmer/
 │   │   │   ├── boot/         # 系统架构与启动
 │   │   │   ├── binder/       # Binder IPC 机制
 │   │   │   ├── component/    # 四大组件
+│   │   │   ├── threading/    # 线程与消息机制
 │   │   │   ├── window-input/ # Window 与输入体系
 │   │   │   ├── view-render/  # View 绘制与渲染
 │   │   │   └── build-system/ # 构建与编译体系
@@ -118,6 +119,12 @@ Glimmer/
 | 8 | [ContentProvider调用流程](notes/mobile/android/platform/component/08-ContentProvider调用流程分析.md) | ContentProvider：query 调用全链路 |
 | 9 | [Fragment总览与源码分析](notes/mobile/android/platform/component/09-Fragment总览与源码分析.md) | Fragment：生命周期、FragmentManager/Transaction/回退栈源码、与 Activity 关系 |
 
+##### 线程与消息机制
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [Handler机制详解](notes/mobile/android/platform/threading/01-Handler机制详解.md) | Handler/Looper/MessageQueue/Message 源码、ThreadLocal、同步屏障、复用池、epoll 唤醒、内存泄漏 |
+
 ##### Window 与输入体系
 
 | 序号 | 文件 | 说明 |
@@ -221,6 +228,7 @@ Glimmer/
 | :---: | ---- | ---- |
 | 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform等深度对比 |
 | 2 | [Kuikly跨端框架总览](notes/cross-platform/02-Kuikly跨端框架总览.md) | Kuikly 总体框架结构、代码目录、核心机制、布局引擎、打包与动态化 |
+| 3 | [Kuikly渲染机制详解](notes/cross-platform/03-Kuikly渲染机制详解.md) | UI 体系（类层级/属性/事件/响应式/指令/控件）、nativeRef/methodId/Export 三大支柱、控件与 Page 桥接、双树排版与渲染下发 |
 
 ### AI 开发
 
