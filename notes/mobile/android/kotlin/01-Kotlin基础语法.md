@@ -91,7 +91,15 @@
 
 📊 **核心差异对比**
 
-![Kotlin 与 Java 主要区别](images/kotlin-vs-java.png)
+| 维度 | Java | Kotlin |
+| --- | --- | --- |
+| 样板代码 | 手写 getter/setter 等大量样板：`class User { private String name; ... }` | `data class` 一行声明：`data class User(val name: String)` |
+| 受检异常 | 强制 `try-catch` / `throws` 声明：`try { ... } catch (IOException e) { }` | 无 checked exception，调用更简洁（需自觉处理） |
+| 空安全 | 引用可空、靠 `@Nullable` 注解，运行期才暴露 NPE | `T?` 编译期强制判空，运行时零开销 |
+| 基本类型 | `int` / `Integer` 手动区分，泛型、集合需装箱 | `Int` 统一写法，编译器自动装箱 / 优化 |
+| 扩展 | 静态工具类：`StringUtils.isEmpty(s)` | 扩展函数 / 扩展属性：`s.isBlank()`，静态分发、链式调用 |
+| 异步 | 线程 + Callback，回调地狱、线程昂贵 | `suspend` + 协程，同步写法写异步、轻量 |
+| 数据类 | 手写 `equals` / `hashCode` / `toString`，样板繁多、易错 | `data class` 自动生成 + `componentN` 解构 + `copy` |
 
 💡 **扩展思考：**
 
