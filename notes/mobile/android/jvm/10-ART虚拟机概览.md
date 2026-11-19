@@ -1,4 +1,4 @@
-# ART 虚拟机分析
+# ART 虚拟机概览
 
 > 本文是 Android 虚拟机（ART，Android Runtime）的深度专文，也是 JVM 系列向 Android 落地的一篇承上启下之作。前面 9 篇讲的是标准 HotSpot JVM，这一篇回答一个绕不开的问题：**为什么 Android 不直接采用 HotSpot JVM，而要自研 Dalvik、ART？** 全文按八章展开：第一章厘清「不采用 HotSpot」的动机，并讲清 class 到 dex 的编译产物转变；第二章详细拆解 DEX 文件格式；第三章独立讲透 Dalvik 的关键技术；第四章独立讲透 ART 的整体架构；第五章聚焦 AOT 与 JIT 的编译原理；第六、七、八章分别深入 GC、ArtMethod 方法执行、类加载与 OAT 加载。重点内容均配图示。
 
