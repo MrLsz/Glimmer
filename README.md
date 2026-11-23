@@ -76,7 +76,7 @@ Glimmer/
 | 7 | [堆分析](notes/mobile/android/jvm/07-堆分析.md) | 堆、存活判定、垃圾收集算法、对象布局、TLAB、逃逸分析 |
 | 8 | [方法区(元空间)](<notes/mobile/android/jvm/08-方法区(元空间)分析.md>) | 方法区与常量池、永久代→元空间、元空间结构、类卸载 |
 | 9 | [JVM核心流程总结](notes/mobile/android/jvm/09-JVM核心流程总结.md) | 源码→字节码→加载→执行全流程概括、Animal/Dog/Main 的总结 |
-| 10 | [ART虚拟机概览](notes/mobile/android/jvm/10-ART虚拟机概览.md) | Dalvik vs ART、AOT/JIT/Profile 编译演进、OAT 结构、CC GC 读屏障、ArtMethod |
+| 10 | [ART虚拟机概览](notes/mobile/android/jvm/10-ART虚拟机概览.md) | Dalvik、ART、AOT/JIT/Profile 编译演进、OAT 结构、ArtMethod |
 
 #### Matrix
 
@@ -118,13 +118,13 @@ Glimmer/
 | 6 | [Service的bindService分析](notes/mobile/android/platform/component/06-Service的bindService分析.md) | Service：bindService 全链路、IBinder 回传 |
 | 7 | [ContentProvider基础与启动流程分析](notes/mobile/android/platform/component/07-ContentProvider基础与启动流程分析.md) | ContentProvider：概念与启动安装全链路 |
 | 8 | [ContentProvider调用流程](notes/mobile/android/platform/component/08-ContentProvider调用流程分析.md) | ContentProvider：query 调用全链路 |
-| 9 | [Fragment总览与源码分析](notes/mobile/android/platform/component/09-Fragment总览与源码分析.md) | Fragment：生命周期、FragmentManager/Transaction/回退栈源码、与 Activity 关系 |
+| 9 | [Fragment总览与源码分析](notes/mobile/android/platform/component/09-Fragment总览与源码分析.md) | Fragment：生命周期、FragmentManager/Transaction  |
 
 ##### 线程与消息机制
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [Handler机制详解](notes/mobile/android/platform/threading/01-Handler机制详解.md) | Handler/Looper/MessageQueue/Message 源码、ThreadLocal、同步屏障、复用池、epoll 唤醒、内存泄漏 |
+| 1 | [Handler机制详解](notes/mobile/android/platform/threading/01-Handler机制详解.md) | Handler/Looper/MessageQueue/Message源码、ThreadLocal、同步、复用池等 |
 
 ##### Window 与输入体系
 
@@ -227,9 +227,9 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform等深度对比 |
+| 1 | [移动端跨平台技术方案详解](notes/cross-platform/01-移动端跨平台技术方案详解.md) | Hybrid/JSBridge、React Native、Flutter、Kotlin Multiplatform 等深度对比 |
 | 2 | [Kuikly跨端框架总览](notes/cross-platform/02-Kuikly跨端框架总览.md) | Kuikly 总体框架结构、代码目录、核心机制、布局引擎、打包与动态化 |
-| 3 | [Kuikly渲染机制详解](notes/cross-platform/03-Kuikly渲染机制详解.md) | UI 体系（类层级/属性/事件/响应式/指令/控件）、nativeRef/methodId/Export 三大支柱、控件与 Page 桥接、双树排版与渲染下发 |
+| 3 | [Kuikly渲染机制详解](notes/cross-platform/03-Kuikly渲染机制详解.md) | UI 体系（类层级/属性/事件/响应式/指令/控件）、nativeRef/methodId/Export |
 
 ### AI 开发
 
