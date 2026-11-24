@@ -154,8 +154,8 @@ Glimmer/
 
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
-| 1 | [SharedPreferences原理分析](notes/mobile/android/platform/storage/01-SharedPreferences原理分析.md) | 内存 Map + 磁盘 XML 双层结构、六种类型、加载/读取/写入源码、commit vs apply、多进程、ANR |
-| 2 | [MMKV原理与使用](notes/mobile/android/platform/storage/02-MMKV原理与使用.md) | mmap 内存映射、protobuf 编码、文件格式、读写/扩容/压缩、多进程、使用方式与 SP 对比 |
+| 1 | [SharedPreferences原理分析](notes/mobile/android/platform/storage/01-SharedPreferences原理分析.md) | 内存 Map+磁盘 XML 双层结构、加载/读取/写入、commit vs apply |
+| 2 | [MMKV原理与使用](notes/mobile/android/platform/storage/02-MMKV原理与使用.md) | mmap 内存映射、protobuf 编码、文件格式、读写/扩容/压缩、多进程 |
 
 ### iOS 开发体系
 
