@@ -16,7 +16,8 @@ Glimmer/
 │   │   │   ├── threading/    # 线程与消息机制
 │   │   │   ├── window-input/ # Window 与输入体系
 │   │   │   ├── view-render/  # View 绘制与渲染
-│   │   │   └── build-system/ # 构建与编译体系
+│   │   │   ├── build-system/ # 构建与编译体系
+│   │   │   └── storage/      # 数据存储
 │   │   ├── java/           # Java 语言
 │   │   ├── kotlin/         # Kotlin 语言
 │   │   ├── jvm/            # JVM 原理
@@ -148,6 +149,12 @@ Glimmer/
 | 序号 | 文件 | 说明 |
 | :---: | ---- | ---- |
 | 1 | [Android编译流程解析](notes/mobile/android/platform/build-system/01-Android编译流程解析.md) | Gradle/AGP、AAPT2 两阶段、d8/R8、签名对齐、Soong/Ninja、APK打包等 |
+
+##### 数据存储
+
+| 序号 | 文件 | 说明 |
+| :---: | ---- | ---- |
+| 1 | [SharedPreferences原理分析](notes/mobile/android/platform/storage/01-SharedPreferences原理分析.md) | 内存 Map + 磁盘 XML 双层结构、六种类型、加载/读取/写入源码、commit vs apply、多进程、ANR |
 
 ### iOS 开发体系
 
