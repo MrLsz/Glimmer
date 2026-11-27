@@ -239,6 +239,7 @@ Glimmer/
 | 2 | [Kuikly跨端框架总览](notes/cross-platform/02-Kuikly跨端框架总览.md) | Kuikly 总体框架结构、代码目录、核心机制、布局引擎、打包与动态化 |
 | 3 | [Kuikly渲染机制详解](notes/cross-platform/03-Kuikly渲染机制详解.md) | UI 体系（类层级/属性/事件/响应式/指令/控件）、nativeRef/methodId/Export |
 | 4 | [KMP跨平台原理与使用](notes/cross-platform/04-KMP跨平台原理与使用.md) | 定位与源码集、expect/actual、Android/iOS 集成、生态、编译运行原理 |
+| 5 | [ReactNative跨平台](notes/cross-platform/05-ReactNative跨平台.md) | 定位、三层架构与线程模型、渲染原理（Fiber/Yoga）、Bridge 旧架构、JSI/Fabric/TurboModules/Codegen 新架构、Native Modules 通信、Hermes、工程生态、选型 |
 
 ### AI 开发
 
